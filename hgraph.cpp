@@ -1,5 +1,7 @@
 #include "hgraph.h"
 
+#include <iostream>
+
 HGraph::HGraph ()
 {
   vertices = nullptr;
@@ -121,7 +123,6 @@ void HGraph::createEdges (int minCountOfVertices, int maxCountOfVertices)
 {
     if (mainGraph)                              // Создание вершин и ребер вызывается
     {                                           // только для корневого графа
-
         int summaryDegree = getSummaryDegree();   // Общее число возможных подключений
 
         // Порог, по прохождении которого
@@ -133,18 +134,20 @@ void HGraph::createEdges (int minCountOfVertices, int maxCountOfVertices)
         // Максимальное число цепей - это
         // вершины * макс. степень / мин. мощность
         edges = new HGEdge * [countOfVertices*logicalThreshold/(maxCountOfVertices*minCountOfVertices)];
+        std::cerr <<countOfVertices*logicalThreshold/(maxCountOfVertices*minCountOfVertices)<<"\n";
 
         for (int i=0; ; i++)        // Начинаем построение ребер (заранее неизвестно, сколько их)
             if (logicalThreshold < summaryDegree)
             {
                 edges[i] = new HGEdge (minCountOfVertices + rand()%(maxCountOfVertices+1));
-
                 do{
                     int nextVertexToConnect;            // Номер очередной вершины для включения в ребро
                     do
                         nextVertexToConnect = rand()%getCountOfVertices();
                     while (vertices[nextVertexToConnect]->isInEdge(edges[i]) ||
                            vertices[nextVertexToConnect]->isFull());
+
+                 //   std::cerr <<nextVertexToConnect<<"\n";
 
                     // Установление инцидентности
                     incidenceInstall(vertices[nextVertexToConnect], edges[i]);

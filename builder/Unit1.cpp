@@ -64,22 +64,30 @@ void __fastcall TForm1::Button3Click(TObject *Sender)
     exponent = 2.0;
   else
     exponent = 3.0;
+
   ProgressBar1->Max = StrToIntDef(Edit6->Text, 0)*countHG;
   ProgressBar1->Min = countHG*2;
   ProgressBar1->Position = countHG*2;
+
   Chart2->Visible = false;
   Chart1->Visible = false;
+
   Series2->Clear();
   Series1->Clear();
+
   float countOfAllFragments = 0;
+
   for (int i=0; i<countHG; i++)
     countOfAllFragments += hGraph[i]->get_countOfFragments();
   countOfAllFragments /= countHG;
+
   Series1->AddXY(1,pow((double)hGraph[0]->get_countOfVertices(),2.0) +
                         pow((double)countOfAllFragments,exponent),"",clRed);
+
   for (int j=2; j<=StrToIntDef(Edit6->Text, 0); j++)
   {
     float countOfAllExternalEdges = 0;
+
     for (int i=0; i<countHG; i++)
     {
       hGraph[i]->resetSplitHG();
@@ -88,6 +96,7 @@ void __fastcall TForm1::Button3Click(TObject *Sender)
       ProgressBar1->Position = j*countHG+i;
       Form1->Refresh();
     }
+
     countOfAllExternalEdges /= countHG;
     Series2->AddXY(j,100*countOfAllExternalEdges/countOfAllFragments,"",clRed);
     Series1->AddXY(j,hGraph[0]->get_countOfVertices() +
@@ -110,15 +119,16 @@ void __fastcall TForm1::FormClose(TObject *Sender, TCloseAction &Action)
 //---------------------------------------------------------------------------
                    //*****************************//
 
-void TForm1::initHierarhyHG()                   // Инициализация массивов для
-{                                               // иерархического разбиения
+void TForm1::initHierarhyHG()                   // РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РјР°СЃСЃРёРІРѕРІ РґР»СЏ
+{                                               // РёРµСЂР°СЂС…РёС‡РµСЃРєРѕРіРѕ СЂР°Р·Р±РёРµРЅРёСЏ
   minNumberSubHG = 0;
   increaseOfCountExternalEdges = new int * [StrToIntDef(Edit12->Text,0)];
   hierarhyHG = new HGraph *** [StrToIntDef(Edit12->Text,0)];
 
   for (int i=0; i<StrToIntDef(Edit12->Text,0); i++)
   {
-    hierarhyHG[i] = new HGraph ** [(int)pow(2.0,i)];
+    hierarhyHG[i] = new HGraph** [(int)pow(2.0,i)];
+
     for (int j=0; j<(int)pow(2.0,i); j++)
       hierarhyHG[i][j] = new HGraph * [countHG];
 
@@ -129,7 +139,7 @@ void TForm1::initHierarhyHG()                   // Инициализация массивов для
   ProgressBar2->Min = 0;
   ProgressBar2->Position = 0;
 
-  for (int i=0; i<countHG; i++)                 // Создание начальных гиперграфов
+  for (int i=0; i<countHG; i++)                 // РЎРѕР·РґР°РЅРёРµ РЅР°С‡Р°Р»СЊРЅС‹С… РіРёРїРµСЂРіСЂР°С„РѕРІ
   {
     hierarhyHG[0][0][i] = new HGraph;
     hierarhyHG[0][0][i]->HGraphGenerator(StrToIntDef(Edit7->Text,0),
@@ -144,14 +154,16 @@ void TForm1::initHierarhyHG()                   // Инициализация массивов для
 //---------------------------------------------------------------------------
                    //*****************************//
 
-  void TForm1::showData (int Complexity)        // Вывод данных на график
-                                                // "затраты в шагах" в зависимости
-                                                // от сложности алгоритма трассировки
+  void TForm1::showData (int Complexity)        // Р’С‹РІРѕРґ РґР°РЅРЅС‹С… РЅР° РіСЂР°С„РёРє
+                                                // "Р·Р°С‚СЂР°С‚С‹ РІ С€Р°РіР°С…" РІ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё
+                                                // РѕС‚ СЃР»РѕР¶РЅРѕСЃС‚Рё Р°Р»РіРѕСЂРёС‚РјР° С‚СЂР°СЃСЃРёСЂРѕРІРєРё
 {
   Chart3->Visible = false;
   Series3->Clear();
+
   double currentCostOfTracing = 0;
   double currentCountOfInternalEdges = 0;
+
   for (int i=0; i<countHG; i++)
     currentCountOfInternalEdges += hierarhyHG[0][0][i]->get_countOfFragments();
   currentCountOfInternalEdges /= countHG;
@@ -166,14 +178,18 @@ void TForm1::initHierarhyHG()                   // Инициализация массивов для
     {
       if (maxCountExternalEdges < increaseOfCountExternalEdges[i][j])
         maxCountExternalEdges = increaseOfCountExternalEdges[i][j];
+
       currentCountOfInternalEdges -= increaseOfCountExternalEdges[i][j];
     }
+
     currentCostOfTracing += pow((double)maxCountExternalEdges,Complexity);
+
     double nextValue = hierarhyHG[i][0][0]->get_countOfVertices() +
                         pow((double)hierarhyHG[i][0][0]->get_countOfVertices()/2,2.0) +
                         currentCostOfTracing +
                         pow (currentCountOfInternalEdges / pow(2.0,i+1),
                         Complexity);
+                        
     Series3->AddXY(i+1,nextValue,"",clRed);
   }
   Chart3->Visible = true;
@@ -182,51 +198,51 @@ void TForm1::initHierarhyHG()                   // Инициализация массивов для
 //---------------------------------------------------------------------------
                    //*****************************//
 
-  void TForm1::gatheringData()                  // Проведение иерархического
-                                                // разбиения и сбор данных
-                                                // об изменении числа внешних связей
+  void TForm1::gatheringData()                  // РџСЂРѕРІРµРґРµРЅРёРµ РёРµСЂР°СЂС…РёС‡РµСЃРєРѕРіРѕ
+                                                // СЂР°Р·Р±РёРµРЅРёСЏ Рё СЃР±РѕСЂ РґР°РЅРЅС‹С…
+                                                // РѕР± РёР·РјРµРЅРµРЅРёРё С‡РёСЃР»Р° РІРЅРµС€РЅРёС… СЃРІСЏР·РµР№
 {
   ProgressBar2->Max = (int)pow(2.0,StrToIntDef(Edit12->Text, 0))*countHG;
   ProgressBar2->Min = countHG;
   ProgressBar2->Position = countHG;
 
-  int countOldExternalEdges = 0;                // Старое число внешних связей
-                                                // для расчета приращения
+  int countOldExternalEdges = 0;                // РЎС‚Р°СЂРѕРµ С‡РёСЃР»Рѕ РІРЅРµС€РЅРёС… СЃРІСЏР·РµР№
+                                                // РґР»СЏ СЂР°СЃС‡РµС‚Р° РїСЂРёСЂР°С‰РµРЅРёСЏ
 
   for (int i=0; i<StrToIntDef(Edit12->Text, 0); i++)
   {
-    Label13->Caption = "Осталось уровней: "+IntToStr(StrToIntDef(Edit12->Text, 0)-i);
+    Label13->Caption = "РћСЃС‚Р°Р»РѕСЃСЊ СѓСЂРѕРІРЅРµР№: "+IntToStr(StrToIntDef(Edit12->Text, 0)-i);
     Label13->Width += 50;
     Form1->Refresh();
-                                            // Уровни
-    for (int j=0; j<(int)pow(2.0,i); j++)       // Подграфы в уровнях
+                                            // РЈСЂРѕРІРЅРё
+    for (int j=0; j<(int)pow(2.0,i); j++)       // РџРѕРґРіСЂР°С„С‹ РІ СѓСЂРѕРІРЅСЏС…
     {
       increaseOfCountExternalEdges[i][j] = 0;
-      for (int k=0; k<countHG; k++)             // Множество экспериментов
+      for (int k=0; k<countHG; k++)             // РњРЅРѕР¶РµСЃС‚РІРѕ СЌРєСЃРїРµСЂРёРјРµРЅС‚РѕРІ
       {
         hierarhyHG[i][j][k]->gravitySplitHG(2,minNumberSubHG);
-                                                // Разбили
+                                                // Р Р°Р·Р±РёР»Рё
 
         increaseOfCountExternalEdges[i][j] += hierarhyHG[0][0][k]->getCountOfExternalEdges();
-                                                // Плюсанул новые внешние связи
-        if (i < StrToIntDef(Edit12->Text, 0)-1) // Если не последняя итерация -
-                                                // создаю подграфы на основе разбиений
+                                                // РџР»СЋСЃР°РЅСѓР» РЅРѕРІС‹Рµ РІРЅРµС€РЅРёРµ СЃРІСЏР·Рё
+        if (i < StrToIntDef(Edit12->Text, 0)-1) // Р•СЃР»Рё РЅРµ РїРѕСЃР»РµРґРЅСЏСЏ РёС‚РµСЂР°С†РёСЏ -
+                                                // СЃРѕР·РґР°СЋ РїРѕРґРіСЂР°С„С‹ РЅР° РѕСЃРЅРѕРІРµ СЂР°Р·Р±РёРµРЅРёР№
         {
           hierarhyHG[i+1][j*2][k] = hierarhyHG[i][j][k]->createSubHG(minNumberSubHG);
           hierarhyHG[i+1][j*2+1][k] = hierarhyHG[i][j][k]->createSubHG(minNumberSubHG+1);
         }
 
       }
-                                                // Вычисляю среднее значение по серии
+                                                // Р’С‹С‡РёСЃР»СЏСЋ СЃСЂРµРґРЅРµРµ Р·РЅР°С‡РµРЅРёРµ РїРѕ СЃРµСЂРёРё
       increaseOfCountExternalEdges[i][j] /= countHG;
 
-                                                // Вычитаю уже имевшиеся связи
-                                                // для получения прироста
+                                                // Р’С‹С‡РёС‚Р°СЋ СѓР¶Рµ РёРјРµРІС€РёРµСЃСЏ СЃРІСЏР·Рё
+                                                // РґР»СЏ РїРѕР»СѓС‡РµРЅРёСЏ РїСЂРёСЂРѕСЃС‚Р°
       increaseOfCountExternalEdges[i][j] -= countOldExternalEdges;
       countOldExternalEdges += increaseOfCountExternalEdges[i][j];
 
-                                                // Увеличиваю счетчик собственных
-                                                // номеров подграфов
+                                                // РЈРІРµР»РёС‡РёРІР°СЋ СЃС‡РµС‚С‡РёРє СЃРѕР±СЃС‚РІРµРЅРЅС‹С…
+                                                // РЅРѕРјРµСЂРѕРІ РїРѕРґРіСЂР°С„РѕРІ
       minNumberSubHG += 2;
 
       ProgressBar2->Position += countHG;
@@ -246,7 +262,7 @@ void __fastcall TForm1::Button4Click(TObject *Sender)
   Chart4->Visible = false;
   Chart3->Visible = false;
 
-  Label13->Caption = "Создание ГГ...";
+  Label13->Caption = "РЎРѕР·РґР°РЅРёРµ Р“Р“...";
   Label13->Width += 50;
   Label13->Visible = true;
   Form1->Refresh();
@@ -256,10 +272,10 @@ void __fastcall TForm1::Button4Click(TObject *Sender)
 
   Series4->Clear();
 
-  Label13->Caption = "Почти все...";
+  Label13->Caption = "РџРѕС‡С‚Рё РІСЃРµ...";
   Form1->Refresh();
-                                                // Заполняю график
-                                                // "процент внешних связей"
+                                                // Р—Р°РїРѕР»РЅСЏСЋ РіСЂР°С„РёРє
+                                                // "РїСЂРѕС†РµРЅС‚ РІРЅРµС€РЅРёС… СЃРІСЏР·РµР№"
   float countAllFragments = 0;
   for (int i=0; i<countHG; i++)
     countAllFragments += hierarhyHG[0][0][i]->get_countOfFragments();

@@ -10,6 +10,12 @@ namespace Ui {
 class MainWindow;
 }
 
+enum Mode
+{
+    SINGLE_LEVEL,
+    HIERARCHICAL
+};
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -24,7 +30,15 @@ public:
     int countHG;
     int minNumberSubHG;
 
+    Mode mode;
+
+private slots:
+    void on_singleLevelAction_changed();
+
+    void on_hierarchicalAction_changed();
+
 private:
+
     Ui::MainWindow *ui;
 
     void initHierarhyHG ();                       // Инициализация массивов для
@@ -37,7 +51,6 @@ private:
      void showData (int Complexity);               // Вывод данных на график
                                                    // "затраты в шагах" в зависимости
                                                    // от сложности алгоритма трассировки
-
 };
 
 #endif // MAINWINDOW_H

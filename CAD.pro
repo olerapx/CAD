@@ -5,6 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui
+QT += printsupport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -18,11 +19,13 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     hgedge.cpp \
     hgvertex.cpp \
-    hgraph.cpp
+    hgraph.cpp \
+    qcustomplot.cpp
 
 HEADERS  += mainwindow.h \
     hgedge.h \
     hgvertex.h \
-    hgraph.h
+    hgraph.h \
+    qcustomplot.h
 
 FORMS    += mainwindow.ui

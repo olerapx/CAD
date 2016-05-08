@@ -30,69 +30,69 @@ __published:	// IDE-managed Components
         TBarSeries *Series2;
         TProgressBar *ProgressBar1; //bottom progress bar
         TPanel *Panel2; //panel with buttons
-        TLabel *Label1; // Число вершин
-        TLabel *Label14; // число подграфов от 2 до
-        TLabel *Label2; // число контактов
+        TLabel *Label1; // Р§РёСЃР»Рѕ РІРµСЂС€РёРЅ
+        TLabel *Label14; // С‡РёСЃР»Рѕ РїРѕРґРіСЂР°С„РѕРІ РѕС‚ 2 РґРѕ
+        TLabel *Label2; // С‡РёСЃР»Рѕ РєРѕРЅС‚Р°РєС‚РѕРІ
         TLabel *Label3; //min
         TLabel *Label4; //max
-        TLabel *Label5; // мощность ребер
+        TLabel *Label5; // РјРѕС‰РЅРѕСЃС‚СЊ СЂРµР±РµСЂ
         TLabel *Label6; //min
         TLabel *Label7; //max
         TLabel *Label8; //delimeter
-        TLabel *Label9; // параметры исходных ГГ
+        TLabel *Label9; // РїР°СЂР°РјРµС‚СЂС‹ РёСЃС…РѕРґРЅС‹С… Р“Р“
         TLabel *Label10; //another delimeter
-        TLabel *Label11; // количество ГГ
+        TLabel *Label11; // РєРѕР»РёС‡РµСЃС‚РІРѕ Р“Р“
 
 
-        TButton *Button1; // создать ГГ
-        TButton *Button2; // рандом
-        TButton *Button3; // последовательно
-        TEdit *Edit1; // ввод числа вершин
-        TEdit *Edit2; // ввод min контактов
-        TEdit *Edit3; // ввод max контактов
-        TEdit *Edit4; // ввод min ребер
-        TEdit *Edit5; // ввод max ребер
-        TEdit *Edit6; // ввод число подграфов от 2 до...
-        TEdit *Edit13; // ввод количества ГГ
-        TRadioGroup *RadioGroup2; // сложность трассировки
+        TButton *Button1; // СЃРѕР·РґР°С‚СЊ Р“Р“
+        TButton *Button2; // СЂР°РЅРґРѕРј
+        TButton *Button3; // РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕ
+        TEdit *Edit1; // РІРІРѕРґ С‡РёСЃР»Р° РІРµСЂС€РёРЅ
+        TEdit *Edit2; // РІРІРѕРґ min РєРѕРЅС‚Р°РєС‚РѕРІ
+        TEdit *Edit3; // РІРІРѕРґ max РєРѕРЅС‚Р°РєС‚РѕРІ
+        TEdit *Edit4; // РІРІРѕРґ min СЂРµР±РµСЂ
+        TEdit *Edit5; // РІРІРѕРґ max СЂРµР±РµСЂ
+        TEdit *Edit6; // РІРІРѕРґ С‡РёСЃР»Рѕ РїРѕРґРіСЂР°С„РѕРІ РѕС‚ 2 РґРѕ...
+        TEdit *Edit13; // РІРІРѕРґ РєРѕР»РёС‡РµСЃС‚РІР° Р“Р“
+        TRadioGroup *RadioGroup2; // СЃР»РѕР¶РЅРѕСЃС‚СЊ С‚СЂР°СЃСЃРёСЂРѕРІРєРё
 
 // tab2
 
         TTabSheet *TabSheet2; //sec tab
         TPanel *Panel3; //panel with  chart & bar
         TPanel *Panel4; //panel with buttons
-        TLabel *Label15; // число вершин
-        TLabel *Label20; // число уровней
-        TLabel *Label21; // число контактов
+        TLabel *Label15; // С‡РёСЃР»Рѕ РІРµСЂС€РёРЅ
+        TLabel *Label20; // С‡РёСЃР»Рѕ СѓСЂРѕРІРЅРµР№
+        TLabel *Label21; // С‡РёСЃР»Рѕ РєРѕРЅС‚Р°РєС‚РѕРІ
         TLabel *Label22; // min
         TLabel *Label23; // max
-        TLabel *Label24; // мощность ребер
+        TLabel *Label24; // РјРѕС‰РЅРѕСЃС‚СЊ СЂРµР±РµСЂ
         TLabel *Label25; // min
         TLabel *Label26; // max
         TLabel *Label16; // delimeter
-        TLabel *Label17; // параметры  исходного ГГ
+        TLabel *Label17; // РїР°СЂР°РјРµС‚СЂС‹  РёСЃС…РѕРґРЅРѕРіРѕ Р“Р“
         TLabel *Label18; //delimeter        
-        TLabel *Label12; // количество ГГ
+        TLabel *Label12; // РєРѕР»РёС‡РµСЃС‚РІРѕ Р“Р“
 
 
-        TButton *Button4; // старт
-        TEdit *Edit7; // ввод числа вершин
-        TEdit *Edit8; // ввод min контактов
-        TEdit *Edit9;  // ввод max контактов
-        TEdit *Edit10;  // ввод min ребер
-        TEdit *Edit11;  // ввод max ребер
-        TEdit *Edit12; // ввод числа уровней
-        TEdit *Edit14; // ввод количества ГГ
+        TButton *Button4; // СЃС‚Р°СЂС‚
+        TEdit *Edit7; // РІРІРѕРґ С‡РёСЃР»Р° РІРµСЂС€РёРЅ
+        TEdit *Edit8; // РІРІРѕРґ min РєРѕРЅС‚Р°РєС‚РѕРІ
+        TEdit *Edit9;  // РІРІРѕРґ max РєРѕРЅС‚Р°РєС‚РѕРІ
+        TEdit *Edit10;  // РІРІРѕРґ min СЂРµР±РµСЂ
+        TEdit *Edit11;  // РІРІРѕРґ max СЂРµР±РµСЂ
+        TEdit *Edit12; // РІРІРѕРґ С‡РёСЃР»Р° СѓСЂРѕРІРЅРµР№
+        TEdit *Edit14; // РІРІРѕРґ РєРѕР»РёС‡РµСЃС‚РІР° Р“Р“
         TProgressBar *ProgressBar2; // bottom progress bar
         TChart *Chart3; // steps chart
         TChart *Chart4; // external edges chart
         TBarSeries *Series3;
         TBarSeries *Series4;
-        TRadioGroup *RadioGroup1; // сложность трассировки
+        TRadioGroup *RadioGroup1; // СЃР»РѕР¶РЅРѕСЃС‚СЊ С‚СЂР°СЃСЃРёСЂРѕРІРєРё
 
 
 
-        TLabel *Label13; // caption: Label13, кажется, не используется
+        TLabel *Label13; // status label
         void __fastcall Button1Click(TObject *Sender);
         void __fastcall Button2Click(TObject *Sender);
         void __fastcall Button3Click(TObject *Sender);
@@ -100,16 +100,16 @@ __published:	// IDE-managed Components
         void __fastcall Button4Click(TObject *Sender);
         void __fastcall RadioGroup1Click(TObject *Sender);
 private:	// User declarations
-  void initHierarhyHG ();                       // Инициализация массивов для
-                                                // иерархического разбиения
+  void initHierarhyHG ();                       // РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РјР°СЃСЃРёРІРѕРІ РґР»СЏ
+                                                // РёРµСЂР°СЂС…РёС‡РµСЃРєРѕРіРѕ СЂР°Р·Р±РёРµРЅРёСЏ
 
-  void gatheringData ();                        // Проведение иерархического
-                                                // разбиения и сбор данных
-                                                // об изменении числа внешних связей
+  void gatheringData ();                        // РџСЂРѕРІРµРґРµРЅРёРµ РёРµСЂР°СЂС…РёС‡РµСЃРєРѕРіРѕ
+                                                // СЂР°Р·Р±РёРµРЅРёСЏ Рё СЃР±РѕСЂ РґР°РЅРЅС‹С…
+                                                // РѕР± РёР·РјРµРЅРµРЅРёРё С‡РёСЃР»Р° РІРЅРµС€РЅРёС… СЃРІСЏР·РµР№
 
-  void showData (int Complexity);               // Вывод данных на график
-                                                // "затраты в шагах" в зависимости
-                                                // от сложности алгоритма трассировки
+  void showData (int Complexity);               // Р’С‹РІРѕРґ РґР°РЅРЅС‹С… РЅР° РіСЂР°С„РёРє
+                                                // "Р·Р°С‚СЂР°С‚С‹ РІ С€Р°РіР°С…" РІ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё
+                                                // РѕС‚ СЃР»РѕР¶РЅРѕСЃС‚Рё Р°Р»РіРѕСЂРёС‚РјР° С‚СЂР°СЃСЃРёСЂРѕРІРєРё
 
 public:		// User declarations
   HGraph ** hGraph;

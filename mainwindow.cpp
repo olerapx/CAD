@@ -36,9 +36,6 @@ void MainWindow::on_singleLevelAction_changed()
 {
     ui->splittingControlGroup->setCurrentIndex(1);
     mode = SINGLE_LEVEL;
-
-    ui->randomButton->setEnabled(false);
-    ui->seriesButton->setEnabled(false);
 }
 
 void MainWindow::on_hierarchicalAction_changed()
@@ -63,8 +60,11 @@ void MainWindow::on_createHGButton_clicked()
                                    ui->maxContactNumberText->text().toInt(),
                                    ui->minEdgeNumberText->text().toInt(),
                                    ui->maxEdgeNumberText->text().toInt());
-    //don't know if is it needed
-    // ui->createHGButton->setEnabled(false);
+
+
+   // ui->createHGButton->setEnabled(false);
+
+    //TODO: MAKE DELETE FOR HGRAPH
 
     ui->randomButton->setEnabled(true);
     ui->seriesButton->setEnabled(true);
@@ -76,9 +76,9 @@ void MainWindow::on_randomButton_clicked()
 
     QVector<double> edgesX, edgesY;
 
-    int HGNumber = ui->HGNumberText->text().toInt();
+    int subHGNumber = ui->subHGNumberText->text().toInt();
 
-    for (int j=2; j<=HGNumber; j++)
+    for (int j=2; j<=subHGNumber; j++)
     {
         float countOfAllFragments = 0;
         float countOfAllExternalEdges = 0;
@@ -94,7 +94,23 @@ void MainWindow::on_randomButton_clicked()
     }
 
     ui->edgesChart->graph(0)->setData(edgesX, edgesY);
+
+    ui->edgesChart->xAxis->setRange(0, getMax(edgesX)*1.1);
+    ui->edgesChart->yAxis->setRange(0, getMax(edgesY)*1.1);
+
     ui->edgesChart->replot();
+}
+
+double MainWindow::getMax(QVector<double> vector)
+{
+    if (vector.size()==0) return 0.0;
+
+    double max = 0.0;
+
+    for (int i=0;i<vector.size();i++)
+        if (vector[i]>max) max = vector[i];
+
+    return max;
 }
 
 void MainWindow::on_seriesButton_clicked()
@@ -107,10 +123,10 @@ void MainWindow::on_seriesButton_clicked()
     else
         exponent = 3.0;
 
-    int HGNumber = ui->HGNumberText->text().toInt();
+    int subHGNumber = ui->subHGNumberText->text().toInt();
 
     ui->progressBar->setMinimum(countHG  *2);
-    ui->progressBar->setMaximum(HGNumber * countHG);
+    ui->progressBar->setMaximum(subHGNumber * countHG);
     ui->progressBar->setValue(countHG * 2);
 
     QVector<double> stepsX, stepsY, edgesX, edgesY;
@@ -124,7 +140,7 @@ void MainWindow::on_seriesButton_clicked()
     stepsX.push_back(1);
     stepsY.push_back(pow((double)hGraph[0]->getCountOfVertices(),2.0) + pow((double)countOfAllFragments,exponent));
 
-    for (int j=2; j<=HGNumber; j++)
+    for (int j=2; j<=subHGNumber; j++)
     {
         float countOfAllExternalEdges = 0;
 
@@ -146,8 +162,18 @@ void MainWindow::on_seriesButton_clicked()
         stepsY.push_back(hGraph[0]->getCountOfVertices() +
                 pow((double)hGraph[0]->getCountOfVertices()/j,2.0) +
                 pow((double)countOfAllExternalEdges,exponent) +
-                pow((double)(countOfAllFragments-countOfAllExternalEdges)/j,exponent));
+                pow((double)(countOfAllFragments-countOfAllExternalEdges)/j, exponent));
     }
+
+    ui->progressBar->setValue(countHG * 2);
+
+    ui->stepsChart->xAxis->setRange(0, getMax(stepsX)*1.1);
+    ui->stepsChart->yAxis->setRange(0, getMax(stepsY)*1.1);
+
+
+    ui->edgesChart->xAxis->setRange(0, getMax(edgesX)*1.1);
+    ui->edgesChart->yAxis->setRange(0, getMax(edgesY)*1.1);
+
 
     ui->stepsChart->graph(0)->setData(stepsX, stepsY);
     ui->stepsChart->replot();
@@ -169,6 +195,9 @@ void MainWindow::resetGraphs()
 
     ui->stepsChart->graph(0)->setPen(QColor(255, 0, 0, 255));
     ui->stepsChart->graph(0)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 4));
+
+    ui->edgesChart->replot();
+    ui->stepsChart->replot();
 }
 
 void MainWindow::on_startButton_clicked()
@@ -181,8 +210,9 @@ void MainWindow::on_startButton_clicked()
 
     this->setWindowTitle("Создание ГГ...");
 
-    initHierarhyHG();
+    resetGraphs();
 
+    initHierarhyHG();
     gatheringData();
 
     this->setWindowTitle("Почти все...");
@@ -207,14 +237,19 @@ void MainWindow::on_startButton_clicked()
     //  Button4->Enabled = false;
     //  RadioGroup1Click(Sender);
 
+    ui->edgesChart->xAxis->setRange(0, getMax(edgesX)*1.1);
+    ui->edgesChart->yAxis->setRange(0, getMax(edgesY)*1.1);
+
     ui->edgesChart->graph(0)->setData(edgesX, edgesY);
     ui->edgesChart->replot();
+
+    if (ui->tracingQuadratic->isChecked())
+        showData(2);
+    else showData(3);
 }
 
 void MainWindow::showData (int Complexity)
 {
-    resetGraphs();
-
     QVector<double> stepsX, stepsY;
 
     double currentCostOfTracing = 0;
@@ -252,6 +287,9 @@ void MainWindow::showData (int Complexity)
         stepsX.push_back(i+1);
         stepsY.push_back(nextValue);
     }
+
+    ui->stepsChart->xAxis->setRange(0, getMax(stepsX)*1.1);
+    ui->stepsChart->yAxis->setRange(0, getMax(stepsY)*1.1);
 
     ui->stepsChart->graph(0)->setData(stepsX, stepsY);
     ui->stepsChart->replot();

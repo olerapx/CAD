@@ -51,6 +51,8 @@ private:
 
     void resetGraphs();
 
+    double getMax(QVector<double> vector);
+
     void initHierarhyHG ();                       // Инициализация массивов для
                                                    // иерархического разбиения
 

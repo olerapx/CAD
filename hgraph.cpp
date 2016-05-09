@@ -134,7 +134,6 @@ void HGraph::createEdges (int minCountOfVertices, int maxCountOfVertices)
         // Максимальное число цепей - это
         // вершины * макс. степень / мин. мощность
         edges = new HGEdge * [countOfVertices*logicalThreshold/(maxCountOfVertices*minCountOfVertices)];
-        std::cerr <<countOfVertices*logicalThreshold/(maxCountOfVertices*minCountOfVertices)<<"\n";
 
         for (int i=0; ; i++)        // Начинаем построение ребер (заранее неизвестно, сколько их)
             if (logicalThreshold < summaryDegree)
@@ -146,8 +145,6 @@ void HGraph::createEdges (int minCountOfVertices, int maxCountOfVertices)
                         nextVertexToConnect = rand()%getCountOfVertices();
                     while (vertices[nextVertexToConnect]->isInEdge(edges[i]) ||
                            vertices[nextVertexToConnect]->isFull());
-
-                 //   std::cerr <<nextVertexToConnect<<"\n";
 
                     // Установление инцидентности
                     incidenceInstall(vertices[nextVertexToConnect], edges[i]);

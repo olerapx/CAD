@@ -39,9 +39,17 @@ private slots:
 
     void on_createHGButton_clicked();
 
+    void on_randomButton_clicked();
+
+    void on_seriesButton_clicked();
+
+    void on_startButton_clicked();
+
 private:
 
     Ui::MainWindow *ui;
+
+    void resetGraphs();
 
     void initHierarhyHG ();                       // Инициализация массивов для
                                                    // иерархического разбиения

@@ -86,8 +86,8 @@ __published:	// IDE-managed Components
         TProgressBar *ProgressBar2; // bottom progress bar
         TChart *Chart3; // steps chart
         TChart *Chart4; // external edges chart
-        TBarSeries *Series3;
-        TBarSeries *Series4;
+        TBarSeries *Series3; //steps graph
+        TBarSeries *Series4; // edges graph
         TRadioGroup *RadioGroup1; // сложность трассировки
 
 

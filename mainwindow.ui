@@ -298,6 +298,9 @@
               <layout class="QVBoxLayout" name="verticalLayout_4">
                <item>
                 <widget class="QPushButton" name="randomButton">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
                  <property name="text">
                   <string>Рандом</string>
                  </property>
@@ -308,6 +311,9 @@
                </item>
                <item>
                 <widget class="QPushButton" name="seriesButton">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
                  <property name="text">
                   <string>Последовательно</string>
                  </property>
@@ -473,8 +479,33 @@
        </layout>
       </item>
       <item row="0" column="0">
-       <layout class="QVBoxLayout" name="chartLayout">
-        <item>
+       <layout class="QGridLayout" name="gridLayout">
+        <item row="4" column="0">
+         <widget class="QProgressBar" name="progressBar">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>400</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="value">
+           <number>0</number>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
          <widget class="QLabel" name="stepsChartLabel">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -490,45 +521,14 @@
           </property>
          </widget>
         </item>
-        <item>
-         <widget class="QCustomPlot" name="stepsChart" native="true">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>550</width>
-            <height>280</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>16777215</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="edgesChartLabel">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
+        <item row="4" column="1">
+         <widget class="QLabel" name="statusLabel">
           <property name="text">
-           <string>Процент внешних связей</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
+           <string/>
           </property>
          </widget>
         </item>
-        <item>
+        <item row="3" column="0" colspan="2">
          <widget class="QCustomPlot" name="edgesChart" native="true">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -550,12 +550,18 @@
           </property>
          </widget>
         </item>
-        <item alignment="Qt::AlignBottom">
-         <widget class="QProgressBar" name="progressBar">
+        <item row="1" column="0" colspan="2">
+         <widget class="QCustomPlot" name="stepsChart" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="minimumSize">
            <size>
-            <width>500</width>
-            <height>0</height>
+            <width>550</width>
+            <height>280</height>
            </size>
           </property>
           <property name="maximumSize">
@@ -564,8 +570,21 @@
             <height>16777215</height>
            </size>
           </property>
-          <property name="value">
-           <number>0</number>
+         </widget>
+        </item>
+        <item row="2" column="0" colspan="2">
+         <widget class="QLabel" name="edgesChartLabel">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Процент внешних связей</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
           </property>
          </widget>
         </item>
@@ -609,7 +628,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Иерархиеское</string>
+    <string>Иерархическое</string>
    </property>
   </action>
  </widget>

@@ -4,10 +4,13 @@
 #include <QMainWindow>
 #include <ctime>
 
-#include "hgraph.h"
+#include "chart/qcustomplot.h"
+#include "line.h"
+#include "hgraph/hgraph.h"
 
-namespace Ui {
-class MainWindow;
+namespace Ui
+{
+    class MainWindow;
 }
 
 enum Mode
@@ -25,7 +28,8 @@ public:
     ~MainWindow();
 
     HGraph ** hGraph;
-    HGraph **** hierarhyHG;
+    HGraph**** hGraphHierarchy;
+
     int ** increaseOfCountExternalEdges;
     int countHG;
     int minNumberSubHG;
@@ -49,18 +53,18 @@ private:
 
     Ui::MainWindow *ui;
 
+    void drawLine (QCustomPlot* chart, Line line, QString name, QPen pen);
+    void drawText (QCustomPlot* chart, QString text, QPen pen, double x, double y);
     void resetGraphs();
-
-    double getMax(QVector<double> vector);
 
     void initHierarhyHG ();                       // Инициализация массивов для
                                                    // иерархического разбиения
 
-     void gatheringData ();                        // Проведение иерархического
+    void gatheringData ();                        // Проведение иерархического
                                                    // разбиения и сбор данных
                                                    // об изменении числа внешних связей
 
-     void showData (int Complexity);               // Вывод данных на график
+    void showData (int Complexity);               // Вывод данных на график
                                                    // "затраты в шагах" в зависимости
                                                    // от сложности алгоритма трассировки
 };

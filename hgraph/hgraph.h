@@ -14,6 +14,7 @@
 class HGraph
 {
 private:
+
     HGVertex **vertices;                          // Вершины
     HGEdge   **edges;                             // Гиперребра
     int numberOfHG;                               // Номер подграфа (у главного -1)
@@ -56,8 +57,6 @@ public:
 
     // Убрать разбиение
     void resetSplitHG ();
-
-
 
     // Генератор гиперграфа
     void HGraphGenerator (int CountOfVertices, int minDegree, int maxDegree,

@@ -18,18 +18,52 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->splittingControlGroup->setCurrentIndex(0);
 
     srand (time(NULL));
+
     hGraph = nullptr;
-    hierarhyHG = nullptr;
+    hGraphHierarchy = nullptr;
     increaseOfCountExternalEdges = nullptr;
 }
 
 MainWindow::~MainWindow()
 {
     delete [] hGraph;
-    delete [] hierarhyHG;
+    delete [] hGraphHierarchy;
     delete [] increaseOfCountExternalEdges;
 
     delete ui;
+}
+
+void MainWindow::drawLine (QCustomPlot* chart, Line line, QString name, QPen pen)
+{
+    chart->addGraph();
+    int i = chart->graphCount()-1;
+
+    chart->graph(i)->setPen(pen);
+    chart->graph(i)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 4));
+
+    chart->graph(i)->setData(line.x, line.y);
+
+    chart->xAxis->setRange(-1, line.getMaxX()*1.1);
+    chart->yAxis->setRange(0, line.getMaxY()*1.1);
+
+    chart->graph(i)->setName(name);
+
+    for (int j=0; j<line.y.size(); j++)
+        drawText(chart, QString::number(line.y[j]), pen,
+                 line.x[j],
+                 line.y[j]+line.getMaxY()/line.y.size()/5);
+
+    chart->replot();
+}
+
+void MainWindow::drawText(QCustomPlot *chart, QString text, QPen pen, double x, double y)
+{
+    QCPItemText *textLabel = new QCPItemText(chart);
+    textLabel->setText(text);
+    textLabel->setPen(pen);
+    chart->addItem(textLabel);
+
+    textLabel->position->setCoords(x, y);
 }
 
 void MainWindow::on_singleLevelAction_changed()
@@ -50,7 +84,13 @@ void MainWindow::on_createHGButton_clicked()
     if (countHG<1)
         countHG=10;
 
+     delete[] hGraph;
+
+    ui->randomButton->setEnabled(true);
+    ui->seriesButton->setEnabled(true);
+
     hGraph = new HGraph* [countHG];
+
     for (int i=0; i<countHG; i++)
         hGraph[i] = new HGraph;
 
@@ -61,11 +101,6 @@ void MainWindow::on_createHGButton_clicked()
                                    ui->minEdgeNumberText->text().toInt(),
                                    ui->maxEdgeNumberText->text().toInt());
 
-
-   // ui->createHGButton->setEnabled(false);
-
-    //TODO: MAKE DELETE FOR HGRAPH
-
     ui->randomButton->setEnabled(true);
     ui->seriesButton->setEnabled(true);
 }
@@ -74,14 +109,14 @@ void MainWindow::on_randomButton_clicked()
 {
     resetGraphs();
 
-    QVector<double> edgesX, edgesY;
+    Line edges;
 
     int subHGNumber = ui->subHGNumberText->text().toInt();
 
     for (int j=2; j<=subHGNumber; j++)
     {
-        float countOfAllFragments = 0;
-        float countOfAllExternalEdges = 0;
+        double countOfAllFragments = 0;
+        double countOfAllExternalEdges = 0;
         for (int i=0; i<countHG; i++)
         {
             hGraph[i]->resetSplitHG();
@@ -89,28 +124,11 @@ void MainWindow::on_randomButton_clicked()
             countOfAllFragments += hGraph[i]->getCountOfFragments();
             countOfAllExternalEdges += hGraph[i]->getCountOfExternalEdges();
         }
-        edgesX.push_back(j);
-        edgesY.push_back(100*countOfAllExternalEdges/countOfAllFragments);
+        edges.x.push_back(j);
+        edges.y.push_back(100*countOfAllExternalEdges/countOfAllFragments);
     }
 
-    ui->edgesChart->graph(0)->setData(edgesX, edgesY);
-
-    ui->edgesChart->xAxis->setRange(0, getMax(edgesX)*1.1);
-    ui->edgesChart->yAxis->setRange(0, getMax(edgesY)*1.1);
-
-    ui->edgesChart->replot();
-}
-
-double MainWindow::getMax(QVector<double> vector)
-{
-    if (vector.size()==0) return 0.0;
-
-    double max = 0.0;
-
-    for (int i=0;i<vector.size();i++)
-        if (vector[i]>max) max = vector[i];
-
-    return max;
+    drawLine(ui->edgesChart, edges, " ", QColor(255,0,0));
 }
 
 void MainWindow::on_seriesButton_clicked()
@@ -129,7 +147,7 @@ void MainWindow::on_seriesButton_clicked()
     ui->progressBar->setMaximum(subHGNumber * countHG);
     ui->progressBar->setValue(countHG * 2);
 
-    QVector<double> stepsX, stepsY, edgesX, edgesY;
+    Line steps, edges;
 
     float countOfAllFragments = 0;
 
@@ -137,8 +155,8 @@ void MainWindow::on_seriesButton_clicked()
         countOfAllFragments += hGraph[i]->getCountOfFragments();
     countOfAllFragments /= countHG;
 
-    stepsX.push_back(1);
-    stepsY.push_back(pow((double)hGraph[0]->getCountOfVertices(),2.0) + pow((double)countOfAllFragments,exponent));
+    steps.x.push_back(1);
+    steps.y.push_back(pow((double)hGraph[0]->getCountOfVertices(),2.0) + pow((double)countOfAllFragments,exponent));
 
     for (int j=2; j<=subHGNumber; j++)
     {
@@ -155,11 +173,11 @@ void MainWindow::on_seriesButton_clicked()
 
         countOfAllExternalEdges /= countHG;
 
-        edgesX.push_back(j);
-        edgesY.push_back(100*countOfAllExternalEdges/countOfAllFragments);
+        edges.x.push_back(j);
+        edges.y.push_back(100*countOfAllExternalEdges/countOfAllFragments);
 
-        stepsX.push_back(j);
-        stepsY.push_back(hGraph[0]->getCountOfVertices() +
+        steps.x.push_back(j);
+        steps.y.push_back(hGraph[0]->getCountOfVertices() +
                 pow((double)hGraph[0]->getCountOfVertices()/j,2.0) +
                 pow((double)countOfAllExternalEdges,exponent) +
                 pow((double)(countOfAllFragments-countOfAllExternalEdges)/j, exponent));
@@ -167,19 +185,8 @@ void MainWindow::on_seriesButton_clicked()
 
     ui->progressBar->setValue(countHG * 2);
 
-    ui->stepsChart->xAxis->setRange(0, getMax(stepsX)*1.1);
-    ui->stepsChart->yAxis->setRange(0, getMax(stepsY)*1.1);
-
-
-    ui->edgesChart->xAxis->setRange(0, getMax(edgesX)*1.1);
-    ui->edgesChart->yAxis->setRange(0, getMax(edgesY)*1.1);
-
-
-    ui->stepsChart->graph(0)->setData(stepsX, stepsY);
-    ui->stepsChart->replot();
-
-    ui->edgesChart->graph(0)->setData(edgesX, edgesY);
-    ui->edgesChart->replot();
+    drawLine(ui->stepsChart, steps, " ", QColor(255,0,0));
+    drawLine(ui->edgesChart, edges, " ", QColor(255,0,0));
 }
 
 void MainWindow::resetGraphs()
@@ -187,14 +194,8 @@ void MainWindow::resetGraphs()
     ui->edgesChart->clearGraphs();
     ui->stepsChart->clearGraphs();
 
-    ui->edgesChart->addGraph();
-    ui->stepsChart->addGraph();
-
-    ui->edgesChart->graph(0)->setPen(QColor(255, 0, 0, 255));
-    ui->edgesChart->graph(0)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 4));
-
-    ui->stepsChart->graph(0)->setPen(QColor(255, 0, 0, 255));
-    ui->stepsChart->graph(0)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 4));
+    ui->edgesChart->clearItems();
+    ui->stepsChart->clearItems();
 
     ui->edgesChart->replot();
     ui->stepsChart->replot();
@@ -202,24 +203,24 @@ void MainWindow::resetGraphs()
 
 void MainWindow::on_startButton_clicked()
 {
+    resetGraphs();
+
+    Line edges;
+
     countHG = ui->HGNumberText->text().toInt();
     if (countHG<1)
         countHG=10;
 
-    QVector<double> edgesX, edgesY;
-
-    this->setWindowTitle("Создание ГГ...");
-
-    resetGraphs();
+    ui->statusLabel->setText("Создание ГГ...");
 
     initHierarhyHG();
     gatheringData();
 
-    this->setWindowTitle("Почти все...");
+    ui->statusLabel->setText("Почти все...");
 
     float countAllFragments = 0;
     for (int i=0; i<countHG; i++)
-        countAllFragments += hierarhyHG[0][0][i]->getCountOfFragments();
+        countAllFragments += hGraphHierarchy[0][0][i]->getCountOfFragments();
     countAllFragments /= countHG;
     float nextIncreaseValue = 0;
 
@@ -230,37 +231,35 @@ void MainWindow::on_startButton_clicked()
         for (int j=0; j<(int)pow(2.0,i); j++)
             nextIncreaseValue += increaseOfCountExternalEdges[i][j];
 
-        edgesX.push_back(i+1);
-        edgesY.push_back(100*nextIncreaseValue/countAllFragments);
+        edges.x.push_back(i+1);
+        edges.y.push_back(100*nextIncreaseValue/countAllFragments);
     }
 
     //  Button4->Enabled = false;
     //  RadioGroup1Click(Sender);
 
-    ui->edgesChart->xAxis->setRange(0, getMax(edgesX)*1.1);
-    ui->edgesChart->yAxis->setRange(0, getMax(edgesY)*1.1);
-
-    ui->edgesChart->graph(0)->setData(edgesX, edgesY);
-    ui->edgesChart->replot();
+    drawLine(ui->edgesChart, edges, " ", QColor(255,0,0));
 
     if (ui->tracingQuadratic->isChecked())
         showData(2);
     else showData(3);
+
+    ui->statusLabel->setText("Готово.");
 }
 
 void MainWindow::showData (int Complexity)
 {
-    QVector<double> stepsX, stepsY;
+    Line steps;
 
     double currentCostOfTracing = 0;
     double currentCountOfInternalEdges = 0;
 
     for (int i=0; i<countHG; i++)
-        currentCountOfInternalEdges += hierarhyHG[0][0][i]->getCountOfFragments();
+        currentCountOfInternalEdges += hGraphHierarchy[0][0][i]->getCountOfFragments();
     currentCountOfInternalEdges /= countHG;
 
-    stepsX.push_back(0);
-    stepsY.push_back(pow((double)currentCountOfInternalEdges, Complexity)+
+    steps.x.push_back(0);
+    steps.y.push_back(pow((double)currentCountOfInternalEdges, Complexity)+
                      pow(ui->vertexNumberText->text().toDouble(),2));
 
     int levelNumber = ui->levelNumberText->text().toInt();
@@ -278,21 +277,17 @@ void MainWindow::showData (int Complexity)
 
         currentCostOfTracing += pow((double)maxCountExternalEdges, Complexity);
 
-        double nextValue = hierarhyHG[i][0][0]->getCountOfVertices() +
-                pow((double)hierarhyHG[i][0][0]->getCountOfVertices()/2,2.0) +
+        double nextValue = hGraphHierarchy[i][0][0]->getCountOfVertices() +
+                pow((double)hGraphHierarchy[i][0][0]->getCountOfVertices()/2,2.0) +
                 currentCostOfTracing +
                 pow (currentCountOfInternalEdges / pow(2.0,i+1),
                      Complexity);
 
-        stepsX.push_back(i+1);
-        stepsY.push_back(nextValue);
+        steps.x.push_back(i+1);
+        steps.y.push_back(nextValue);
     }
 
-    ui->stepsChart->xAxis->setRange(0, getMax(stepsX)*1.1);
-    ui->stepsChart->yAxis->setRange(0, getMax(stepsY)*1.1);
-
-    ui->stepsChart->graph(0)->setData(stepsX, stepsY);
-    ui->stepsChart->replot();
+    drawLine(ui->stepsChart, steps, " ", QColor(255,0,0));
 }
 
 void MainWindow::initHierarhyHG()
@@ -301,14 +296,14 @@ void MainWindow::initHierarhyHG()
 
     minNumberSubHG = 0;
     increaseOfCountExternalEdges = new int * [levelNumber];
-    hierarhyHG = new HGraph*** [levelNumber];
+    hGraphHierarchy = new HGraph*** [levelNumber];
 
     for (int i=0; i<levelNumber; i++)
     {
-        hierarhyHG[i] = new HGraph** [(int)pow(2.0,i)];
+        hGraphHierarchy[i] = new HGraph** [(int)pow(2.0,i)];
 
         for (int j=0; j<(int)pow(2.0,i); j++)
-            hierarhyHG[i][j] = new HGraph* [countHG];
+            hGraphHierarchy[i][j] = new HGraph* [countHG];
 
         increaseOfCountExternalEdges[i] = new int [(int)pow(2.0,i)];
     }
@@ -319,8 +314,8 @@ void MainWindow::initHierarhyHG()
 
     for (int i=0; i<countHG; i++)
     {
-        hierarhyHG[0][0][i] = new HGraph;
-        hierarhyHG[0][0][i]->HGraphGenerator(ui->vertexNumberText->text().toInt(),
+        hGraphHierarchy[0][0][i] = new HGraph;
+        hGraphHierarchy[0][0][i]->HGraphGenerator(ui->vertexNumberText->text().toInt(),
                                              ui->minContactNumberText->text().toInt(),
                                              ui->maxContactNumberText->text().toInt(),
                                              ui->minEdgeNumberText->text().toInt(),
@@ -342,23 +337,23 @@ void MainWindow::gatheringData()
 
     for (int i=0; i<levelNumber; i++)
     {
-        this->setWindowTitle("Осталось уровней: "+levelNumber-i);
+        ui->statusLabel->setText("Осталось уровней: "+levelNumber-i);
 
         for (int j=0; j<(int)pow(2.0, i); j++)       // Подграфы в уровнях
         {
             increaseOfCountExternalEdges[i][j] = 0;
             for (int k=0; k<countHG; k++)             // Множество экспериментов
             {
-                hierarhyHG[i][j][k]->gravitySplitHG(2,minNumberSubHG);
+                hGraphHierarchy[i][j][k]->gravitySplitHG(2,minNumberSubHG);
                 // Разбили
 
-                increaseOfCountExternalEdges[i][j] += hierarhyHG[0][0][k]->getCountOfExternalEdges();
+                increaseOfCountExternalEdges[i][j] += hGraphHierarchy[0][0][k]->getCountOfExternalEdges();
                 // Плюсанул новые внешние связи
                 if (i <levelNumber-1) // Если не последняя итерация -
                     // создаю подграфы на основе разбиений
                 {
-                    hierarhyHG[i+1][j*2][k] = hierarhyHG[i][j][k]->createSubHG(minNumberSubHG);
-                    hierarhyHG[i+1][j*2+1][k] = hierarhyHG[i][j][k]->createSubHG(minNumberSubHG+1);
+                    hGraphHierarchy[i+1][j*2][k] = hGraphHierarchy[i][j][k]->createSubHG(minNumberSubHG);
+                    hGraphHierarchy[i+1][j*2+1][k] = hGraphHierarchy[i][j][k]->createSubHG(minNumberSubHG+1);
                 }
 
             }

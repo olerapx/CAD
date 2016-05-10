@@ -17,15 +17,17 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    hgedge.cpp \
-    hgvertex.cpp \
-    hgraph.cpp \
-    qcustomplot.cpp
+    hgraph/hgedge.cpp \
+    hgraph/hgvertex.cpp \
+    hgraph/hgraph.cpp \
+    chart/qcustomplot.cpp \
+    line.cpp
 
 HEADERS  += mainwindow.h \
-    hgedge.h \
-    hgvertex.h \
-    hgraph.h \
-    qcustomplot.h
+    hgraph/hgedge.h \
+    hgraph/hgvertex.h \
+    hgraph/hgraph.h \
+    chart/qcustomplot.h \
+    line.h
 
 FORMS    += mainwindow.ui

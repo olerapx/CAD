@@ -3,19 +3,24 @@
 
 #include "hgedge.h"
 
+#include <vector>
+
 class HGEdge;
 
 /**
  * @brief The HGVertex class
  * Вершина гиперграфа.
  */
+
+using namespace std;
+
 class HGVertex
 {
 private:
     int numberV;                                  // Собственный номер вершины
     int maxDegree;                                // Максимально возможное число инцидентных гиперребер
     int numberOfHG;                               // Номер подграфа, -1, если не принадлежит ни к одному
-    HGEdge **edges;                               // Инцидентные гиперребра
+    vector <HGEdge*> edges;                               // Инцидентные гиперребра
     bool full;                                    // Состояние заполненности
 
     // Поиск свободного места и изменение состояния заполненности, если такого нет
@@ -34,10 +39,10 @@ public:
     void setNumberOfHG (int numberSubHG);
 
     // Попытка включения вершины в ребро
-    bool connectVertex (HGEdge *newEdge);
+    bool connectEdge (HGEdge *newEdge);
 
     // Отключение вершины от ребра
-    void disconnectVertex (HGEdge *oldEdge);
+    void disconnectEdge (HGEdge *oldEdge);
 
     // Геттер заполненности
     bool isFull ();

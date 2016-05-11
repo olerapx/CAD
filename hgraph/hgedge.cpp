@@ -3,13 +3,13 @@
 HGEdge::HGEdge()
 {
     maxCountOfVertex = 0;
-    vertices = nullptr;
 }
 
 HGEdge::HGEdge (int maxVertexCount)
 {
     maxCountOfVertex = maxVertexCount;
-    vertices = new HGVertex * [maxVertexCount];
+    vertices.resize(maxVertexCount);
+
     for (int i=0; i<maxVertexCount; i++)
         vertices[i] = nullptr;
 }
@@ -19,6 +19,17 @@ HGEdge::~HGEdge ()
     if (maxCountOfVertex > 0)
         for (int i=0; i<maxCountOfVertex; i++)
             vertices[i] = nullptr;
+}
+
+int HGEdge::getCountOfFreePlaces()
+{
+    if (full)
+        return 0;
+    int countOfFreePlaces = 0;
+    for (int i=0; i<maxCountOfVertex; i++)
+        if (vertices[i] == nullptr)
+            countOfFreePlaces++;
+    return countOfFreePlaces;
 }
 
 int HGEdge::freePlaceForConnect ()
@@ -49,6 +60,8 @@ void HGEdge::disconnectVertex (HGVertex *oldVertex)
             vertices[i] = nullptr;
             if (full)
                 full = false;
+
+            oldVertex->disconnectEdge(this);
             return;
         }
 }

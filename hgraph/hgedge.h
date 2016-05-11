@@ -3,7 +3,11 @@
 
 #include "hgvertex.h"
 
+#include <vector>
+
 class HGVertex;
+
+using namespace std;
 
 /**
  * @brief The HGEdge class
@@ -13,7 +17,7 @@ class HGEdge
 {
 private:
     int maxCountOfVertex;                         // Максимальная мощность ребра
-    HGVertex **vertices;                          // Указатели на вершины
+    vector<HGVertex*> vertices;                   // Указатели на вершины
     bool full;                                    // Состояние заполненности
 
     //Поиск свободного места и изменение состояния заполненности, если такого нет.
@@ -27,6 +31,8 @@ public:
 
     //Исключение вершины из ребра.
     void disconnectVertex (HGVertex *oldVertex);
+
+    int getCountOfFreePlaces();
 
     //Попытка включения вершины в ребро.
     bool connectVertex (HGVertex *newVertex);

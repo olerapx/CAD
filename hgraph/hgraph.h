@@ -11,12 +11,15 @@
  * @brief The HGraph class
  * Гиперграф.
  */
+
+using namespace std;
+
 class HGraph
 {
 private:
 
-    HGVertex **vertices;                          // Вершины
-    HGEdge   **edges;                             // Гиперребра
+    vector<HGVertex*> vertices;                          // Вершины
+    vector<HGEdge*>   edges;                             // Гиперребра
     int numberOfHG;                               // Номер подграфа (у главного -1)
     int countOfVertices;                          // Число вершин
     int countOfEdges;                             // Число ребер
@@ -41,9 +44,10 @@ private:
 
 public:
     HGraph ();
+    ~HGraph();
 
     //Конструктор подграфа.
-    HGraph (HGVertex **masOfVertex, int cOfVertices, int numberSubG);
+    HGraph (vector<HGVertex*>& masOfVertex, int numberSubG);
 
     //Создание подграфа.
     HGraph* createSubHG (int numberOfSubHG);

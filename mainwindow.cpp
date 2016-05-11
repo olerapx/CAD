@@ -19,17 +19,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     srand (time(NULL));
 
-    hGraph = nullptr;
-    hGraphHierarchy = nullptr;
-    increaseOfCountExternalEdges = nullptr;
 }
 
 MainWindow::~MainWindow()
 {
-    delete [] hGraph;
-    delete [] hGraphHierarchy;
-    delete [] increaseOfCountExternalEdges;
-
     delete ui;
 }
 
@@ -84,12 +77,12 @@ void MainWindow::on_createHGButton_clicked()
     if (countHG<1)
         countHG=10;
 
-     delete[] hGraph;
+     hGraph.clear();
 
     ui->randomButton->setEnabled(true);
     ui->seriesButton->setEnabled(true);
 
-    hGraph = new HGraph* [countHG];
+    hGraph.resize(countHG);
 
     for (int i=0; i<countHG; i++)
         hGraph[i] = new HGraph;
@@ -107,7 +100,7 @@ void MainWindow::on_createHGButton_clicked()
 
 void MainWindow::on_randomButton_clicked()
 {
-    resetGraphs();
+    resetCharts();
 
     Line edges;
 
@@ -133,7 +126,7 @@ void MainWindow::on_randomButton_clicked()
 
 void MainWindow::on_seriesButton_clicked()
 {
-    resetGraphs();
+    resetCharts();
 
     float exponent;
     if (ui->tracingQuadratic->isChecked())
@@ -189,7 +182,7 @@ void MainWindow::on_seriesButton_clicked()
     drawLine(ui->edgesChart, edges, " ", QColor(255,0,0));
 }
 
-void MainWindow::resetGraphs()
+void MainWindow::resetCharts()
 {
     ui->edgesChart->clearGraphs();
     ui->stepsChart->clearGraphs();
@@ -203,7 +196,7 @@ void MainWindow::resetGraphs()
 
 void MainWindow::on_startButton_clicked()
 {
-    resetGraphs();
+    resetCharts();
 
     Line edges;
 
@@ -295,17 +288,21 @@ void MainWindow::initHierarhyHG()
     int levelNumber = ui->levelNumberText->text().toInt();
 
     minNumberSubHG = 0;
-    increaseOfCountExternalEdges = new int * [levelNumber];
-    hGraphHierarchy = new HGraph*** [levelNumber];
+
+    increaseOfCountExternalEdges.clear();
+    increaseOfCountExternalEdges.resize(levelNumber);
+
+    hGraphHierarchy.clear();
+    hGraphHierarchy.resize(levelNumber);
 
     for (int i=0; i<levelNumber; i++)
     {
-        hGraphHierarchy[i] = new HGraph** [(int)pow(2.0,i)];
+        hGraphHierarchy[i].resize((int)pow(2.0,i));
 
         for (int j=0; j<(int)pow(2.0,i); j++)
-            hGraphHierarchy[i][j] = new HGraph* [countHG];
+            hGraphHierarchy[i][j].resize(countHG);
 
-        increaseOfCountExternalEdges[i] = new int [(int)pow(2.0,i)];
+        increaseOfCountExternalEdges[i].resize((int)pow(2.0,i));
     }
 
     ui->progressBar->setMinimum(0);

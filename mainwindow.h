@@ -27,10 +27,11 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    HGraph ** hGraph;
-    HGraph**** hGraphHierarchy;
+    vector<HGraph*> hGraph;
 
-    int ** increaseOfCountExternalEdges;
+    vector<vector<vector<HGraph*>>> hGraphHierarchy;
+
+    vector<vector<int>> increaseOfCountExternalEdges;
     int countHG;
     int minNumberSubHG;
 
@@ -55,7 +56,7 @@ private:
 
     void drawLine (QCustomPlot* chart, Line line, QString name, QPen pen);
     void drawText (QCustomPlot* chart, QString text, QPen pen, double x, double y);
-    void resetGraphs();
+    void resetCharts();
 
     void initHierarhyHG ();                       // Инициализация массивов для
                                                    // иерархического разбиения

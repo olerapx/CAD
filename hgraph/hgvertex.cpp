@@ -5,7 +5,6 @@ HGVertex::HGVertex ()
     numberV = 0;
     maxDegree = 0;
     full = true;
-    edges = nullptr;
     numberOfHG = -1;
 }
 
@@ -15,7 +14,8 @@ HGVertex::HGVertex (int nV, int maxD)
     numberV = nV;
     maxDegree = maxD;
     full = false;
-    edges = new HGEdge * [maxD];
+
+    edges.resize(maxD);
     for (int i=0; i<maxD; i++)
         edges[i] = nullptr;
 }
@@ -56,7 +56,7 @@ void HGVertex::setNumberOfHG (int numberSubHG)
     numberOfHG = numberSubHG;
 }
 
-bool HGVertex::connectVertex (HGEdge *newEdge)
+bool HGVertex::connectEdge (HGEdge *newEdge)
 {
     if (full)
         return false;
@@ -73,7 +73,7 @@ bool HGVertex::connectVertex (HGEdge *newEdge)
     }
 }
 
-void HGVertex::disconnectVertex (HGEdge *oldEdge)
+void HGVertex::disconnectEdge (HGEdge *oldEdge)
 {
     for (int i=0; i<maxDegree; i++)
         if (edges[i] == oldEdge)
@@ -81,6 +81,8 @@ void HGVertex::disconnectVertex (HGEdge *oldEdge)
             edges[i] = nullptr;
             if (full)
                 full = false;
+
+            oldEdge->disconnectVertex(this);
             return;
         }
 }

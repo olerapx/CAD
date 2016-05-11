@@ -15,9 +15,7 @@ HGVertex::HGVertex (int nV, int maxD)
     maxDegree = maxD;
     full = false;
 
-    edges.resize(maxD);
-    for (int i=0; i<maxD; i++)
-        edges[i] = nullptr;
+    edges.resize(maxD, nullptr);
 }
 
 HGVertex::~HGVertex()

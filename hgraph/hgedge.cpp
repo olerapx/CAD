@@ -1,5 +1,4 @@
 #include "hgedge.h"
-
 HGEdge::HGEdge()
 {
     maxCountOfVertex = 0;
@@ -9,9 +8,6 @@ HGEdge::HGEdge (int maxVertexCount)
 {
     maxCountOfVertex = maxVertexCount;
     vertices.resize(maxVertexCount);
-
-    for (int i=0; i<maxVertexCount; i++)
-        vertices[i] = nullptr;
 }
 
 HGEdge::~HGEdge ()
@@ -26,6 +22,7 @@ int HGEdge::getCountOfFreePlaces()
     if (full)
         return 0;
     int countOfFreePlaces = 0;
+
     for (int i=0; i<maxCountOfVertex; i++)
         if (vertices[i] == nullptr)
             countOfFreePlaces++;

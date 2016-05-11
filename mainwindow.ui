@@ -71,14 +71,14 @@
             <number>10</number>
            </property>
            <item>
-            <widget class="QLabel" name="HGNumberLabel">
+            <widget class="QLabel" name="experimentNumberLabel">
              <property name="text">
-              <string>Количество гиперграфов</string>
+              <string>Количество экспериментов</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="HGNumberText">
+            <widget class="QLineEdit" name="experimentNumberText">
              <property name="maximumSize">
               <size>
                <width>16777215</width>

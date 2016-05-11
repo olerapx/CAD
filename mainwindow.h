@@ -32,7 +32,7 @@ public:
     vector<vector<vector<HGraph*>>> hGraphHierarchy;
 
     vector<vector<int>> increaseOfCountExternalEdges;
-    int countHG;
+    int experimentNumber; // число экспериментов для подсчета среднего значения
     int minNumberSubHG;
 
     Mode mode;

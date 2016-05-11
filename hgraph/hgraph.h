@@ -18,8 +18,8 @@ class HGraph
 {
 private:
 
-    vector<HGVertex*> vertices;                          // Вершины
-    vector<HGEdge*>   edges;                             // Гиперребра
+    vector<HGVertex*> vertices;                   // Вершины
+    vector<HGEdge*>   edges;                      // Гиперребра
     int numberOfHG;                               // Номер подграфа (у главного -1)
     int countOfVertices;                          // Число вершин
     int countOfEdges;                             // Число ребер

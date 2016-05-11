@@ -73,21 +73,21 @@ void MainWindow::on_hierarchicalAction_changed()
 
 void MainWindow::on_createHGButton_clicked()
 {
-    countHG = ui->HGNumberText->text().toInt();
-    if (countHG<1)
-        countHG=10;
+    experimentNumber = ui->experimentNumberText->text().toInt();
+    if (experimentNumber<1)
+        experimentNumber=10;
+
+    for (size_t i=0;i<hGraph.size();i++)
+          //  delete hGraph[i];
+        ;
 
      hGraph.clear();
+     hGraph.resize(experimentNumber);
 
-    ui->randomButton->setEnabled(true);
-    ui->seriesButton->setEnabled(true);
-
-    hGraph.resize(countHG);
-
-    for (int i=0; i<countHG; i++)
+    for (int i=0; i<experimentNumber; i++)
         hGraph[i] = new HGraph;
 
-    for (int i=0; i<countHG; i++)
+    for (int i=0; i<experimentNumber; i++)
         hGraph[i]->HGraphGenerator(ui->vertexNumberText->text().toInt(),
                                    ui->minContactNumberText->text().toInt(),
                                    ui->maxContactNumberText->text().toInt(),
@@ -110,7 +110,7 @@ void MainWindow::on_randomButton_clicked()
     {
         double countOfAllFragments = 0;
         double countOfAllExternalEdges = 0;
-        for (int i=0; i<countHG; i++)
+        for (int i=0; i<experimentNumber; i++)
         {
             hGraph[i]->resetSplitHG();
             hGraph[i]->randomSplitHG(j,0);
@@ -136,17 +136,17 @@ void MainWindow::on_seriesButton_clicked()
 
     int subHGNumber = ui->subHGNumberText->text().toInt();
 
-    ui->progressBar->setMinimum(countHG  *2);
-    ui->progressBar->setMaximum(subHGNumber * countHG);
-    ui->progressBar->setValue(countHG * 2);
+    ui->progressBar->setMinimum(experimentNumber  *2);
+    ui->progressBar->setMaximum(subHGNumber * experimentNumber);
+    ui->progressBar->setValue(experimentNumber * 2);
 
     Line steps, edges;
 
     float countOfAllFragments = 0;
 
-    for (int i=0; i<countHG; i++)
+    for (int i=0; i<experimentNumber; i++)
         countOfAllFragments += hGraph[i]->getCountOfFragments();
-    countOfAllFragments /= countHG;
+    countOfAllFragments /= experimentNumber;
 
     steps.x.push_back(1);
     steps.y.push_back(pow((double)hGraph[0]->getCountOfVertices(),2.0) + pow((double)countOfAllFragments,exponent));
@@ -155,16 +155,16 @@ void MainWindow::on_seriesButton_clicked()
     {
         float countOfAllExternalEdges = 0;
 
-        for (int i=0; i<countHG; i++)
+        for (int i=0; i<experimentNumber; i++)
         {
             hGraph[i]->resetSplitHG();
             hGraph[i]->gravitySplitHG(j,0);
             countOfAllExternalEdges += hGraph[i]->getCountOfExternalEdges();
 
-            ui->progressBar->setValue(j*countHG+1);
+            ui->progressBar->setValue(j*experimentNumber+1);
         }
 
-        countOfAllExternalEdges /= countHG;
+        countOfAllExternalEdges /= experimentNumber;
 
         edges.x.push_back(j);
         edges.y.push_back(100*countOfAllExternalEdges/countOfAllFragments);
@@ -176,7 +176,7 @@ void MainWindow::on_seriesButton_clicked()
                 pow((double)(countOfAllFragments-countOfAllExternalEdges)/j, exponent));
     }
 
-    ui->progressBar->setValue(countHG * 2);
+    ui->progressBar->setValue(experimentNumber * 2);
 
     drawLine(ui->stepsChart, steps, " ", QColor(255,0,0));
     drawLine(ui->edgesChart, edges, " ", QColor(255,0,0));
@@ -200,9 +200,9 @@ void MainWindow::on_startButton_clicked()
 
     Line edges;
 
-    countHG = ui->HGNumberText->text().toInt();
-    if (countHG<1)
-        countHG=10;
+    experimentNumber = ui->experimentNumberText->text().toInt();
+    if (experimentNumber<1)
+        experimentNumber=10;
 
     ui->statusLabel->setText("Создание ГГ...");
 
@@ -212,9 +212,9 @@ void MainWindow::on_startButton_clicked()
     ui->statusLabel->setText("Почти все...");
 
     float countAllFragments = 0;
-    for (int i=0; i<countHG; i++)
+    for (int i=0; i<experimentNumber; i++)
         countAllFragments += hGraphHierarchy[0][0][i]->getCountOfFragments();
-    countAllFragments /= countHG;
+    countAllFragments /= experimentNumber;
     float nextIncreaseValue = 0;
 
     int levelNumber = ui->levelNumberText->text().toInt();
@@ -238,6 +238,8 @@ void MainWindow::on_startButton_clicked()
     else showData(3);
 
     ui->statusLabel->setText("Готово.");
+
+        std::cerr<<"dfsdfsdfs";
 }
 
 void MainWindow::showData (int Complexity)
@@ -247,9 +249,9 @@ void MainWindow::showData (int Complexity)
     double currentCostOfTracing = 0;
     double currentCountOfInternalEdges = 0;
 
-    for (int i=0; i<countHG; i++)
+    for (int i=0; i<experimentNumber; i++)
         currentCountOfInternalEdges += hGraphHierarchy[0][0][i]->getCountOfFragments();
-    currentCountOfInternalEdges /= countHG;
+    currentCountOfInternalEdges /= experimentNumber;
 
     steps.x.push_back(0);
     steps.y.push_back(pow((double)currentCountOfInternalEdges, Complexity)+
@@ -292,7 +294,16 @@ void MainWindow::initHierarhyHG()
     increaseOfCountExternalEdges.clear();
     increaseOfCountExternalEdges.resize(levelNumber);
 
+    for (size_t i=0; i<hGraphHierarchy.size(); i++)
+        for (size_t j=0; j<hGraphHierarchy[i].size(); j++)
+                for (size_t k=0; k<hGraphHierarchy[i][j].size(); k++)
+                            if (hGraphHierarchy[i][j][k]!=nullptr)
+                               // delete hGraphHierarchy[i][j][k];
+                    ;
+
+
     hGraphHierarchy.clear();
+
     hGraphHierarchy.resize(levelNumber);
 
     for (int i=0; i<levelNumber; i++)
@@ -300,16 +311,16 @@ void MainWindow::initHierarhyHG()
         hGraphHierarchy[i].resize((int)pow(2.0,i));
 
         for (int j=0; j<(int)pow(2.0,i); j++)
-            hGraphHierarchy[i][j].resize(countHG);
+            hGraphHierarchy[i][j].resize(experimentNumber);
 
         increaseOfCountExternalEdges[i].resize((int)pow(2.0,i));
     }
 
     ui->progressBar->setMinimum(0);
-    ui->progressBar->setMaximum(countHG);
+    ui->progressBar->setMaximum(experimentNumber);
     ui->progressBar->setValue(0);
 
-    for (int i=0; i<countHG; i++)
+    for (int i=0; i<experimentNumber; i++)
     {
         hGraphHierarchy[0][0][i] = new HGraph;
         hGraphHierarchy[0][0][i]->HGraphGenerator(ui->vertexNumberText->text().toInt(),
@@ -325,13 +336,12 @@ void MainWindow::gatheringData()
 {
     int levelNumber = ui->levelNumberText->text().toInt();
 
-    ui->progressBar->setMinimum(countHG);
-    ui->progressBar->setMaximum((int)pow(2.0, levelNumber*countHG));
+    ui->progressBar->setMinimum(experimentNumber);
+    ui->progressBar->setMaximum((int)pow(2.0, levelNumber*experimentNumber));
 
-    ui->progressBar->setValue(countHG);
+    ui->progressBar->setValue(experimentNumber);
 
     int countOldExternalEdges = 0;
-
     for (int i=0; i<levelNumber; i++)
     {
         ui->statusLabel->setText("Осталось уровней: "+levelNumber-i);
@@ -339,7 +349,7 @@ void MainWindow::gatheringData()
         for (int j=0; j<(int)pow(2.0, i); j++)       // Подграфы в уровнях
         {
             increaseOfCountExternalEdges[i][j] = 0;
-            for (int k=0; k<countHG; k++)             // Множество экспериментов
+            for (int k=0; k<experimentNumber; k++)             // Множество экспериментов
             {
                 hGraphHierarchy[i][j][k]->gravitySplitHG(2,minNumberSubHG);
                 // Разбили
@@ -352,10 +362,9 @@ void MainWindow::gatheringData()
                     hGraphHierarchy[i+1][j*2][k] = hGraphHierarchy[i][j][k]->createSubHG(minNumberSubHG);
                     hGraphHierarchy[i+1][j*2+1][k] = hGraphHierarchy[i][j][k]->createSubHG(minNumberSubHG+1);
                 }
-
             }
             // Вычисляю среднее значение по серии
-            increaseOfCountExternalEdges[i][j] /= countHG;
+            increaseOfCountExternalEdges[i][j] /= experimentNumber;
 
             // Вычитаю уже имевшиеся связи
             // для получения прироста
@@ -366,7 +375,7 @@ void MainWindow::gatheringData()
             // номеров подграфов
             minNumberSubHG += 2;
 
-            ui->progressBar->setValue(ui->progressBar->value()+countHG);
+            ui->progressBar->setValue(ui->progressBar->value()+experimentNumber);
         }
     }
 }

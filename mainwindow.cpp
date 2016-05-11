@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include <iostream>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -78,21 +77,21 @@ void MainWindow::on_createHGButton_clicked()
         experimentNumber=10;
 
     for (size_t i=0;i<hGraph.size();i++)
-          //  delete hGraph[i];
+            delete hGraph[i];
         ;
 
      hGraph.clear();
      hGraph.resize(experimentNumber);
 
     for (int i=0; i<experimentNumber; i++)
+    {
         hGraph[i] = new HGraph;
-
-    for (int i=0; i<experimentNumber; i++)
         hGraph[i]->HGraphGenerator(ui->vertexNumberText->text().toInt(),
-                                   ui->minContactNumberText->text().toInt(),
-                                   ui->maxContactNumberText->text().toInt(),
-                                   ui->minEdgeNumberText->text().toInt(),
-                                   ui->maxEdgeNumberText->text().toInt());
+                               ui->minContactNumberText->text().toInt(),
+                               ui->maxContactNumberText->text().toInt(),
+                               ui->minEdgeNumberText->text().toInt(),
+                               ui->maxEdgeNumberText->text().toInt());
+    }
 
     ui->randomButton->setEnabled(true);
     ui->seriesButton->setEnabled(true);
@@ -128,7 +127,7 @@ void MainWindow::on_seriesButton_clicked()
 {
     resetCharts();
 
-    float exponent;
+    double exponent;
     if (ui->tracingQuadratic->isChecked())
         exponent = 2.0;
     else
@@ -147,7 +146,6 @@ void MainWindow::on_seriesButton_clicked()
     for (int i=0; i<experimentNumber; i++)
         countOfAllFragments += hGraph[i]->getCountOfFragments();
     countOfAllFragments /= experimentNumber;
-
     steps.x.push_back(1);
     steps.y.push_back(pow((double)hGraph[0]->getCountOfVertices(),2.0) + pow((double)countOfAllFragments,exponent));
 
@@ -163,7 +161,6 @@ void MainWindow::on_seriesButton_clicked()
 
             ui->progressBar->setValue(j*experimentNumber+1);
         }
-
         countOfAllExternalEdges /= experimentNumber;
 
         edges.x.push_back(j);
@@ -175,7 +172,6 @@ void MainWindow::on_seriesButton_clicked()
                 pow((double)countOfAllExternalEdges,exponent) +
                 pow((double)(countOfAllFragments-countOfAllExternalEdges)/j, exponent));
     }
-
     ui->progressBar->setValue(experimentNumber * 2);
 
     drawLine(ui->stepsChart, steps, " ", QColor(255,0,0));
@@ -238,8 +234,6 @@ void MainWindow::on_startButton_clicked()
     else showData(3);
 
     ui->statusLabel->setText("Готово.");
-
-        std::cerr<<"dfsdfsdfs";
 }
 
 void MainWindow::showData (int Complexity)
@@ -298,7 +292,7 @@ void MainWindow::initHierarhyHG()
         for (size_t j=0; j<hGraphHierarchy[i].size(); j++)
                 for (size_t k=0; k<hGraphHierarchy[i][j].size(); k++)
                             if (hGraphHierarchy[i][j][k]!=nullptr)
-                               // delete hGraphHierarchy[i][j][k];
+                                delete hGraphHierarchy[i][j][k];
                     ;
 
 

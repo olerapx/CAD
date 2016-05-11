@@ -18,12 +18,6 @@ HGVertex::HGVertex (int nV, int maxD)
     edges.resize(maxD, nullptr);
 }
 
-HGVertex::~HGVertex()
-{
-    for (int i=0; i<maxDegree; i++)
-        edges[i] = nullptr;
-}
-
 int HGVertex::freePlaceForConnect ()
 {
     if (full)

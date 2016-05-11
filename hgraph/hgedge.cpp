@@ -2,19 +2,14 @@
 HGEdge::HGEdge()
 {
     maxCountOfVertex = 0;
+    full = true;
 }
 
 HGEdge::HGEdge (int maxVertexCount)
 {
     maxCountOfVertex = maxVertexCount;
     vertices.resize(maxVertexCount);
-}
-
-HGEdge::~HGEdge ()
-{
-    if (maxCountOfVertex > 0)
-        for (int i=0; i<maxCountOfVertex; i++)
-            vertices[i] = nullptr;
+    full = false;
 }
 
 int HGEdge::getCountOfFreePlaces()

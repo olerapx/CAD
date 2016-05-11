@@ -1,7 +1,5 @@
 #include "hgraph.h"
 
-#include <iostream>
-
 HGraph::HGraph ()
 {
   countOfVertices = 0;
@@ -89,9 +87,6 @@ HGraph::~HGraph()
         for (size_t i=0;i<vertices.size();i++)
             delete vertices[i];
     }
-
-    vertices.clear();
-    edges.clear();
 }
 
 void HGraph::createVertices (int countVertices, int minDegree, int maxDegree)
@@ -187,7 +182,8 @@ void HGraph::createEdges (int minCountOfVertices, int maxCountOfVertices)
                 // Составляю матрицу-проекцию будущих ребер
                 int countOfFreeVertices = getCountOfFreeVertices();
                 int globalMaxDegree = logicalThreshold/maxCountOfVertices;
-                int ** connectionMatrix = new int * [countOfFreeVertices];
+
+                vector<vector<int>> connectionMatrix (countOfFreeVertices);
 
                 // 0 - нет контакта, 1 - есть
                 // Надо распределить единицы по матрице
@@ -196,11 +192,7 @@ void HGraph::createEdges (int minCountOfVertices, int maxCountOfVertices)
                 // ребер
                 // Получившиеся строки - прототипы ребер
                 for (int k=0; k<countOfFreeVertices; k++)
-                {
-                    connectionMatrix[k] = new int [globalMaxDegree+1];
-                    for (int j=0; j<globalMaxDegree; j++)
-                        connectionMatrix[k][j] = 0;
-                }
+                    connectionMatrix[k].resize(globalMaxDegree+1, 0);
 
 
                 int elementOfMatrixNumber = 0;
@@ -220,10 +212,9 @@ void HGraph::createEdges (int minCountOfVertices, int maxCountOfVertices)
                     }
                 }                                     // Матрица готова
 
-                int *masOfPowerEdges = new int [globalMaxDegree];
+                vector<int> masOfPowerEdges (globalMaxDegree, 0);
                 for (int k=0; k<globalMaxDegree; k++)
                 {
-                    masOfPowerEdges[k] = 0;
                    for (int j=0; j<countOfFreeVertices; j++)
                         if (connectionMatrix[j][k] == 1)
                             masOfPowerEdges[k]++;
@@ -278,11 +269,9 @@ void HGraph::createEdges (int minCountOfVertices, int maxCountOfVertices)
 
                 }
                 setCountOfEdges (i-1);
-                delete [] masOfPowerEdges;
 
-                for (int i=0;i<countOfFreeVertices;i++)
-                    delete[] connectionMatrix[i];
-                delete [] connectionMatrix;
+                connectionMatrix.clear();
+                masOfPowerEdges.clear();
                 break;
             }
     }
@@ -429,7 +418,7 @@ void HGraph::randomSplitHG (int countSubHG, int startNumberSubG)
 {
     splitResultCount = countSubHG;
     // Мощности подграфов
-    int *masPowerOfSubHG = new int [countSubHG];
+    vector<int> masPowerOfSubHG (countSubHG);
 
     for (int i=0; i<countSubHG; i++)
         masPowerOfSubHG[i] = countOfVertices/countSubHG;
@@ -449,34 +438,31 @@ void HGraph::randomSplitHG (int countSubHG, int startNumberSubG)
             vertices[numberNextVertex]->setNumberOfHG(i+startNumberSubG);
         }
 
-    delete[] masPowerOfSubHG;
+    masPowerOfSubHG.clear();
 }
 
 void HGraph::gravitySplitHG (int countSubHG, int startNumberSubG)
 {
     splitResultCount = countSubHG;
     // Мощности подграфов
-    int *masPowerOfSubHG = new int [countSubHG];
+    vector<int> masPowerOfSubHG (countSubHG);
 
     for (int i=0; i<countSubHG; i++)
         masPowerOfSubHG[i] = countOfVertices/countSubHG;
 
-    for (int i=0; i<countOfVertices%countSubHG; i++)
+    for (int i=0; i<countOfVertices % countSubHG; i++)
         masPowerOfSubHG[i]++;
 
     for (int i=0; i<countSubHG; i++)
         gravityEdge(masPowerOfSubHG[i], i+startNumberSubG);
 
-    delete[] masPowerOfSubHG;
+    masPowerOfSubHG.clear();
 }
 
 HGraph * HGraph::createSubHG (int numberOfSubHG)
 {
     if (numberOfSubHG >= 0)
-    {
-        HGraph * subHG = new HGraph(vertices, numberOfSubHG);
-        return subHG;
-    }
+        return new HGraph(vertices, numberOfSubHG);
     else
         return nullptr;
 }

@@ -30,8 +30,6 @@ public:
     HGVertex ();
     HGVertex (int nV, int maxD);
 
-    ~HGVertex ();
-
     // Геттер номера подграфа
     int getNumberOfHG ();
 

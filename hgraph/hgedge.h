@@ -27,8 +27,6 @@ public:
     HGEdge ();
     HGEdge (int maxVertexCount);
 
-    ~HGEdge ();
-
     //Исключение вершины из ребра.
     void disconnectVertex (HGVertex *oldVertex);
 

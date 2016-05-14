@@ -5,7 +5,7 @@
 #include <ctime>
 
 #include "chart/qcustomplot.h"
-#include "line.h"
+#include "chart/line.h"
 #include "hgraph/hgraph.h"
 
 namespace Ui
@@ -30,8 +30,8 @@ public:
     vector<HGraph*> hGraph;
 
     vector<vector<vector<HGraph*>>> hGraphHierarchy;
-
     vector<vector<int>> increaseOfCountExternalEdges;
+
     int experimentNumber; // число экспериментов для подсчета среднего значения
     int minNumberSubHG;
 

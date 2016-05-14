@@ -73,8 +73,6 @@ void HGVertex::disconnectEdge (HGEdge *oldEdge)
             edges[i] = nullptr;
             if (full)
                 full = false;
-
-            oldEdge->disconnectVertex(this);
             return;
         }
 }
@@ -120,9 +118,11 @@ bool HGVertex::isInEdge (HGEdge *e)
 {
     if (maxDegree == 0)
         return false;
+
     for (int i=0; i<maxDegree; i++)
         if (edges[i] == e)
             return true;
+
     return false;
 }
 
@@ -130,10 +130,12 @@ int HGVertex::getCountOfFreePlaces ()
 {
     if (full)
         return 0;
+
     int countOfFreePlaces = 0;
     for (int i=0; i<maxDegree; i++)
         if (edges[i] == nullptr)
             countOfFreePlaces++;
+
     return countOfFreePlaces;
 }
 

@@ -8,8 +8,9 @@ HGEdge::HGEdge()
 HGEdge::HGEdge (int maxVertexCount)
 {
     maxCountOfVertex = maxVertexCount;
-    vertices.resize(maxVertexCount);
     full = false;
+
+    vertices.resize(maxVertexCount);
 }
 
 int HGEdge::getCountOfFreePlaces()
@@ -52,8 +53,6 @@ void HGEdge::disconnectVertex (HGVertex *oldVertex)
             vertices[i] = nullptr;
             if (full)
                 full = false;
-
-            oldVertex->disconnectEdge(this);
             return;
         }
 }
@@ -139,4 +138,3 @@ int HGEdge::getCountSubHG ()
             }
     return countSubHG;
 }
-

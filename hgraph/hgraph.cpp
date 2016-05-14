@@ -100,7 +100,7 @@ void HGraph::createVertices (int countVertices, int minDegree, int maxDegree)
         vertices.resize(countVertices);
         setCountOfVertices (countVertices);
         for (int i=0; i<countVertices; i++)
-            vertices[i] = new HGVertex (i,(minDegree+rand()%(maxDegree-minDegree+1)));
+            vertices[i] = new HGVertex (i, (minDegree+rand()%(maxDegree-minDegree+1)));
     }
 }
 
@@ -310,7 +310,7 @@ bool HGraph::incidenceInstall (HGVertex * vertex, HGEdge *edge)
 
 void HGraph::incidenceUninstall (HGVertex * vertex, HGEdge *edge)
 {
-//    vertex->disconnectEdge(edge);
+    vertex->disconnectEdge(edge);
     edge->disconnectVertex(vertex);
 }
 
@@ -459,7 +459,7 @@ void HGraph::gravitySplitHG (int countSubHG, int startNumberSubG)
     masPowerOfSubHG.clear();
 }
 
-HGraph * HGraph::createSubHG (int numberOfSubHG)
+HGraph* HGraph::createSubHG (int numberOfSubHG)
 {
     if (numberOfSubHG >= 0)
         return new HGraph(vertices, numberOfSubHG);

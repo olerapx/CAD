@@ -1,9 +1,9 @@
 #ifndef HGEDGE_H
 #define HGEDGE_H
 
-#include "hgvertex.h"
-
 #include <vector>
+
+#include "hgvertex.h"
 
 class HGVertex;
 
@@ -16,8 +16,9 @@ using namespace std;
 class HGEdge
 {
 private:
-    int maxCountOfVertex;                         // Максимальная мощность ребра
     vector<HGVertex*> vertices;                   // Указатели на вершины
+
+    int maxCountOfVertex;                         // Максимальная мощность ребра
     bool full;                                    // Состояние заполненности
 
     //Поиск свободного места и изменение состояния заполненности, если такого нет.
@@ -35,7 +36,7 @@ public:
     //Попытка включения вершины в ребро.
     bool connectVertex (HGVertex *newVertex);
 
-    bool isFull ();
+    bool isFull();
 
     //Сеттер/геттер максимальной мощности.
     bool setMaxCountOfVertex (int maxCV);

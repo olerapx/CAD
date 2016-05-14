@@ -14,10 +14,9 @@ MainWindow::MainWindow(QWidget *parent) :
         modeGroup->addAction(*i);
 
     on_singleLevelAction_changed();
-    ui->splittingControlGroup->setCurrentIndex(0);
+    ui->splittingControlGroup->setCurrentIndex(0); // action index magic. Dunno
 
     srand (time(NULL));
-
 }
 
 MainWindow::~MainWindow()
@@ -78,7 +77,6 @@ void MainWindow::on_createHGButton_clicked()
 
     for (size_t i=0;i<hGraph.size();i++)
             delete hGraph[i];
-        ;
 
      hGraph.clear();
      hGraph.resize(experimentNumber);
@@ -224,9 +222,6 @@ void MainWindow::on_startButton_clicked()
         edges.y.push_back(100*nextIncreaseValue/countAllFragments);
     }
 
-    //  Button4->Enabled = false;
-    //  RadioGroup1Click(Sender);
-
     drawLine(ui->edgesChart, edges, " ", QColor(255,0,0));
 
     if (ui->tracingQuadratic->isChecked())
@@ -293,8 +288,6 @@ void MainWindow::initHierarhyHG()
                 for (size_t k=0; k<hGraphHierarchy[i][j].size(); k++)
                             if (hGraphHierarchy[i][j][k]!=nullptr)
                                 delete hGraphHierarchy[i][j][k];
-                    ;
-
 
     hGraphHierarchy.clear();
 

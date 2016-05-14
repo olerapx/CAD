@@ -1,9 +1,9 @@
 #ifndef HGVERTEX_H
 #define HGVERTEX_H
 
-#include "hgedge.h"
-
 #include <vector>
+
+#include "hgedge.h"
 
 class HGEdge;
 
@@ -17,10 +17,11 @@ using namespace std;
 class HGVertex
 {
 private:
+    vector <HGEdge*> edges;                               // Инцидентные гиперребра
+
     int numberV;                                  // Собственный номер вершины
     int maxDegree;                                // Максимально возможное число инцидентных гиперребер
     int numberOfHG;                               // Номер подграфа, -1, если не принадлежит ни к одному
-    vector <HGEdge*> edges;                               // Инцидентные гиперребра
     bool full;                                    // Состояние заполненности
 
     // Поиск свободного места и изменение состояния заполненности, если такого нет

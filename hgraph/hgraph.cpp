@@ -367,6 +367,51 @@ void HGraph::HGraphGenerator (int CountOfVertices, int minDegree, int maxDegree,
     createEdges(minPowerOfEdge, maxPowerOfEdge);
 }
 
+void HGraph::randomSplitHG (int countSubHG, int startNumberSubG)
+{
+    splitResultCount = countSubHG;
+    // Мощности подграфов
+    vector<int> masPowerOfSubHG (countSubHG);
+
+    for (int i=0; i<countSubHG; i++)
+        masPowerOfSubHG[i] = countOfVertices/countSubHG;
+
+    for (int i=0; i<countOfVertices%countSubHG; i++)
+        masPowerOfSubHG[i]++;
+
+    for (int i=0; i<countSubHG; i++)
+        for (int j=0; j<masPowerOfSubHG[i]; j++)
+        {
+            int numberNextVertex;
+            do
+            {
+                numberNextVertex = rand()%countOfVertices;
+            }
+            while(vertices[numberNextVertex]->getNumberOfHG() != numberOfHG);
+            vertices[numberNextVertex]->setNumberOfHG(i+startNumberSubG);
+        }
+
+    masPowerOfSubHG.clear();
+}
+
+void HGraph::gravitySplitHG (int countSubHG, int startNumberSubG)
+{
+    splitResultCount = countSubHG;
+    // Мощности подграфов
+    vector<int> masPowerOfSubHG (countSubHG);
+
+    for (int i=0; i<countSubHG; i++)
+        masPowerOfSubHG[i] = countOfVertices/countSubHG;
+
+    for (int i=0; i<countOfVertices % countSubHG; i++)
+        masPowerOfSubHG[i]++;
+
+    for (int i=0; i<countSubHG; i++)
+        gravityEdge(masPowerOfSubHG[i], i+startNumberSubG);
+
+    masPowerOfSubHG.clear();
+}
+
 void HGraph::gravityEdge (int powerOfSubHG, int numberOfSubHG)
 {
     int minSplitOfEdge = 1;                     // Нижняя граница оценки
@@ -414,50 +459,6 @@ void HGraph::gravityEdge (int powerOfSubHG, int numberOfSubHG)
     while (countPlacesInSubHG > 0);
 }
 
-void HGraph::randomSplitHG (int countSubHG, int startNumberSubG)
-{
-    splitResultCount = countSubHG;
-    // Мощности подграфов
-    vector<int> masPowerOfSubHG (countSubHG);
-
-    for (int i=0; i<countSubHG; i++)
-        masPowerOfSubHG[i] = countOfVertices/countSubHG;
-
-    for (int i=0; i<countOfVertices%countSubHG; i++)
-        masPowerOfSubHG[i]++;
-
-    for (int i=0; i<countSubHG; i++)
-        for (int j=0; j<masPowerOfSubHG[i]; j++)
-        {
-            int numberNextVertex;
-            do
-            {
-                numberNextVertex = rand()%countOfVertices;
-            }
-            while(vertices[numberNextVertex]->getNumberOfHG() != numberOfHG);
-            vertices[numberNextVertex]->setNumberOfHG(i+startNumberSubG);
-        }
-
-    masPowerOfSubHG.clear();
-}
-
-void HGraph::gravitySplitHG (int countSubHG, int startNumberSubG)
-{
-    splitResultCount = countSubHG;
-    // Мощности подграфов
-    vector<int> masPowerOfSubHG (countSubHG);
-
-    for (int i=0; i<countSubHG; i++)
-        masPowerOfSubHG[i] = countOfVertices/countSubHG;
-
-    for (int i=0; i<countOfVertices % countSubHG; i++)
-        masPowerOfSubHG[i]++;
-
-    for (int i=0; i<countSubHG; i++)
-        gravityEdge(masPowerOfSubHG[i], i+startNumberSubG);
-
-    masPowerOfSubHG.clear();
-}
 
 HGraph* HGraph::createSubHG (int numberOfSubHG)
 {

@@ -32,8 +32,9 @@ public:
     vector<vector<vector<HGraph*>>> hGraphHierarchy;
     vector<vector<int>> increaseOfCountExternalEdges;
 
-    int experimentNumber; // число экспериментов для подсчета среднего значения
+    int experimentNumber; // for getting an average value
     int minNumberSubHG;
+    int splittingNumber = 2; // on each level of the hierarchical model
 
     Mode mode;
 
@@ -58,16 +59,9 @@ private:
     void drawText (QCustomPlot* chart, QString text, QPen pen, double x, double y);
     void resetCharts();
 
-    void initHierarhyHG ();                       // Инициализация массивов для
-                                                   // иерархического разбиения
-
-    void gatheringData ();                        // Проведение иерархического
-                                                   // разбиения и сбор данных
-                                                   // об изменении числа внешних связей
-
-    void showData (int Complexity);               // Вывод данных на график
-                                                   // "затраты в шагах" в зависимости
-                                                   // от сложности алгоритма трассировки
+    void initHierarchyHG ();
+    void gatheringData ();
+    void showData (int complexity);
 };
 
 #endif // MAINWINDOW_H

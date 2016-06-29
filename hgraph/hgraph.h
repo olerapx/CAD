@@ -3,17 +3,17 @@
 
 #include <cmath>
 #include <cstdlib>
+#include <stdint.h>
 
 #include "hgvertex.h"
 #include "hgedge.h"
+
+using namespace std;
 
 /**
  * @brief The HGraph class
  * Гиперграф.
  */
-
-using namespace std;
-
 class HGraph
 {
 private:
@@ -92,7 +92,7 @@ public:
     int getCountOfEdges ();
 
     // Геттер числа ребер
-    int getCountOfFragments ();
+    int getCountOfFragments();
 
     // Сеттер числа гиперребер
     bool setCountOfEdges (int cE);

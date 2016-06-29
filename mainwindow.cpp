@@ -110,7 +110,7 @@ void MainWindow::on_randomButton_clicked()
         for (int i=0; i<experimentNumber; i++)
         {
             hGraph[i]->resetSplitHG();
-            hGraph[i]->randomSplitHG(j,0);
+            hGraph[i]->randomSplitHG(j, 0);
             countOfAllFragments += hGraph[i]->getCountOfFragments();
             countOfAllExternalEdges += hGraph[i]->getCountOfExternalEdges();
         }
@@ -196,26 +196,30 @@ void MainWindow::on_startButton_clicked()
 
     experimentNumber = ui->experimentNumberText->text().toInt();
     if (experimentNumber<1)
-        experimentNumber=10;
+        experimentNumber=1;
+
+    splittingNumber = ui->splittingNumberText->text().toInt();
+    if (splittingNumber < 2)
+        splittingNumber = 2;
 
     ui->statusLabel->setText("Создание ГГ...");
 
-    initHierarhyHG();
+    initHierarchyHG();
     gatheringData();
 
     ui->statusLabel->setText("Почти все...");
 
-    float countAllFragments = 0;
+    double countAllFragments = 0.0;
     for (int i=0; i<experimentNumber; i++)
         countAllFragments += hGraphHierarchy[0][0][i]->getCountOfFragments();
     countAllFragments /= experimentNumber;
-    float nextIncreaseValue = 0;
+    double nextIncreaseValue = 0.0;
 
     int levelNumber = ui->levelNumberText->text().toInt();
 
     for (int i=0; i<levelNumber; i++)
     {
-        for (int j=0; j<(int)pow(2.0,i); j++)
+        for (int j=0; j<(int)pow(splittingNumber, i); j++)
             nextIncreaseValue += increaseOfCountExternalEdges[i][j];
 
         edges.x.push_back(i+1);
@@ -231,50 +235,8 @@ void MainWindow::on_startButton_clicked()
     ui->statusLabel->setText("Готово.");
 }
 
-void MainWindow::showData (int Complexity)
-{
-    Line steps;
 
-    double currentCostOfTracing = 0;
-    double currentCountOfInternalEdges = 0;
-
-    for (int i=0; i<experimentNumber; i++)
-        currentCountOfInternalEdges += hGraphHierarchy[0][0][i]->getCountOfFragments();
-    currentCountOfInternalEdges /= experimentNumber;
-
-    steps.x.push_back(0);
-    steps.y.push_back(pow((double)currentCountOfInternalEdges, Complexity)+
-                     pow(ui->vertexNumberText->text().toDouble(),2));
-
-    int levelNumber = ui->levelNumberText->text().toInt();
-
-    for (int i=0; i<levelNumber; i++)
-    {
-        int maxCountExternalEdges = 0;
-        for (int j=0; j<(int)pow(2.0,i); j++)
-        {
-            if (maxCountExternalEdges < increaseOfCountExternalEdges[i][j])
-                maxCountExternalEdges = increaseOfCountExternalEdges[i][j];
-
-            currentCountOfInternalEdges -= increaseOfCountExternalEdges[i][j];
-        }
-
-        currentCostOfTracing += pow((double)maxCountExternalEdges, Complexity);
-
-        double nextValue = hGraphHierarchy[i][0][0]->getCountOfVertices() +
-                pow((double)hGraphHierarchy[i][0][0]->getCountOfVertices()/2,2.0) +
-                currentCostOfTracing +
-                pow (currentCountOfInternalEdges / pow(2.0,i+1),
-                     Complexity);
-
-        steps.x.push_back(i+1);
-        steps.y.push_back(nextValue);
-    }
-
-    drawLine(ui->stepsChart, steps, " ", QColor(255,0,0));
-}
-
-void MainWindow::initHierarhyHG()
+void MainWindow::initHierarchyHG()
 {
     int levelNumber = ui->levelNumberText->text().toInt();
 
@@ -295,12 +257,14 @@ void MainWindow::initHierarhyHG()
 
     for (int i=0; i<levelNumber; i++)
     {
-        hGraphHierarchy[i].resize((int)pow(2.0,i));
+        int splittingNumberOnLevel = (int)pow(splittingNumber, i);
 
-        for (int j=0; j<(int)pow(2.0,i); j++)
+        hGraphHierarchy[i].resize(splittingNumberOnLevel);
+
+        for (int j=0; j<splittingNumberOnLevel; j++)
             hGraphHierarchy[i][j].resize(experimentNumber);
 
-        increaseOfCountExternalEdges[i].resize((int)pow(2.0,i));
+        increaseOfCountExternalEdges[i].resize(splittingNumberOnLevel);
     }
 
     ui->progressBar->setMinimum(0);
@@ -323,31 +287,37 @@ void MainWindow::gatheringData()
 {
     int levelNumber = ui->levelNumberText->text().toInt();
 
-    ui->progressBar->setMinimum(experimentNumber);
-    ui->progressBar->setMaximum((int)pow(2.0, levelNumber*experimentNumber));
+    ui->progressBar->setMinimum(0);
+    int max = 0;
+    for (int i=0; i<levelNumber; i++)
+        max += (int)pow(splittingNumber, i) * experimentNumber;
 
-    ui->progressBar->setValue(experimentNumber);
+    ui->progressBar->setMaximum(max);
+
+    ui->progressBar->setValue(0);
 
     int countOldExternalEdges = 0;
     for (int i=0; i<levelNumber; i++)
     {
+        int splittingNumberOnLevel = (int) pow(splittingNumber,i);
+
         ui->statusLabel->setText("Осталось уровней: "+levelNumber-i);
 
-        for (int j=0; j<(int)pow(2.0, i); j++)       // Подграфы в уровнях
+        for (int j=0; j<splittingNumberOnLevel; j++)       // Подграфы в уровнях
         {
             increaseOfCountExternalEdges[i][j] = 0;
             for (int k=0; k<experimentNumber; k++)             // Множество экспериментов
             {
-                hGraphHierarchy[i][j][k]->gravitySplitHG(2,minNumberSubHG);
+                hGraphHierarchy[i][j][k]->gravitySplitHG(splittingNumber, minNumberSubHG);
                 // Разбили
 
                 increaseOfCountExternalEdges[i][j] += hGraphHierarchy[0][0][k]->getCountOfExternalEdges();
                 // Плюсанул новые внешние связи
-                if (i <levelNumber-1) // Если не последняя итерация -
+                if (i < levelNumber-1) // Если не последняя итерация -
                     // создаю подграфы на основе разбиений
                 {
-                    hGraphHierarchy[i+1][j*2][k] = hGraphHierarchy[i][j][k]->createSubHG(minNumberSubHG);
-                    hGraphHierarchy[i+1][j*2+1][k] = hGraphHierarchy[i][j][k]->createSubHG(minNumberSubHG+1);
+                    for (int l=0;l<splittingNumber;l++)
+                        hGraphHierarchy[i+1][j*splittingNumber + l][k] = hGraphHierarchy[i][j][k]->createSubHG(minNumberSubHG + l);
                 }
             }
             // Вычисляю среднее значение по серии
@@ -360,9 +330,52 @@ void MainWindow::gatheringData()
 
             // Увеличиваю счетчик собственных
             // номеров подграфов
-            minNumberSubHG += 2;
+            minNumberSubHG += splittingNumber;
 
             ui->progressBar->setValue(ui->progressBar->value()+experimentNumber);
         }
     }
+}
+
+void MainWindow::showData (int complexity)
+{
+    Line steps;
+
+    double currentCostOfTracing = 0;
+    double currentCountOfInternalEdges = 0;
+
+    for (int i=0; i<experimentNumber; i++)
+        currentCountOfInternalEdges += hGraphHierarchy[0][0][i]->getCountOfFragments();
+    currentCountOfInternalEdges /= experimentNumber;
+
+    steps.x.push_back(0);
+    steps.y.push_back(pow((double)currentCountOfInternalEdges, complexity)+
+                     pow(ui->vertexNumberText->text().toDouble(),splittingNumber));///CHECK
+
+    int levelNumber = ui->levelNumberText->text().toInt();
+
+    for (int i=0; i<levelNumber; i++)
+    {
+        int maxCountExternalEdges = 0;
+        for (int j=0; j<(int)pow(splittingNumber, i); j++)
+        {
+            if (maxCountExternalEdges < increaseOfCountExternalEdges[i][j])
+                maxCountExternalEdges = increaseOfCountExternalEdges[i][j];
+
+            currentCountOfInternalEdges -= increaseOfCountExternalEdges[i][j];
+        }
+
+        currentCostOfTracing += pow((double)maxCountExternalEdges, complexity);
+
+        double nextValue = hGraphHierarchy[i][0][0]->getCountOfVertices() +
+                pow((double)hGraphHierarchy[i][0][0]->getCountOfVertices()/2,splittingNumber) + ///CHECK
+                currentCostOfTracing +
+                pow (currentCountOfInternalEdges / pow(splittingNumber,i+1),
+                     complexity);
+
+        steps.x.push_back(i+1);
+        steps.y.push_back(nextValue);
+    }
+
+    drawLine(ui->stepsChart, steps, " ", QColor(255,0,0));
 }

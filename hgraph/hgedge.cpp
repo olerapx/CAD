@@ -1,4 +1,5 @@
 #include "hgedge.h"
+
 HGEdge::HGEdge()
 {
     maxCountOfVertex = 0;

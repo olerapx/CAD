@@ -17,6 +17,12 @@ MainWindow::MainWindow(QWidget *parent) :
     on_singleLevelAction_changed();
     ui->splittingControlGroup->setCurrentIndex(0); // action index magic. Dunno
 
+    ui->stepsChart->legend->setVisible(true);
+    ui->edgesChart->legend->setVisible(true);
+
+    ui->edgesChart->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignLeft|Qt::AlignBottom);
+    ui->stepsChart->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignLeft|Qt::AlignBottom);
+
     srand (time(NULL));
 }
 
@@ -38,7 +44,7 @@ void MainWindow::drawLine (QCustomPlot* chart, Line line, QString name, QPen pen
     chart->xAxis->setRange(-1, line.getMaxX()*1.1);
     chart->yAxis->setRange(0, line.getMaxY()*1.1);
 
-    chart->graph(i)->setName(name);
+    chart->graph(i)->setName(name);  
 
     for (int j=0; j<line.y.size(); j++)
         drawText(chart, QString::number(line.y[j]), pen,
@@ -227,7 +233,7 @@ void MainWindow::on_startButton_clicked()
         edges.y.push_back(100*nextIncreaseValue/countAllFragments);
     }
 
-    drawLine(ui->edgesChart, edges, " ", QColor(255,0,0));
+    drawLine(ui->edgesChart, edges, QString::number(splittingNumber), QColor(255,0,0));
 
     if (ui->tracingQuadratic->isChecked())
         showData(2);
@@ -377,5 +383,5 @@ void MainWindow::showData (int complexity)
         steps.y.push_back(nextValue);
     }
 
-    drawLine(ui->stepsChart, steps, " ", QColor(255,0,0));
+    drawLine(ui->stepsChart, steps, QString::number(splittingNumber), QColor(255,0,0));
 }

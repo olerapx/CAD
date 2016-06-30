@@ -65,22 +65,6 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="0">
-         <widget class="QLabel" name="stepsChartLabel">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Затраты в шагах</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
         <item row="4" column="1">
          <widget class="QLabel" name="statusLabel">
           <property name="text">
@@ -108,7 +92,6 @@
             <height>16777215</height>
            </size>
           </property>
-          <zorder></zorder>
          </widget>
         </item>
         <item row="1" column="0" colspan="2">
@@ -143,6 +126,22 @@
           </property>
           <property name="text">
            <string>Процент внешних связей</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0" colspan="2">
+         <widget class="QLabel" name="stepsChartLabel">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Затраты в шагах</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -381,7 +380,7 @@
            </sizepolicy>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="singleLevelPage">
            <layout class="QGridLayout" name="gridLayout_2">
@@ -463,10 +462,6 @@
              </widget>
             </item>
            </layout>
-           <zorder>createHGButton</zorder>
-           <zorder>subHGNumberLabel</zorder>
-           <zorder>subHGNumberText</zorder>
-           <zorder>startGroup</zorder>
           </widget>
           <widget class="QWidget" name="hierarchicalPage">
            <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -499,7 +494,7 @@
                </sizepolicy>
               </property>
               <property name="text">
-               <string>Число разбиений на уровне</string>
+               <string>Число разбиений от 2 до</string>
               </property>
              </widget>
             </item>

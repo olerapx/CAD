@@ -2,79 +2,87 @@
 
 HGraph::HGraph ()
 {
-  countOfVertices = 0;
-  countOfEdges = 0;
-  splitResultCount = 0;
-  mainGraph = true;
-  numberOfHG = -1;
+    countOfVertices = 0;
+    countOfEdges = 0;
+    splitResultCount = 0;
+    mainGraph = true;
+    numberOfHG = -1;
 }
 
-HGraph::HGraph (vector<HGVertex *> &masOfVertex, int numberSubG)
+HGraph::HGraph (vector<HGVertex*> &masOfVertex, int numberSubG)
 {
-  splitResultCount = 0;
-  mainGraph = false;
-  numberOfHG = numberSubG;
+    splitResultCount = 0;
+    mainGraph = false;
+    numberOfHG = numberSubG;
 
-  int countVerticesOfSubG = 0;
-  int countEdgesOfSubG = 0;
-  for (size_t i=0; i<masOfVertex.size(); i++)           // Считаю число вершин, входящих
-                                              // в подграф, и максимальное
-                                              // число инцидентных им ребер
-    if (masOfVertex[i]->getNumberOfHG()==numberSubG)
-    {
-      countVerticesOfSubG++;
-      countEdgesOfSubG += masOfVertex[i]->getMaxDegree()
-                              - masOfVertex[i]->getCountOfFreePlaces();
-    }
-
-  vertices.resize(countVerticesOfSubG);
-
-  countOfVertices = countVerticesOfSubG;
-
-                                              // Промежуточный массив под ребра
-                                              // для устранения дублей
-  vector<HGEdge*> newEdges;
-  newEdges.resize(countEdgesOfSubG);
-  countVerticesOfSubG = 0;
-  countEdgesOfSubG = 0;
-
-  for (size_t i=0; i<masOfVertex.size(); i++)
-    if (masOfVertex[i]->getNumberOfHG()==numberSubG)
-    {
-                                              // Делаю собственные ссылки на
-                                              // вершины у подграфа
-      vertices[countVerticesOfSubG] = masOfVertex[i];
-      countVerticesOfSubG++;
-      for (int j=0; j<masOfVertex[i]->getMaxDegree(); j++)
-        if (masOfVertex[i]->getEdge(j)!= nullptr)
+    int countVerticesOfSubG = 0;
+    int countEdgesOfSubG = 0;
+    for (size_t i=0; i<masOfVertex.size(); i++)           // Считаю число вершин, входящих
+        // в подграф, и максимальное
+        // число инцидентных им ребер
+        if (masOfVertex[i]->getNumberOfHG()==numberSubG)
         {
-          bool newEdge = true;
-                                              // Если такое ребро уже есть,
-                                              // то включать уже не надо
-          for (int k=0; k<countEdgesOfSubG; k++)
-            if (newEdges[k] == masOfVertex[i]->getEdge(j))
-            {
-              newEdge = false;
-              break;
-            }
-          if (newEdge)
-          {
-            newEdges[countEdgesOfSubG] = masOfVertex[i]->getEdge(j);
-            countEdgesOfSubG++;
-          }
+            countVerticesOfSubG++;
+            countEdgesOfSubG += masOfVertex[i]->getMaxDegree()
+                    - masOfVertex[i]->getCountOfFreePlaces();
         }
-    }
-                                              // Окончательное формирование
-                                              // массива ссылок на ребра
-                                              // подграфа
-  edges.resize(countEdgesOfSubG-1);
 
-  countOfEdges = countEdgesOfSubG-1;
-  for (int i=0; i<(countEdgesOfSubG-1); i++)
-  {
-    edges[i] = newEdges[i];
-    newEdges[i] = nullptr;
-  }
+    vertices.resize(countVerticesOfSubG);
+
+    countOfVertices = countVerticesOfSubG;
+
+    // Промежуточный массив под ребра
+    // для устранения дублей
+    vector<HGEdge*> newEdges;
+    newEdges.resize(countEdgesOfSubG);
+    countVerticesOfSubG = 0;
+    countEdgesOfSubG = 0;
+
+    for (size_t i=0; i<masOfVertex.size(); i++)
+        if (masOfVertex[i]->getNumberOfHG()==numberSubG)
+        {
+            // Делаю собственные ссылки на
+            // вершины у подграфа
+            vertices[countVerticesOfSubG] = masOfVertex[i];
+            countVerticesOfSubG++;
+            for (int j=0; j<masOfVertex[i]->getMaxDegree(); j++)
+                if (masOfVertex[i]->getEdge(j)!= nullptr)
+                {
+                    bool newEdge = true;
+                    // Если такое ребро уже есть,
+                    // то включать уже не надо
+                    for (int k=0; k<countEdgesOfSubG; k++)
+                        if (newEdges[k] == masOfVertex[i]->getEdge(j))
+                        {
+                            newEdge = false;
+                            break;
+                        }
+                    if (newEdge)
+                    {
+                        newEdges[countEdgesOfSubG] = masOfVertex[i]->getEdge(j);
+                        countEdgesOfSubG++;
+                    }
+                }
+        }
+    // Окончательное формирование
+    // массива ссылок на ребра
+    // подграфа
+    countOfEdges = countEdgesOfSubG-1;
+
+    if (countOfEdges <0)
+    {
+        countOfEdges = 0; /// dangerous
+        countOfVertices = 0;
+        vertices.clear();
+    }
+
+    edges.resize(countOfEdges);
+
+    for (int i=0; i<(countEdgesOfSubG-1); i++)
+    {
+        edges[i] = newEdges[i];
+        newEdges[i] = nullptr;
+    }
 }
 
 HGraph::~HGraph()
@@ -172,7 +180,7 @@ void HGraph::createEdges (int minCountOfVertices, int maxCountOfVertices)
                     incidenceInstall(vertices[nextVertexToConnect], edges[i]);
 
                     summaryDegree--;                    // Снижаем число оставшихся для
-                                                        // обработки подключений
+                    // обработки подключений
                 }
                 while (!(edges[i]->isFull()));
             }
@@ -215,7 +223,7 @@ void HGraph::createEdges (int minCountOfVertices, int maxCountOfVertices)
                 vector<int> masOfPowerEdges (globalMaxDegree, 0);
                 for (int k=0; k<globalMaxDegree; k++)
                 {
-                   for (int j=0; j<countOfFreeVertices; j++)
+                    for (int j=0; j<countOfFreeVertices; j++)
                         if (connectionMatrix[j][k] == 1)
                             masOfPowerEdges[k]++;
                 }

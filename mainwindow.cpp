@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <iostream>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -133,7 +134,7 @@ void MainWindow::on_seriesButton_clicked()
 
     int subHGNumber = ui->subHGNumberText->text().toInt();
 
-    ui->progressBar->setMinimum(experimentNumber  *2);
+    ui->progressBar->setMinimum(experimentNumber * 2);
     ui->progressBar->setMaximum(subHGNumber * experimentNumber);
     ui->progressBar->setValue(experimentNumber * 2);
 
@@ -154,7 +155,7 @@ void MainWindow::on_seriesButton_clicked()
         for (int i=0; i<experimentNumber; i++)
         {
             hGraph[i]->resetSplitHG();
-            hGraph[i]->gravitySplitHG(j,0);
+            hGraph[i]->gravitySplitHG(j, 0);
             countOfAllExternalEdges += hGraph[i]->getCountOfExternalEdges();
 
             ui->progressBar->setValue(j*experimentNumber+1);
@@ -234,7 +235,6 @@ void MainWindow::on_startButton_clicked()
 
     ui->statusLabel->setText("Готово.");
 }
-
 
 void MainWindow::initHierarchyHG()
 {
@@ -316,7 +316,7 @@ void MainWindow::gatheringData()
                 if (i < levelNumber-1) // Если не последняя итерация -
                     // создаю подграфы на основе разбиений
                 {
-                    for (int l=0;l<splittingNumber;l++)
+                    for (int l=0; l<splittingNumber; l++)
                         hGraphHierarchy[i+1][j*splittingNumber + l][k] = hGraphHierarchy[i][j][k]->createSubHG(minNumberSubHG + l);
                 }
             }
@@ -350,7 +350,7 @@ void MainWindow::showData (int complexity)
 
     steps.x.push_back(0);
     steps.y.push_back(pow((double)currentCountOfInternalEdges, complexity)+
-                     pow(ui->vertexNumberText->text().toDouble(),splittingNumber));///CHECK
+                     pow(ui->vertexNumberText->text().toDouble(), splittingNumber)); ///TODO: check here
 
     int levelNumber = ui->levelNumberText->text().toInt();
 
@@ -368,10 +368,10 @@ void MainWindow::showData (int complexity)
         currentCostOfTracing += pow((double)maxCountExternalEdges, complexity);
 
         double nextValue = hGraphHierarchy[i][0][0]->getCountOfVertices() +
-                pow((double)hGraphHierarchy[i][0][0]->getCountOfVertices()/2,splittingNumber) + ///CHECK
+                pow((double)hGraphHierarchy[i][0][0]->getCountOfVertices()/splittingNumber, splittingNumber) +
                 currentCostOfTracing +
                 pow (currentCountOfInternalEdges / pow(splittingNumber,i+1),
-                     complexity);
+                     complexity); ///TODO: check here
 
         steps.x.push_back(i+1);
         steps.y.push_back(nextValue);

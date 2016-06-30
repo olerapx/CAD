@@ -3,7 +3,6 @@
 
 #include <cmath>
 #include <cstdlib>
-#include <stdint.h>
 
 #include "hgvertex.h"
 #include "hgedge.h"
@@ -96,7 +95,6 @@ public:
 
     // Сеттер числа гиперребер
     bool setCountOfEdges (int cE);
-
 };
 
 #endif // HGRAPH_H

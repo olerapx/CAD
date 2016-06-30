@@ -34,7 +34,9 @@ public:
 
     int experimentNumber; // for getting an average value
     int minNumberSubHG;
-    int splittingNumber = 2; // on each level of the hierarchical model
+
+    // on each level of the hierarchical model
+    int splittingNumber;
 
     Mode mode;
 

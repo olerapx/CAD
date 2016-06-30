@@ -7,13 +7,12 @@
 
 class HGEdge;
 
+using namespace std;
+
 /**
  * @brief The HGVertex class
  * Вершина гиперграфа.
  */
-
-using namespace std;
-
 class HGVertex
 {
 private:

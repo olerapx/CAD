@@ -21,13 +21,16 @@ SOURCES += main.cpp\
     hgraph/hgvertex.cpp \
     hgraph/hgraph.cpp \
     chart/qcustomplot.cpp \
-    chart/line.cpp
+    chart/line.cpp \
+    datawindow.cpp
 
 HEADERS  += mainwindow.h \
     hgraph/hgedge.h \
     hgraph/hgvertex.h \
     hgraph/hgraph.h \
     chart/qcustomplot.h \
-    chart/line.h
+    chart/line.h \
+    datawindow.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    datawindow.ui

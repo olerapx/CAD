@@ -28,3 +28,9 @@ double Line::getMaxY()
 
     return max;
 }
+
+void Line::clear()
+{
+    x.clear();
+    y.clear();
+}

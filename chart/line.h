@@ -12,6 +12,8 @@ public:
 
     double getMaxX();
     double getMaxY();
+
+    void clear();
 };
 
 #endif // LINE_H

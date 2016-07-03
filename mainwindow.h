@@ -3,10 +3,14 @@
 
 #include <QMainWindow>
 #include <ctime>
+#include <sstream>
+#include <iomanip>
 
 #include "chart/qcustomplot.h"
 #include "chart/line.h"
 #include "hgraph/hgraph.h"
+
+#include "datawindow.h"
 
 namespace Ui
 {
@@ -32,13 +36,19 @@ public:
     vector<vector<vector<HGraph*>>> hGraphHierarchy;
     vector<vector<int>> increaseOfCountExternalEdges;
 
+    Line steps, edges;
+
     int experimentNumber; // for getting an average value
     int minNumberSubHG;
 
     // on each level of the hierarchical model
-    int splittingNumber;
+    int minSplittingNumber;
+    int maxSplittingNumber;
+    int levelNumber;
 
     Mode mode;
+
+    QString data;
 
 private slots:
     void on_singleLevelAction_changed();
@@ -53,17 +63,20 @@ private slots:
 
     void on_startButton_clicked();
 
+    void on_showButton_clicked();
+
 private:
 
     Ui::MainWindow *ui;
 
-    void drawLine (QCustomPlot* chart, Line line, QString name, QPen pen);
+    void drawLine (QCustomPlot* chart, Line line, QString name, QPen pen, bool drawLabels = true);
     void drawText (QCustomPlot* chart, QString text, QPen pen, double x, double y);
-    void resetCharts();
+    void reset();
 
-    void initHierarchyHG ();
-    void gatheringData ();
-    void showData (int complexity);
+    void calculateData (int splittingNumber, QColor graphColor);
+    void initHierarchyHG (int splittingNumber);
+    void gatheringData (int splittingNumber);
+    void showData (int splittingNumber, int complexity, QColor graphColor);
 };
 
 #endif // MAINWINDOW_H

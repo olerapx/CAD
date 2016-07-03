@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include <iostream>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -31,7 +30,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::drawLine (QCustomPlot* chart, Line line, QString name, QPen pen)
+void MainWindow::drawLine (QCustomPlot* chart, Line line, QString name, QPen pen, bool drawLabels)
 {
     chart->addGraph();
     int i = chart->graphCount()-1;
@@ -46,10 +45,11 @@ void MainWindow::drawLine (QCustomPlot* chart, Line line, QString name, QPen pen
 
     chart->graph(i)->setName(name);  
 
-    for (int j=0; j<line.y.size(); j++)
-        drawText(chart, QString::number(line.y[j]), pen,
-                 line.x[j],
-                 line.y[j]+line.getMaxY()/line.y.size()/5);
+    if (drawLabels)
+        for (int j=0; j<line.y.size(); j++)
+            drawText(chart, QString::number(line.y[j]), pen,
+                     line.x[j],
+                     line.y[j]+line.getMaxY()/line.y.size()/5);
 
     chart->replot();
 }
@@ -79,10 +79,10 @@ void MainWindow::on_hierarchicalAction_changed()
 void MainWindow::on_createHGButton_clicked()
 {
     experimentNumber = ui->experimentNumberText->text().toInt();
-    if (experimentNumber<1)
-        experimentNumber=10;
+    if (experimentNumber < 1)
+        experimentNumber = 10;
 
-    for (size_t i=0;i<hGraph.size();i++)
+    for (size_t i=0; i<hGraph.size(); i++)
             delete hGraph[i];
 
      hGraph.clear();
@@ -104,9 +104,7 @@ void MainWindow::on_createHGButton_clicked()
 
 void MainWindow::on_randomButton_clicked()
 {
-    resetCharts();
-
-    Line edges;
+    reset();
 
     int subHGNumber = ui->subHGNumberText->text().toInt();
 
@@ -126,11 +124,21 @@ void MainWindow::on_randomButton_clicked()
     }
 
     drawLine(ui->edgesChart, edges, " ", QColor(255,0,0));
+
+    std::stringstream str;
+    str << "Случайное разбиение\n";
+
+    str  << std::left << std::setw(23) << "Подграфы" << std::setw(20) << "Связи" << "\n";
+
+    for (int i=0; i<edges.x.size(); i++)
+        str << std::setw(15) << edges.x[i] << std::setw(15) << edges.y[i] << "\n";
+
+    data = QString::fromStdString(str.str());
 }
 
 void MainWindow::on_seriesButton_clicked()
 {
-    resetCharts();
+    reset();
 
     double exponent;
     if (ui->tracingQuadratic->isChecked())
@@ -144,19 +152,17 @@ void MainWindow::on_seriesButton_clicked()
     ui->progressBar->setMaximum(subHGNumber * experimentNumber);
     ui->progressBar->setValue(experimentNumber * 2);
 
-    Line steps, edges;
-
-    float countOfAllFragments = 0;
+    double countOfAllFragments = 0;
 
     for (int i=0; i<experimentNumber; i++)
         countOfAllFragments += hGraph[i]->getCountOfFragments();
     countOfAllFragments /= experimentNumber;
     steps.x.push_back(1);
-    steps.y.push_back(pow((double)hGraph[0]->getCountOfVertices(),2.0) + pow((double)countOfAllFragments,exponent));
+    steps.y.push_back(pow((double)hGraph[0]->getCountOfVertices(),2.0) + pow(countOfAllFragments,exponent));
 
     for (int j=2; j<=subHGNumber; j++)
     {
-        float countOfAllExternalEdges = 0;
+        double countOfAllExternalEdges = 0;
 
         for (int i=0; i<experimentNumber; i++)
         {
@@ -169,21 +175,33 @@ void MainWindow::on_seriesButton_clicked()
         countOfAllExternalEdges /= experimentNumber;
 
         edges.x.push_back(j);
-        edges.y.push_back(100*countOfAllExternalEdges/countOfAllFragments);
+        edges.y.push_back(100* (countOfAllExternalEdges/countOfAllFragments));
 
         steps.x.push_back(j);
         steps.y.push_back(hGraph[0]->getCountOfVertices() +
                 pow((double)hGraph[0]->getCountOfVertices()/j,2.0) +
-                pow((double)countOfAllExternalEdges,exponent) +
-                pow((double)(countOfAllFragments-countOfAllExternalEdges)/j, exponent));
+                pow(countOfAllExternalEdges,exponent) +
+                pow((countOfAllFragments - countOfAllExternalEdges)/j, exponent));
     }
     ui->progressBar->setValue(experimentNumber * 2);
 
     drawLine(ui->stepsChart, steps, " ", QColor(255,0,0));
     drawLine(ui->edgesChart, edges, " ", QColor(255,0,0));
+
+    std::stringstream str;
+    str << "Последовательное разбиение\n";
+
+    str  << std::left << std::setw(23) << "Подграфы" << std::setw(19) << "Шаги" << std::setw(20) << "Связи" << "\n";
+
+    str << std::setw(15) << steps.x[0] << std::setw(15) << steps.y[0]  << "N/A\n";
+
+    for (int i=0; i<edges.x.size(); i++)
+        str << std::setw(15) << steps.x[i+1] << std::setw(15) << steps.y[i+1] << std::setw(15) << edges.y[i] << "\n";
+
+    data = QString::fromStdString(str.str());
 }
 
-void MainWindow::resetCharts()
+void MainWindow::reset()
 {
     ui->edgesChart->clearGraphs();
     ui->stepsChart->clearGraphs();
@@ -193,26 +211,45 @@ void MainWindow::resetCharts()
 
     ui->edgesChart->replot();
     ui->stepsChart->replot();
+
+    data.clear();
+    steps.clear();
+    edges.clear();
 }
 
 void MainWindow::on_startButton_clicked()
 {
-    resetCharts();
-
-    Line edges;
+    reset();
 
     experimentNumber = ui->experimentNumberText->text().toInt();
     if (experimentNumber<1)
         experimentNumber=1;
 
-    splittingNumber = ui->splittingNumberText->text().toInt();
-    if (splittingNumber < 2)
-        splittingNumber = 2;
+    minSplittingNumber = ui->minSplittingNumberText->text().toInt();
+    if (minSplittingNumber < 2)
+        minSplittingNumber = 2;
 
+    maxSplittingNumber = ui->maxSplittingNumberText->text().toInt();
+    if (maxSplittingNumber < 2)
+        maxSplittingNumber = 2;
+
+    levelNumber = ui->levelNumberText->text().toInt();
+
+    for (int i=minSplittingNumber; i <= maxSplittingNumber; i++)
+    {
+        calculateData(i, QColor(rand()%255, rand()%255, rand()%255));
+    }
+}
+
+void MainWindow::calculateData(int splittingNumber, QColor graphColor)
+{
     ui->statusLabel->setText("Создание ГГ...");
 
-    initHierarchyHG();
-    gatheringData();
+    edges.clear();
+    steps.clear();
+
+    initHierarchyHG(splittingNumber);
+    gatheringData(splittingNumber);
 
     ui->statusLabel->setText("Почти все...");
 
@@ -221,8 +258,6 @@ void MainWindow::on_startButton_clicked()
         countAllFragments += hGraphHierarchy[0][0][i]->getCountOfFragments();
     countAllFragments /= experimentNumber;
     double nextIncreaseValue = 0.0;
-
-    int levelNumber = ui->levelNumberText->text().toInt();
 
     for (int i=0; i<levelNumber; i++)
     {
@@ -233,19 +268,17 @@ void MainWindow::on_startButton_clicked()
         edges.y.push_back(100*nextIncreaseValue/countAllFragments);
     }
 
-    drawLine(ui->edgesChart, edges, QString::number(splittingNumber), QColor(255,0,0));
+    drawLine(ui->edgesChart, edges, QString::number(splittingNumber), graphColor, false);
 
     if (ui->tracingQuadratic->isChecked())
-        showData(2);
-    else showData(3);
+        showData(splittingNumber, 2, graphColor);
+    else showData(splittingNumber, 3, graphColor);
 
     ui->statusLabel->setText("Готово.");
 }
 
-void MainWindow::initHierarchyHG()
+void MainWindow::initHierarchyHG(int splittingNumber)
 {
-    int levelNumber = ui->levelNumberText->text().toInt();
-
     minNumberSubHG = 0;
 
     increaseOfCountExternalEdges.clear();
@@ -289,10 +322,8 @@ void MainWindow::initHierarchyHG()
     }
 }
 
-void MainWindow::gatheringData()
+void MainWindow::gatheringData(int splittingNumber)
 {
-    int levelNumber = ui->levelNumberText->text().toInt();
-
     ui->progressBar->setMinimum(0);
     int max = 0;
     for (int i=0; i<levelNumber; i++)
@@ -309,10 +340,10 @@ void MainWindow::gatheringData()
 
         ui->statusLabel->setText("Осталось уровней: "+levelNumber-i);
 
-        for (int j=0; j<splittingNumberOnLevel; j++)       // Подграфы в уровнях
+        for (int j=0; j<splittingNumberOnLevel; j++)
         {
             increaseOfCountExternalEdges[i][j] = 0;
-            for (int k=0; k<experimentNumber; k++)             // Множество экспериментов
+            for (int k=0; k<experimentNumber; k++)
             {
                 hGraphHierarchy[i][j][k]->gravitySplitHG(splittingNumber, minNumberSubHG);
                 // Разбили
@@ -326,7 +357,7 @@ void MainWindow::gatheringData()
                         hGraphHierarchy[i+1][j*splittingNumber + l][k] = hGraphHierarchy[i][j][k]->createSubHG(minNumberSubHG + l);
                 }
             }
-            // Вычисляю среднее значение по серии
+
             increaseOfCountExternalEdges[i][j] /= experimentNumber;
 
             // Вычитаю уже имевшиеся связи
@@ -334,8 +365,6 @@ void MainWindow::gatheringData()
             increaseOfCountExternalEdges[i][j] -= countOldExternalEdges;
             countOldExternalEdges += increaseOfCountExternalEdges[i][j];
 
-            // Увеличиваю счетчик собственных
-            // номеров подграфов
             minNumberSubHG += splittingNumber;
 
             ui->progressBar->setValue(ui->progressBar->value()+experimentNumber);
@@ -343,10 +372,8 @@ void MainWindow::gatheringData()
     }
 }
 
-void MainWindow::showData (int complexity)
+void MainWindow::showData (int splittingNumber, int complexity, QColor graphColor)
 {
-    Line steps;
-
     double currentCostOfTracing = 0;
     double currentCountOfInternalEdges = 0;
 
@@ -383,5 +410,24 @@ void MainWindow::showData (int complexity)
         steps.y.push_back(nextValue);
     }
 
-    drawLine(ui->stepsChart, steps, QString::number(splittingNumber), QColor(255,0,0));
+    drawLine(ui->stepsChart, steps, QString::number(splittingNumber), graphColor, false);
+
+    std::stringstream str;
+    str << "Число уровней: " << splittingNumber << "\n";
+
+    str  << std::left << std::setw(23) << "Подграфы" << std::setw(19) << "Шаги" << std::setw(20) << "Связи" << "\n";
+
+    str << std::setw(15) << steps.x[0] << std::setw(15) << steps.y[0]  << "N/A\n";
+
+    for (int i=0; i<edges.x.size(); i++)
+        str << std::setw(15) << steps.x[i+1] << std::setw(15) << steps.y[i+1] << std::setw(15) << edges.y[i] << "\n";
+
+    data += QString::fromStdString(str.str());
+}
+
+void MainWindow::on_showButton_clicked()
+{
+    DataWindow dw;
+    dw.setData(data);
+    dw.exec();
 }

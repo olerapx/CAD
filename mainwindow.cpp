@@ -140,12 +140,8 @@ void MainWindow::on_seriesButton_clicked()
 {
     reset();
 
-    double exponent;
-    if (ui->tracingQuadratic->isChecked())
-        exponent = 2.0;
-    else
-        exponent = 3.0;
-
+    tracingComplexity = ui->tracingComplexityText->text().toDouble();
+    deploymentComplexity = ui->deploymentComplexityText->text().toDouble();
     int subHGNumber = ui->subHGNumberText->text().toInt();
 
     ui->progressBar->setMinimum(experimentNumber * 2);
@@ -158,7 +154,7 @@ void MainWindow::on_seriesButton_clicked()
         countOfAllFragments += hGraph[i]->getCountOfFragments();
     countOfAllFragments /= experimentNumber;
     steps.x.push_back(1);
-    steps.y.push_back(pow((double)hGraph[0]->getCountOfVertices(),2.0) + pow(countOfAllFragments,exponent));
+    steps.y.push_back(pow((double)hGraph[0]->getCountOfVertices(), deploymentComplexity) + pow(countOfAllFragments, tracingComplexity));
 
     for (int j=2; j<=subHGNumber; j++)
     {
@@ -179,9 +175,9 @@ void MainWindow::on_seriesButton_clicked()
 
         steps.x.push_back(j);
         steps.y.push_back(hGraph[0]->getCountOfVertices() +
-                pow((double)hGraph[0]->getCountOfVertices()/j,2.0) +
-                pow(countOfAllExternalEdges,exponent) +
-                pow((countOfAllFragments - countOfAllExternalEdges)/j, exponent));
+                pow((double)hGraph[0]->getCountOfVertices()/j, deploymentComplexity) +
+                pow(countOfAllExternalEdges,tracingComplexity) +
+                pow((countOfAllFragments - countOfAllExternalEdges)/j, tracingComplexity));
     }
     ui->progressBar->setValue(experimentNumber * 2);
 
@@ -192,7 +188,6 @@ void MainWindow::on_seriesButton_clicked()
     str << "Последовательное разбиение\n";
 
     str  << std::left << std::setw(23) << "Подграфы" << std::setw(19) << "Шаги" << std::setw(20) << "Связи" << "\n";
-
     str << std::setw(15) << steps.x[0] << std::setw(15) << steps.y[0]  << "N/A\n";
 
     for (int i=0; i<edges.x.size(); i++)
@@ -233,12 +228,12 @@ void MainWindow::on_startButton_clicked()
     if (maxSplittingNumber < 2)
         maxSplittingNumber = 2;
 
+    tracingComplexity = ui->tracingComplexityText->text().toDouble();
+    deploymentComplexity = ui->deploymentComplexityText->text().toDouble();
     levelNumber = ui->levelNumberText->text().toInt();
 
     for (int i=minSplittingNumber; i <= maxSplittingNumber; i++)
-    {
         calculateData(i, QColor(rand()%255, rand()%255, rand()%255));
-    }
 }
 
 void MainWindow::calculateData(int splittingNumber, QColor graphColor)
@@ -270,9 +265,7 @@ void MainWindow::calculateData(int splittingNumber, QColor graphColor)
 
     drawLine(ui->edgesChart, edges, QString::number(splittingNumber), graphColor, false);
 
-    if (ui->tracingQuadratic->isChecked())
-        showData(splittingNumber, 2, graphColor);
-    else showData(splittingNumber, 3, graphColor);
+    showData(splittingNumber, graphColor);
 
     ui->statusLabel->setText("Готово.");
 }
@@ -336,7 +329,7 @@ void MainWindow::gatheringData(int splittingNumber)
     int countOldExternalEdges = 0;
     for (int i=0; i<levelNumber; i++)
     {
-        int splittingNumberOnLevel = (int) pow(splittingNumber,i);
+        int splittingNumberOnLevel = (int) pow(splittingNumber, i);
 
         ui->statusLabel->setText("Осталось уровней: "+levelNumber-i);
 
@@ -346,12 +339,10 @@ void MainWindow::gatheringData(int splittingNumber)
             for (int k=0; k<experimentNumber; k++)
             {
                 hGraphHierarchy[i][j][k]->gravitySplitHG(splittingNumber, minNumberSubHG);
-                // Разбили
 
                 increaseOfCountExternalEdges[i][j] += hGraphHierarchy[0][0][k]->getCountOfExternalEdges();
-                // Плюсанул новые внешние связи
-                if (i < levelNumber-1) // Если не последняя итерация -
-                    // создаю подграфы на основе разбиений
+
+                if (i < levelNumber-1) // Если не последняя итерация - создаю подграфы на основе разбиений
                 {
                     for (int l=0; l<splittingNumber; l++)
                         hGraphHierarchy[i+1][j*splittingNumber + l][k] = hGraphHierarchy[i][j][k]->createSubHG(minNumberSubHG + l);
@@ -372,7 +363,7 @@ void MainWindow::gatheringData(int splittingNumber)
     }
 }
 
-void MainWindow::showData (int splittingNumber, int complexity, QColor graphColor)
+void MainWindow::showData (int splittingNumber, QColor graphColor)
 {
     double currentCostOfTracing = 0;
     double currentCountOfInternalEdges = 0;
@@ -382,8 +373,8 @@ void MainWindow::showData (int splittingNumber, int complexity, QColor graphColo
     currentCountOfInternalEdges /= experimentNumber;
 
     steps.x.push_back(0);
-    steps.y.push_back(pow((double)currentCountOfInternalEdges, complexity)+
-                     pow(ui->vertexNumberText->text().toDouble(), splittingNumber)); ///TODO: check here
+    steps.y.push_back(pow((double)currentCountOfInternalEdges, tracingComplexity)+
+                     pow(ui->vertexNumberText->text().toDouble(), deploymentComplexity));
 
     int levelNumber = ui->levelNumberText->text().toInt();
 
@@ -398,13 +389,13 @@ void MainWindow::showData (int splittingNumber, int complexity, QColor graphColo
             currentCountOfInternalEdges -= increaseOfCountExternalEdges[i][j];
         }
 
-        currentCostOfTracing += pow((double)maxCountExternalEdges, complexity);
+        currentCostOfTracing += pow((double)maxCountExternalEdges, tracingComplexity);
 
         double nextValue = hGraphHierarchy[i][0][0]->getCountOfVertices() +
-                pow((double)hGraphHierarchy[i][0][0]->getCountOfVertices()/splittingNumber, splittingNumber) +
+                pow((double)hGraphHierarchy[i][0][0]->getCountOfVertices()/splittingNumber, deploymentComplexity) +
                 currentCostOfTracing +
-                pow (currentCountOfInternalEdges / pow(splittingNumber,i+1),
-                     complexity); ///TODO: check here
+                pow (currentCountOfInternalEdges / pow(splittingNumber, i+1),
+                     tracingComplexity);
 
         steps.x.push_back(i+1);
         steps.y.push_back(nextValue);
@@ -413,10 +404,9 @@ void MainWindow::showData (int splittingNumber, int complexity, QColor graphColo
     drawLine(ui->stepsChart, steps, QString::number(splittingNumber), graphColor, false);
 
     std::stringstream str;
-    str << "Число уровней: " << splittingNumber << "\n";
+    str << splittingNumber <<"-хотомическое разбиение" << "\n";
 
     str  << std::left << std::setw(23) << "Подграфы" << std::setw(19) << "Шаги" << std::setw(20) << "Связи" << "\n";
-
     str << std::setw(15) << steps.x[0] << std::setw(15) << steps.y[0]  << "N/A\n";
 
     for (int i=0; i<edges.x.size(); i++)

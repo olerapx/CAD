@@ -46,6 +46,8 @@ public:
     int maxSplittingNumber;
     int levelNumber;
 
+    double deploymentComplexity, tracingComplexity;
+
     Mode mode;
 
     QString data;
@@ -76,7 +78,7 @@ private:
     void calculateData (int splittingNumber, QColor graphColor);
     void initHierarchyHG (int splittingNumber);
     void gatheringData (int splittingNumber);
-    void showData (int splittingNumber, int complexity, QColor graphColor);
+    void showData (int splittingNumber, QColor graphColor);
 };
 
 #endif // MAINWINDOW_H

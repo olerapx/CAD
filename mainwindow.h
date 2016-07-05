@@ -31,26 +31,26 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    vector<HGraph*> hGraph;
+    /* common */
+    Mode mode;
+    Line steps, edges;
+    double deploymentComplexity, tracingComplexity;
 
+    QString data;
+
+    int experimentNumber;
+
+    /* single-level */
+    vector<HGraph*> hGraph;
+    int minNumberSubHG;
+
+    /* hierarchical */
     vector<vector<vector<HGraph*>>> hGraphHierarchy;
     vector<vector<int>> increaseOfCountExternalEdges;
 
-    Line steps, edges;
-
-    int experimentNumber; // for getting an average value
-    int minNumberSubHG;
-
-    // on each level of the hierarchical model
     int minSplittingNumber;
     int maxSplittingNumber;
     int levelNumber;
-
-    double deploymentComplexity, tracingComplexity;
-
-    Mode mode;
-
-    QString data;
 
 private slots:
     void on_singleLevelAction_changed();

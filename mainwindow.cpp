@@ -10,7 +10,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QActionGroup* modeGroup = new QActionGroup(this);
 
     QList<QAction*> modeActions = ui->modeMenu->actions();
-    for (auto i = modeActions.begin();i<modeActions.end();i++)
+    for (auto i = modeActions.begin(); i<modeActions.end(); i++)
         modeGroup->addAction(*i);
 
     on_singleLevelAction_changed();
@@ -80,7 +80,10 @@ void MainWindow::on_createHGButton_clicked()
 {
     experimentNumber = ui->experimentNumberText->text().toInt();
     if (experimentNumber < 1)
-        experimentNumber = 10;
+    {
+        experimentNumber = 1;
+        ui->experimentNumberText->setText("1");
+    }
 
     for (size_t i=0; i<hGraph.size(); i++)
             delete hGraph[i];
@@ -108,8 +111,14 @@ void MainWindow::on_randomButton_clicked()
 
     int subHGNumber = ui->subHGNumberText->text().toInt();
 
+    ui->progressBar->setMinimum(experimentNumber * 2);
+    ui->progressBar->setMaximum(subHGNumber * experimentNumber);
+    ui->progressBar->setValue(experimentNumber * 2);
+
     for (int j=2; j<=subHGNumber; j++)
     {
+        ui->statusLabel->setText("Осталось уровней: "+ QString::number(subHGNumber-j));
+
         double countOfAllFragments = 0;
         double countOfAllExternalEdges = 0;
         for (int i=0; i<experimentNumber; i++)
@@ -118,10 +127,15 @@ void MainWindow::on_randomButton_clicked()
             hGraph[i]->randomSplitHG(j, 0);
             countOfAllFragments += hGraph[i]->getCountOfFragments();
             countOfAllExternalEdges += hGraph[i]->getCountOfExternalEdges();
+
+            ui->progressBar->setValue(j*experimentNumber+1);
         }
         edges.x.push_back(j);
         edges.y.push_back(100*countOfAllExternalEdges/countOfAllFragments);
     }
+
+    ui->progressBar->setValue(experimentNumber * 2);
+    ui->statusLabel->setText("Готово");
 
     drawLine(ui->edgesChart, edges, " ", QColor(255,0,0));
 
@@ -160,6 +174,8 @@ void MainWindow::on_seriesButton_clicked()
     {
         double countOfAllExternalEdges = 0;
 
+        ui->statusLabel->setText("Осталось уровней: "+ QString::number(subHGNumber-j));
+
         for (int i=0; i<experimentNumber; i++)
         {
             hGraph[i]->resetSplitHG();
@@ -180,6 +196,8 @@ void MainWindow::on_seriesButton_clicked()
                 pow((countOfAllFragments - countOfAllExternalEdges)/j, tracingComplexity));
     }
     ui->progressBar->setValue(experimentNumber * 2);
+
+    ui->statusLabel->setText("Готово");
 
     drawLine(ui->stepsChart, steps, " ", QColor(255,0,0));
     drawLine(ui->edgesChart, edges, " ", QColor(255,0,0));
@@ -218,15 +236,24 @@ void MainWindow::on_startButton_clicked()
 
     experimentNumber = ui->experimentNumberText->text().toInt();
     if (experimentNumber<1)
-        experimentNumber=1;
+    {
+        experimentNumber = 1;
+        ui->experimentNumberText->setText("1");
+    }
 
     minSplittingNumber = ui->minSplittingNumberText->text().toInt();
     if (minSplittingNumber < 2)
+    {
         minSplittingNumber = 2;
+        ui->minSplittingNumberText->setText("2");
+    }
 
     maxSplittingNumber = ui->maxSplittingNumberText->text().toInt();
     if (maxSplittingNumber < 2)
+    {
         maxSplittingNumber = 2;
+        ui->maxSplittingNumberText->setText("2");
+    }
 
     tracingComplexity = ui->tracingComplexityText->text().toDouble();
     deploymentComplexity = ui->deploymentComplexityText->text().toDouble();
@@ -234,6 +261,8 @@ void MainWindow::on_startButton_clicked()
 
     for (int i=minSplittingNumber; i <= maxSplittingNumber; i++)
         calculateData(i, QColor(rand()%255, rand()%255, rand()%255));
+
+    ui->statusLabel->setText("Готово");
 }
 
 void MainWindow::calculateData(int splittingNumber, QColor graphColor)
@@ -245,8 +274,6 @@ void MainWindow::calculateData(int splittingNumber, QColor graphColor)
 
     initHierarchyHG(splittingNumber);
     gatheringData(splittingNumber);
-
-    ui->statusLabel->setText("Почти все...");
 
     double countAllFragments = 0.0;
     for (int i=0; i<experimentNumber; i++)
@@ -263,11 +290,7 @@ void MainWindow::calculateData(int splittingNumber, QColor graphColor)
         edges.y.push_back(100*nextIncreaseValue/countAllFragments);
     }
 
-    drawLine(ui->edgesChart, edges, QString::number(splittingNumber), graphColor, false);
-
     showData(splittingNumber, graphColor);
-
-    ui->statusLabel->setText("Готово.");
 }
 
 void MainWindow::initHierarchyHG(int splittingNumber)
@@ -331,7 +354,7 @@ void MainWindow::gatheringData(int splittingNumber)
     {
         int splittingNumberOnLevel = (int) pow(splittingNumber, i);
 
-        ui->statusLabel->setText("Осталось уровней: "+levelNumber-i);
+        ui->statusLabel->setText("Осталось уровней: "+ QString::number(levelNumber-i));
 
         for (int j=0; j<splittingNumberOnLevel; j++)
         {
@@ -401,6 +424,7 @@ void MainWindow::showData (int splittingNumber, QColor graphColor)
         steps.y.push_back(nextValue);
     }
 
+    drawLine(ui->edgesChart, edges, QString::number(splittingNumber), graphColor, false);
     drawLine(ui->stepsChart, steps, QString::number(splittingNumber), graphColor, false);
 
     std::stringstream str;

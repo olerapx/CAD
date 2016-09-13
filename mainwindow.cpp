@@ -429,6 +429,9 @@ void MainWindow::showData (int splittingNumber, QColor graphColor)
 
     std::stringstream str;
     str << splittingNumber <<"-хотомическое разбиение" << "\n";
+    str << "Сложность размещения: " << deploymentComplexity << "\n";
+    str << "Сложность трассировки: " << tracingComplexity << "\n";
+
 
     str  << std::left << std::setw(23) << "Подграфы" << std::setw(19) << "Шаги" << std::setw(20) << "Связи" << "\n";
     str << std::setw(15) << steps.x[0] << std::setw(15) << steps.y[0]  << "N/A\n";

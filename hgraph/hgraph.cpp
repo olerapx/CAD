@@ -183,8 +183,8 @@ void HGraph::createEdges (int minCountOfVertices, int maxCountOfVertices)
         ///-----///
         for (int i=0; ; i++)        // Начинаем построение ребер (заранее неизвестно, сколько их)
         {
-            std::cout<<"threshold:\t"<<logicalThreshold<<"\t summDeg:\t"<<summaryDegree<<"\t elses:\t"<<el<<
-                       "\t piss:\t"<<piss<<endl;
+        //    std::cout<<"threshold:\t"<<logicalThreshold<<"\t summDeg:\t"<<summaryDegree<<"\t elses:\t"<<el<<
+        //               "\t piss:\t"<<piss<<endl;
             piss++;
 
             if (logicalThreshold < summaryDegree)

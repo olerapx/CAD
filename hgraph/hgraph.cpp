@@ -1,5 +1,7 @@
 #include "hgraph.h"
 
+#include <iostream>
+
 HGraph::HGraph ()
 {
     countOfVertices = 0;
@@ -144,8 +146,10 @@ int HGraph::getGlobalMaxDegree ()
 
 void HGraph::createEdges (int minCountOfVertices, int maxCountOfVertices)
 {
-    if (mainGraph)                              // Создание вершин и ребер вызывается
-    {                                           // только для корневого графа
+    // Создание вершин и ребер вызывается
+    // только для корневого графа
+    if (mainGraph)
+    {
         int summaryDegree = getSummaryDegree();   // Общее число возможных подключений
 
         // Порог, по прохождении которого
@@ -156,36 +160,61 @@ void HGraph::createEdges (int minCountOfVertices, int maxCountOfVertices)
 
         // Максимальное число цепей - это
         // вершины * макс. степень / мин. мощность
+
         for (size_t i=0;i<edges.size();i++)
             delete edges[i];
 
         edges.clear();
         edges.resize(countOfVertices*logicalThreshold/(maxCountOfVertices*minCountOfVertices));
 
+        // to pick random vertice correctly
+        vector<HGVertex*> temp;
+        temp.resize(vertices.size());
+        for(int i=0; i<temp.size(); i++)
+        {
+            temp[i] = vertices[i];
+        }
+
+        ///DEBUG///
+        long piss, el;
+
+        piss = 0;
+        el=0;
+        ///-----///
         for (int i=0; ; i++)        // Начинаем построение ребер (заранее неизвестно, сколько их)
+        {
+            std::cout<<"threshold:\t"<<logicalThreshold<<"\t summDeg:\t"<<summaryDegree<<"\t elses:\t"<<el<<
+                       "\t piss:\t"<<piss<<endl;
+            piss++;
+
             if (logicalThreshold < summaryDegree)
             {
                 edges[i] = new HGEdge (minCountOfVertices + rand()%(maxCountOfVertices+1));
+
                 do
                 {
-                    int nextVertexToConnect;            // Номер очередной вершины для включения в ребро
-                    do
-                    {
-                        nextVertexToConnect = rand()%getCountOfVertices();
-                    }
-                    while (vertices[nextVertexToConnect]->isInEdge(edges[i]) ||
-                           vertices[nextVertexToConnect]->isFull());
+
+                    // Номер очередной вершины для включения в ребро
+                    int nextVertexToConnect = rand()%temp.size();
 
                     // Установление инцидентности
-                    incidenceInstall(vertices[nextVertexToConnect], edges[i]);
+                    incidenceInstall(temp[nextVertexToConnect], edges[i]);
 
-                    summaryDegree--;                    // Снижаем число оставшихся для
-                    // обработки подключений
-                }
-                while (!(edges[i]->isFull()));
+                    if(temp[nextVertexToConnect]->isFull())
+                    {
+                        temp.erase(temp.begin()+nextVertexToConnect);
+                    }
+
+                    summaryDegree--;                    // Снижаем число оставшихся для обработки подключений
+
+                } while (!(edges[i]->isFull()));
+
+
             }
             else
             {
+                el++;
+
                 // Логика обработки последних подключений
                 // Составляю матрицу-проекцию будущих ребер
                 int countOfFreeVertices = getCountOfFreeVertices();
@@ -282,6 +311,7 @@ void HGraph::createEdges (int minCountOfVertices, int maxCountOfVertices)
                 masOfPowerEdges.clear();
                 break;
             }
+        }
     }
 }
 

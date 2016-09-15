@@ -16,21 +16,23 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp \
+        gui/mainwindow.cpp \
     hgraph/hgedge.cpp \
     hgraph/hgvertex.cpp \
     hgraph/hgraph.cpp \
     chart/qcustomplot.cpp \
     chart/line.cpp \
-    datawindow.cpp
+    gui/datawindow.cpp
 
-HEADERS  += mainwindow.h \
+HEADERS  += gui/mainwindow.h \
     hgraph/hgedge.h \
     hgraph/hgvertex.h \
     hgraph/hgraph.h \
     chart/qcustomplot.h \
     chart/line.h \
-    datawindow.h
+   gui/datawindow.h
 
-FORMS    += mainwindow.ui \
-    datawindow.ui
+FORMS    += gui/mainwindow.ui \
+    gui/datawindow.ui
+
+DISTFILES +=

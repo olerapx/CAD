@@ -170,7 +170,7 @@ void HGraph::createEdges (int minCountOfVertices, int maxCountOfVertices)
         // to pick random vertice correctly
         vector<HGVertex*> temp;
         temp.resize(vertices.size());
-        for(int i=0; i<temp.size(); i++)
+        for(size_t i=0; i<temp.size(); i++)
         {
             temp[i] = vertices[i];
         }

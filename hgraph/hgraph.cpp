@@ -1,7 +1,5 @@
 #include "hgraph.h"
 
-#include <iostream>
-
 HGraph::HGraph ()
 {
     countOfVertices = 0;
@@ -73,9 +71,9 @@ HGraph::HGraph (vector<HGVertex*> &masOfVertex, int numberSubG)
 
     if (countOfEdges <0)
     {
-        countOfEdges = 0; /// dangerous
-        countOfVertices = 0;
-        vertices.clear();
+            countOfEdges = 0; /// dangerous
+            countOfVertices = 0;
+            vertices.clear();
     }
 
     edges.resize(countOfEdges);
@@ -175,18 +173,8 @@ void HGraph::createEdges (int minCountOfVertices, int maxCountOfVertices)
             temp[i] = vertices[i];
         }
 
-        ///DEBUG///
-        long piss, el;
-
-        piss = 0;
-        el=0;
-        ///-----///
         for (int i=0; ; i++)        // Начинаем построение ребер (заранее неизвестно, сколько их)
         {
-        //    std::cout<<"threshold:\t"<<logicalThreshold<<"\t summDeg:\t"<<summaryDegree<<"\t elses:\t"<<el<<
-        //               "\t piss:\t"<<piss<<endl;
-            piss++;
-
             if (logicalThreshold < summaryDegree)
             {
                 edges[i] = new HGEdge (minCountOfVertices + rand()%(maxCountOfVertices+1));
@@ -213,8 +201,6 @@ void HGraph::createEdges (int minCountOfVertices, int maxCountOfVertices)
             }
             else
             {
-                el++;
-
                 // Логика обработки последних подключений
                 // Составляю матрицу-проекцию будущих ребер
                 int countOfFreeVertices = getCountOfFreeVertices();
@@ -452,20 +438,26 @@ void HGraph::gravitySplitHG (int countSubHG, int startNumberSubG)
 
 void HGraph::gravityEdge (int powerOfSubHG, int numberOfSubHG)
 {
-    int minSplitOfEdge = 1;                     // Нижняя граница оценки
-    // числа подграфов, в которые
-    // входит ребро
+    int minSplitOfEdge = 1; // Нижняя граница оценки числа подграфов, в которые входит ребро
 
     // Число вершин для включения
     // в подграф
     int countPlacesInSubHG = powerOfSubHG;
-    bool noCorrectEdges;                        // Сигнал для поднятия нижней
-    // границы
+
+    bool noCorrectEdges; // Сигнал для поднятия нижней границы
     do
     {
         noCorrectEdges = true;
+
+        bool hasAnyAvailableEdge = false;
+
         for (int i=0; i<countOfEdges; i++)
         {
+            for (int j=0; j<edges[i]->getMaxCountOfVertex(); j++)
+                if (edges[i]->getVertex(j) != nullptr)
+                    if (edges[i]->getVertex(j)->getNumberOfHG() == numberOfHG)
+                        hasAnyAvailableEdge = true;
+
             // Нашел подходящее ребро
             if (edges[i]->getCountSubHG() <= minSplitOfEdge)
             {
@@ -493,6 +485,11 @@ void HGraph::gravityEdge (int powerOfSubHG, int numberOfSubHG)
         }
         if (noCorrectEdges)                   // Когда не нашел подходящих ребер
             minSplitOfEdge++;                   // поднимаем нижнюю границу
+
+        if (!hasAnyAvailableEdge)
+        {
+           throw HGraphException ("Can't split hypergraph: too few vertices.\nNo one edge is available for splitting.");
+        }
     }
     while (countPlacesInSubHG > 0);
 }

@@ -48,8 +48,7 @@ public:
     vector<vector<vector<HGraph*>>> hGraphHierarchy;
     vector<vector<int>> increaseOfCountExternalEdges;
 
-    int minSplittingNumber;
-    int maxSplittingNumber;
+    vector<int> splittingNumbers;
     int levelNumber;
 
 private slots:
@@ -75,10 +74,14 @@ private:
     void drawText (QCustomPlot* chart, QString text, QPen pen, double x, double y);
     void reset();
 
-    void calculateData (int splittingNumber, QColor graphColor);
-    void initHierarchyHG (int splittingNumber);
-    void gatheringData (int splittingNumber);
-    void showData (int splittingNumber, QColor graphColor);
+    void parseSplittingNumbers();
+
+    void calculateData (QColor graphColor);
+
+    int getNumberOfComputersOnLevel(int level);
+    void initHierarchyHG ();
+    void gatheringData ();
+    void showData (QColor graphColor);
 };
 
 #endif // MAINWINDOW_H

@@ -22,7 +22,8 @@ SOURCES += main.cpp\
     hgraph/hgraph.cpp \
     chart/qcustomplot.cpp \
     chart/line.cpp \
-    gui/datawindow.cpp
+    gui/datawindow.cpp \
+    hgraph/hgraphexception.cpp
 
 HEADERS  += gui/mainwindow.h \
     hgraph/hgedge.h \
@@ -30,7 +31,8 @@ HEADERS  += gui/mainwindow.h \
     hgraph/hgraph.h \
     chart/qcustomplot.h \
     chart/line.h \
-   gui/datawindow.h
+   gui/datawindow.h \
+    hgraph/hgraphexception.h
 
 FORMS    += gui/mainwindow.ui \
     gui/datawindow.ui

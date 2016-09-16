@@ -107,111 +107,127 @@ void MainWindow::on_createHGButton_clicked()
 
 void MainWindow::on_randomButton_clicked()
 {
-    reset();
-
-    int subHGNumber = ui->subHGNumberText->text().toInt();
-
-    ui->progressBar->setMinimum(experimentNumber * 2);
-    ui->progressBar->setMaximum(subHGNumber * experimentNumber);
-    ui->progressBar->setValue(experimentNumber * 2);
-
-    for (int j=2; j<=subHGNumber; j++)
+    try
     {
-        ui->statusLabel->setText("Осталось уровней: "+ QString::number(subHGNumber-j));
+        reset();
 
-        double countOfAllFragments = 0;
-        double countOfAllExternalEdges = 0;
-        for (int i=0; i<experimentNumber; i++)
+        int subHGNumber = ui->subHGNumberText->text().toInt();
+
+        ui->progressBar->setMinimum(experimentNumber * 2);
+        ui->progressBar->setMaximum(subHGNumber * experimentNumber);
+        ui->progressBar->setValue(experimentNumber * 2);
+
+        for (int j=2; j<=subHGNumber; j++)
         {
-            hGraph[i]->resetSplitHG();
-            hGraph[i]->randomSplitHG(j, 0);
-            countOfAllFragments += hGraph[i]->getCountOfFragments();
-            countOfAllExternalEdges += hGraph[i]->getCountOfExternalEdges();
+            ui->statusLabel->setText("Осталось уровней: "+ QString::number(subHGNumber-j));
 
-            ui->progressBar->setValue(j*experimentNumber+1);
+            double countOfAllFragments = 0;
+            double countOfAllExternalEdges = 0;
+            for (int i=0; i<experimentNumber; i++)
+            {
+                hGraph[i]->resetSplitHG();
+                hGraph[i]->randomSplitHG(j, 0);
+                countOfAllFragments += hGraph[i]->getCountOfFragments();
+                countOfAllExternalEdges += hGraph[i]->getCountOfExternalEdges();
+
+                ui->progressBar->setValue(j*experimentNumber+1);
+            }
+            edges.x.push_back(j);
+            edges.y.push_back(100*countOfAllExternalEdges/countOfAllFragments);
         }
-        edges.x.push_back(j);
-        edges.y.push_back(100*countOfAllExternalEdges/countOfAllFragments);
+
+        ui->progressBar->setValue(experimentNumber * 2);
+
+        drawLine(ui->edgesChart, edges, " ", QColor(255,0,0));
+
+        std::stringstream str;
+        str << "Случайное разбиение\n";
+
+        str  << std::left << std::setw(23) << "Подграфы" << std::setw(20) << "Связи" << "\n";
+
+        for (int i=0; i<edges.x.size(); i++)
+            str << std::setw(15) << edges.x[i] << std::setw(15) << edges.y[i] << "\n";
+
+        data = QString::fromStdString(str.str());
+
+    }
+    catch (HGraphException &ex)
+    {
+        QMessageBox::critical(0, "Critical", ex.getError().c_str());
     }
 
-    ui->progressBar->setValue(experimentNumber * 2);
     ui->statusLabel->setText("Готово");
-
-    drawLine(ui->edgesChart, edges, " ", QColor(255,0,0));
-
-    std::stringstream str;
-    str << "Случайное разбиение\n";
-
-    str  << std::left << std::setw(23) << "Подграфы" << std::setw(20) << "Связи" << "\n";
-
-    for (int i=0; i<edges.x.size(); i++)
-        str << std::setw(15) << edges.x[i] << std::setw(15) << edges.y[i] << "\n";
-
-    data = QString::fromStdString(str.str());
 }
 
 void MainWindow::on_seriesButton_clicked()
 {
-    reset();
-
-    tracingComplexity = ui->tracingComplexityText->text().toDouble();
-    deploymentComplexity = ui->deploymentComplexityText->text().toDouble();
-    int subHGNumber = ui->subHGNumberText->text().toInt();
-
-    ui->progressBar->setMinimum(experimentNumber * 2);
-    ui->progressBar->setMaximum(subHGNumber * experimentNumber);
-    ui->progressBar->setValue(experimentNumber * 2);
-
-    double countOfAllFragments = 0;
-
-    for (int i=0; i<experimentNumber; i++)
-        countOfAllFragments += hGraph[i]->getCountOfFragments();
-    countOfAllFragments /= experimentNumber;
-    steps.x.push_back(1);
-    steps.y.push_back(pow((double)hGraph[0]->getCountOfVertices(), deploymentComplexity) + pow(countOfAllFragments, tracingComplexity));
-
-    for (int j=2; j<=subHGNumber; j++)
+    try
     {
-        double countOfAllExternalEdges = 0;
+        reset();
 
-        ui->statusLabel->setText("Осталось уровней: "+ QString::number(subHGNumber-j));
+        tracingComplexity = ui->tracingComplexityText->text().toDouble();
+        deploymentComplexity = ui->deploymentComplexityText->text().toDouble();
+        int subHGNumber = ui->subHGNumberText->text().toInt();
+
+        ui->progressBar->setMinimum(experimentNumber * 2);
+        ui->progressBar->setMaximum(subHGNumber * experimentNumber);
+        ui->progressBar->setValue(experimentNumber * 2);
+
+        double countOfAllFragments = 0;
 
         for (int i=0; i<experimentNumber; i++)
+            countOfAllFragments += hGraph[i]->getCountOfFragments();
+        countOfAllFragments /= experimentNumber;
+        steps.x.push_back(1);
+        steps.y.push_back(pow((double)hGraph[0]->getCountOfVertices(), deploymentComplexity) + pow(countOfAllFragments, tracingComplexity));
+
+        for (int j=2; j<=subHGNumber; j++)
         {
-            hGraph[i]->resetSplitHG();
-            hGraph[i]->gravitySplitHG(j, 0);
-            countOfAllExternalEdges += hGraph[i]->getCountOfExternalEdges();
+            double countOfAllExternalEdges = 0;
 
-            ui->progressBar->setValue(j*experimentNumber+1);
+            ui->statusLabel->setText("Осталось уровней: "+ QString::number(subHGNumber-j));
+
+            for (int i=0; i<experimentNumber; i++)
+            {
+                hGraph[i]->resetSplitHG();
+                hGraph[i]->gravitySplitHG(j, 0);
+                countOfAllExternalEdges += hGraph[i]->getCountOfExternalEdges();
+
+                ui->progressBar->setValue(j*experimentNumber+1);
+            }
+            countOfAllExternalEdges /= experimentNumber;
+
+            edges.x.push_back(j);
+            edges.y.push_back(100* (countOfAllExternalEdges/countOfAllFragments));
+
+            steps.x.push_back(j);
+            steps.y.push_back(hGraph[0]->getCountOfVertices() +
+                    pow((double)hGraph[0]->getCountOfVertices()/j, deploymentComplexity) +
+                    pow(countOfAllExternalEdges,tracingComplexity) +
+                    pow((countOfAllFragments - countOfAllExternalEdges)/j, tracingComplexity));
         }
-        countOfAllExternalEdges /= experimentNumber;
+        ui->progressBar->setValue(experimentNumber * 2);
 
-        edges.x.push_back(j);
-        edges.y.push_back(100* (countOfAllExternalEdges/countOfAllFragments));
 
-        steps.x.push_back(j);
-        steps.y.push_back(hGraph[0]->getCountOfVertices() +
-                pow((double)hGraph[0]->getCountOfVertices()/j, deploymentComplexity) +
-                pow(countOfAllExternalEdges,tracingComplexity) +
-                pow((countOfAllFragments - countOfAllExternalEdges)/j, tracingComplexity));
+        drawLine(ui->stepsChart, steps, " ", QColor(255,0,0));
+        drawLine(ui->edgesChart, edges, " ", QColor(255,0,0));
+
+        std::stringstream str;
+        str << "Последовательное разбиение\n";
+
+        str  << std::left << std::setw(23) << "Подграфы" << std::setw(19) << "Шаги" << std::setw(20) << "Связи" << "\n";
+        str << std::setw(15) << steps.x[0] << std::setw(15) << steps.y[0]  << "N/A\n";
+
+        for (int i=0; i<edges.x.size(); i++)
+            str << std::setw(15) << steps.x[i+1] << std::setw(15) << steps.y[i+1] << std::setw(15) << edges.y[i] << "\n";
+
+        data = QString::fromStdString(str.str());
     }
-    ui->progressBar->setValue(experimentNumber * 2);
-
+    catch (HGraphException &ex)
+    {
+        QMessageBox::critical(0, "Critical", ex.getError().c_str());
+    }
     ui->statusLabel->setText("Готово");
-
-    drawLine(ui->stepsChart, steps, " ", QColor(255,0,0));
-    drawLine(ui->edgesChart, edges, " ", QColor(255,0,0));
-
-    std::stringstream str;
-    str << "Последовательное разбиение\n";
-
-    str  << std::left << std::setw(23) << "Подграфы" << std::setw(19) << "Шаги" << std::setw(20) << "Связи" << "\n";
-    str << std::setw(15) << steps.x[0] << std::setw(15) << steps.y[0]  << "N/A\n";
-
-    for (int i=0; i<edges.x.size(); i++)
-        str << std::setw(15) << steps.x[i+1] << std::setw(15) << steps.y[i+1] << std::setw(15) << edges.y[i] << "\n";
-
-    data = QString::fromStdString(str.str());
 }
 
 void MainWindow::reset()
@@ -241,39 +257,58 @@ void MainWindow::on_startButton_clicked()
         ui->experimentNumberText->setText("1");
     }
 
-    minSplittingNumber = ui->minSplittingNumberText->text().toInt();
-    if (minSplittingNumber < 2)
-    {
-        minSplittingNumber = 2;
-        ui->minSplittingNumberText->setText("2");
-    }
-
-    maxSplittingNumber = ui->maxSplittingNumberText->text().toInt();
-    if (maxSplittingNumber < 2)
-    {
-        maxSplittingNumber = 2;
-        ui->maxSplittingNumberText->setText("2");
-    }
-
     tracingComplexity = ui->tracingComplexityText->text().toDouble();
     deploymentComplexity = ui->deploymentComplexityText->text().toDouble();
     levelNumber = ui->levelNumberText->text().toInt();
 
-    for (int i=minSplittingNumber; i <= maxSplittingNumber; i++)
-        calculateData(i, QColor(rand()%255, rand()%255, rand()%255));
+    parseSplittingNumbers();
+
+    try
+    {
+        calculateData(QColor(rand()%255, rand()%255, rand()%255));
+    }
+    catch (HGraphException &ex)
+    {
+        QMessageBox::critical(0, "Critical", ex.getError().c_str());
+    }
 
     ui->statusLabel->setText("Готово");
 }
 
-void MainWindow::calculateData(int splittingNumber, QColor graphColor)
+void MainWindow::parseSplittingNumbers()
+{
+    splittingNumbers.clear();
+
+    ui->splittingNumberText->text().remove(' ');
+
+    splittingNumbers.resize(levelNumber);
+
+    QStringList numbers = ui->splittingNumberText->text().split(';', QString::KeepEmptyParts);
+
+    if (numbers.size() < levelNumber)
+    {
+        for (int i = numbers.size(); i<levelNumber ; i++)
+            numbers.push_back("2");
+    }
+
+    int i = 0;
+    for (QStringList::iterator iter = numbers.begin(); iter != numbers.end(); iter++)
+    {
+        if ((*iter) == "") (*iter) = "2";
+        splittingNumbers[i] = (*iter).toInt();
+        i++;
+    }
+}
+
+void MainWindow::calculateData(QColor graphColor)
 {
     ui->statusLabel->setText("Создание ГГ...");
 
     edges.clear();
     steps.clear();
 
-    initHierarchyHG(splittingNumber);
-    gatheringData(splittingNumber);
+    initHierarchyHG();
+    gatheringData();
 
     double countAllFragments = 0.0;
     for (int i=0; i<experimentNumber; i++)
@@ -283,17 +318,27 @@ void MainWindow::calculateData(int splittingNumber, QColor graphColor)
 
     for (int i=0; i<levelNumber; i++)
     {
-        for (int j=0; j<(int)pow(splittingNumber, i); j++)
+        int numberOfComputersOnLevel =  getNumberOfComputersOnLevel(i);
+        for (int j=0; j<numberOfComputersOnLevel; j++)
             nextIncreaseValue += increaseOfCountExternalEdges[i][j];
 
         edges.x.push_back(i+1);
         edges.y.push_back(100*nextIncreaseValue/countAllFragments);
     }
 
-    showData(splittingNumber, graphColor);
+    showData(graphColor);
 }
 
-void MainWindow::initHierarchyHG(int splittingNumber)
+int MainWindow::getNumberOfComputersOnLevel(int level)
+{
+    int res = 1;
+    for (int i=0; i< level; i++)
+        res*=splittingNumbers[i];
+
+    return res;
+}
+
+void MainWindow::initHierarchyHG()
 {
     minNumberSubHG = 0;
 
@@ -302,9 +347,9 @@ void MainWindow::initHierarchyHG(int splittingNumber)
 
     for (size_t i=0; i<hGraphHierarchy.size(); i++)
         for (size_t j=0; j<hGraphHierarchy[i].size(); j++)
-                for (size_t k=0; k<hGraphHierarchy[i][j].size(); k++)
-                            if (hGraphHierarchy[i][j][k]!=nullptr)
-                                delete hGraphHierarchy[i][j][k];
+            for (size_t k=0; k<hGraphHierarchy[i][j].size(); k++)
+                if (hGraphHierarchy[i][j][k]!=nullptr)
+                    delete hGraphHierarchy[i][j][k];
 
     hGraphHierarchy.clear();
 
@@ -312,14 +357,14 @@ void MainWindow::initHierarchyHG(int splittingNumber)
 
     for (int i=0; i<levelNumber; i++)
     {
-        int splittingNumberOnLevel = (int)pow(splittingNumber, i);
+        int numberOfComputersOnLevel = getNumberOfComputersOnLevel(i);
 
-        hGraphHierarchy[i].resize(splittingNumberOnLevel);
+        hGraphHierarchy[i].resize(numberOfComputersOnLevel);
 
-        for (int j=0; j<splittingNumberOnLevel; j++)
+        for (int j=0; j<numberOfComputersOnLevel; j++)
             hGraphHierarchy[i][j].resize(experimentNumber);
 
-        increaseOfCountExternalEdges[i].resize(splittingNumberOnLevel);
+        increaseOfCountExternalEdges[i].resize(numberOfComputersOnLevel);
     }
 
     ui->progressBar->setMinimum(0);
@@ -338,12 +383,12 @@ void MainWindow::initHierarchyHG(int splittingNumber)
     }
 }
 
-void MainWindow::gatheringData(int splittingNumber)
+void MainWindow::gatheringData()
 {
     ui->progressBar->setMinimum(0);
     int max = 0;
     for (int i=0; i<levelNumber; i++)
-        max += (int)pow(splittingNumber, i) * experimentNumber;
+        max += getNumberOfComputersOnLevel(i) * experimentNumber;
 
     ui->progressBar->setMaximum(max);
 
@@ -352,23 +397,23 @@ void MainWindow::gatheringData(int splittingNumber)
     int countOldExternalEdges = 0;
     for (int i=0; i<levelNumber; i++)
     {
-        int splittingNumberOnLevel = (int) pow(splittingNumber, i);
+        int numberOfComputersOnLevel = getNumberOfComputersOnLevel(i);
 
         ui->statusLabel->setText("Осталось уровней: "+ QString::number(levelNumber-i));
 
-        for (int j=0; j<splittingNumberOnLevel; j++)
+        for (int j=0; j<numberOfComputersOnLevel; j++)
         {
             increaseOfCountExternalEdges[i][j] = 0;
             for (int k=0; k<experimentNumber; k++)
             {
-                hGraphHierarchy[i][j][k]->gravitySplitHG(splittingNumber, minNumberSubHG);
+                hGraphHierarchy[i][j][k]->gravitySplitHG(splittingNumbers[i], minNumberSubHG);
 
                 increaseOfCountExternalEdges[i][j] += hGraphHierarchy[0][0][k]->getCountOfExternalEdges();
 
                 if (i < levelNumber-1) // Если не последняя итерация - создаю подграфы на основе разбиений
                 {
-                    for (int l=0; l<splittingNumber; l++)
-                        hGraphHierarchy[i+1][j*splittingNumber + l][k] = hGraphHierarchy[i][j][k]->createSubHG(minNumberSubHG + l);
+                    for (int l=0; l<splittingNumbers[i]; l++)
+                        hGraphHierarchy[i+1][j*splittingNumbers[i] + l][k] = hGraphHierarchy[i][j][k]->createSubHG(minNumberSubHG + l);
                 }
             }
 
@@ -379,14 +424,14 @@ void MainWindow::gatheringData(int splittingNumber)
             increaseOfCountExternalEdges[i][j] -= countOldExternalEdges;
             countOldExternalEdges += increaseOfCountExternalEdges[i][j];
 
-            minNumberSubHG += splittingNumber;
+            minNumberSubHG += splittingNumbers[i];
 
             ui->progressBar->setValue(ui->progressBar->value()+experimentNumber);
         }
     }
 }
 
-void MainWindow::showData (int splittingNumber, QColor graphColor)
+void MainWindow::showData (QColor graphColor)
 {
     double currentCostOfTracing = 0;
     double currentCountOfInternalEdges = 0;
@@ -404,7 +449,9 @@ void MainWindow::showData (int splittingNumber, QColor graphColor)
     for (int i=0; i<levelNumber; i++)
     {
         int maxCountExternalEdges = 0;
-        for (int j=0; j<(int)pow(splittingNumber, i); j++)
+        int numberOfComputersOnLevel = getNumberOfComputersOnLevel(i);
+
+        for (int j=0; j< numberOfComputersOnLevel; j++)
         {
             if (maxCountExternalEdges < increaseOfCountExternalEdges[i][j])
                 maxCountExternalEdges = increaseOfCountExternalEdges[i][j];
@@ -415,23 +462,25 @@ void MainWindow::showData (int splittingNumber, QColor graphColor)
         currentCostOfTracing += pow((double)maxCountExternalEdges, tracingComplexity);
 
         double nextValue = hGraphHierarchy[i][0][0]->getCountOfVertices() +
-                pow((double)hGraphHierarchy[i][0][0]->getCountOfVertices()/splittingNumber, deploymentComplexity) +
+                pow((double)hGraphHierarchy[i][0][0]->getCountOfVertices()/splittingNumbers[i], deploymentComplexity) +
                 currentCostOfTracing +
-                pow (currentCountOfInternalEdges / pow(splittingNumber, i+1),
+                pow (currentCountOfInternalEdges / getNumberOfComputersOnLevel(i+1),
                      tracingComplexity);
 
         steps.x.push_back(i+1);
         steps.y.push_back(nextValue);
     }
 
-    drawLine(ui->edgesChart, edges, QString::number(splittingNumber), graphColor, false);
-    drawLine(ui->stepsChart, steps, QString::number(splittingNumber), graphColor, false);
+    drawLine(ui->edgesChart, edges, QString::number(1), graphColor, false);
+    drawLine(ui->stepsChart, steps, QString::number(1), graphColor, false);
 
     std::stringstream str;
-    str << splittingNumber <<"-хотомическое разбиение" << "\n";
+    str << "Число разбиений: ";
+    for (size_t i = 0; i<splittingNumbers.size(); i++)
+        str << splittingNumbers[i] << ((i == splittingNumbers.size()-1) ? "\n" : " ");
+
     str << "Сложность размещения: " << deploymentComplexity << "\n";
     str << "Сложность трассировки: " << tracingComplexity << "\n";
-
 
     str  << std::left << std::setw(23) << "Подграфы" << std::setw(19) << "Шаги" << std::setw(20) << "Связи" << "\n";
     str << std::setw(15) << steps.x[0] << std::setw(15) << steps.y[0]  << "N/A\n";

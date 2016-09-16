@@ -6,6 +6,7 @@
 
 #include "hgvertex.h"
 #include "hgedge.h"
+#include "hgraphexception.h"
 
 using namespace std;
 

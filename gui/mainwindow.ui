@@ -228,7 +228,7 @@
             </size>
            </property>
            <property name="text">
-            <string>33000</string>
+            <string>2000</string>
            </property>
           </widget>
          </item>
@@ -390,7 +390,7 @@
          </sizepolicy>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="singleLevelPage">
          <layout class="QGridLayout" name="gridLayout_2">
@@ -502,9 +502,9 @@
            </widget>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout">
+           <layout class="QVBoxLayout" name="verticalLayout_2">
             <item>
-             <widget class="QLabel" name="minSplittingNumberLabel">
+             <widget class="QLabel" name="splittingNumber">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -512,67 +512,18 @@
                </sizepolicy>
               </property>
               <property name="text">
-               <string>Число разбиений от</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="minSplittingNumberText">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>5</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>20</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="text">
-               <string>2</string>
+               <string>Число разбиений на уровнях
+(через &quot;;&quot;) </string>
               </property>
               <property name="alignment">
                <set>Qt::AlignCenter</set>
               </property>
-              <property name="readOnly">
-               <bool>false</bool>
-              </property>
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="maxSplittingNumberLabel">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
+             <widget class="QLineEdit" name="splittingNumberText">
               <property name="text">
-               <string>до</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="maxSplittingNumberText">
-              <property name="maximumSize">
-               <size>
-                <width>20</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="text">
-               <string>2</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignCenter</set>
+               <string>3;3;3;3;3;3</string>
               </property>
              </widget>
             </item>
@@ -733,7 +684,7 @@
      <x>0</x>
      <y>0</y>
      <width>826</width>
-     <height>20</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="modeMenu">

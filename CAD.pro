@@ -23,7 +23,8 @@ SOURCES += main.cpp\
     chart/qcustomplot.cpp \
     chart/line.cpp \
     gui/datawindow.cpp \
-    hgraph/hgraphexception.cpp
+    hgraph/hgraphexception.cpp \
+    chart/linecolorpicker.cpp
 
 HEADERS  += gui/mainwindow.h \
     hgraph/hgedge.h \
@@ -32,7 +33,8 @@ HEADERS  += gui/mainwindow.h \
     chart/qcustomplot.h \
     chart/line.h \
    gui/datawindow.h \
-    hgraph/hgraphexception.h
+    hgraph/hgraphexception.h \
+    chart/linecolorpicker.h
 
 FORMS    += gui/mainwindow.ui \
     gui/datawindow.ui

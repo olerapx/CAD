@@ -9,6 +9,7 @@
 #include "chart/qcustomplot.h"
 #include "chart/line.h"
 #include "hgraph/hgraph.h"
+#include "chart/linecolorpicker.h"
 
 #include "datawindow.h"
 
@@ -48,7 +49,7 @@ public:
     vector<vector<vector<HGraph*>>> hGraphHierarchy;
     vector<vector<int>> increaseOfCountExternalEdges;
 
-    vector<int> splittingNumbers;
+    vector<vector<int>> splittingNumbers;
     int levelNumber;
 
 private slots:
@@ -76,13 +77,14 @@ private:
     void clearHGraphs();
 
     void parseSplittingNumbers();
+    void parseSplittingNumber(QString string, int i);
 
-    void calculateData (QColor graphColor);
+    void calculateData (QColor graphColor, size_t index);
 
-    int getNumberOfComputersOnLevel(int level);
-    void initHierarchyHG ();
-    void gatheringData ();
-    void showData (QColor graphColor);
+    int getNumberOfComputersOnLevel(size_t index, size_t level);
+    void initHierarchyHG (size_t index);
+    void gatheringData (size_t index);
+    void showData (QColor graphColor, size_t index);
 };
 
 #endif // MAINWINDOW_H

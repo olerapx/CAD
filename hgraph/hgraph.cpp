@@ -444,11 +444,10 @@ void HGraph::gravityEdge (int powerOfSubHG, int numberOfSubHG)
     // в подграф
     int countPlacesInSubHG = powerOfSubHG;
 
-    bool noCorrectEdges; // Сигнал для поднятия нижней границы
+    bool hasAvailableEdge = false; // Сигнал для поднятия нижней границы
     do
     {
-        noCorrectEdges = true;
-
+        hasAvailableEdge = false;
         bool hasAnyAvailableEdge = false;
 
         for (int i=0; i<countOfEdges; i++)
@@ -466,7 +465,7 @@ void HGraph::gravityEdge (int powerOfSubHG, int numberOfSubHG)
                     if (edges[i]->getVertex(j) != nullptr)
                         if (edges[i]->getVertex(j)->getNumberOfHG() == numberOfHG)
                         {
-                            noCorrectEdges = false;
+                            hasAvailableEdge = true;
                             // Включаю в подграф
                             // столько, сколько влезет :)
                             edges[i]->getVertex(j)->setNumberOfHG(numberOfSubHG);
@@ -483,24 +482,25 @@ void HGraph::gravityEdge (int powerOfSubHG, int numberOfSubHG)
                 }
             }
         }
-        if (noCorrectEdges)                   // Когда не нашел подходящих ребер
+        if (!hasAvailableEdge)                   // Когда не нашел подходящих ребер
             minSplitOfEdge++;                   // поднимаем нижнюю границу
 
         if (!hasAnyAvailableEdge)
         {
-           throw HGraphException ("Can't split hypergraph: too few vertices.\nNo one edge is available for splitting.");
+           throw HGraphException ("Can't split hypergraph: too few vertices.\nNo one edge is available for splitting."
+                                  " Increase the number of vertices or try again.");
         }
     }
     while (countPlacesInSubHG > 0);
 }
 
 
-HGraph* HGraph::createSubHG (int numberOfSubHG)
+HGraph *HGraph::createSubHG(int numberOfSubHG)
 {
     if (numberOfSubHG >= 0)
         return new HGraph(vertices, numberOfSubHG);
     else
-        return nullptr;
+        throw HGraphException ("Hypergraph number cannot be lesser than 0.");
 }
 
 void HGraph::resetSplitHG ()

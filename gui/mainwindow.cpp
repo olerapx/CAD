@@ -43,7 +43,7 @@ void MainWindow::drawLine (QCustomPlot* chart, Line line, QString name, QPen pen
     chart->xAxis->setRange(-1, line.getMaxX()*1.1);
     chart->yAxis->setRange(0, line.getMaxY()*1.1);
 
-    chart->graph(i)->setName(name);  
+    chart->graph(i)->setName(name);
 
     if (drawLabels)
         for (int j=0; j<line.y.size(); j++)
@@ -85,11 +85,7 @@ void MainWindow::on_createHGButton_clicked()
         ui->experimentNumberText->setText("1");
     }
 
-    for (size_t i=0; i<hGraph.size(); i++)
-            delete hGraph[i];
-
-     hGraph.clear();
-     hGraph.resize(experimentNumber);
+    clearHGraphs();
 
     for (int i=0; i<experimentNumber; i++)
     {
@@ -103,6 +99,20 @@ void MainWindow::on_createHGButton_clicked()
 
     ui->randomButton->setEnabled(true);
     ui->seriesButton->setEnabled(true);
+    ui->startButton->setEnabled(true);
+}
+
+void MainWindow::clearHGraphs()
+{
+    hGraph.clear();
+    hGraph.resize(experimentNumber);
+
+    for (size_t i=0; i<hGraphHierarchy.size(); i++)
+        for (size_t j=0; j<hGraphHierarchy[i].size(); j++)
+            for (size_t k=0; k<hGraphHierarchy[i][j].size(); k++)
+                delete hGraphHierarchy[i][j][k];
+
+    hGraphHierarchy.clear();
 }
 
 void MainWindow::on_randomButton_clicked()
@@ -250,13 +260,6 @@ void MainWindow::on_startButton_clicked()
 {
     reset();
 
-    experimentNumber = ui->experimentNumberText->text().toInt();
-    if (experimentNumber<1)
-    {
-        experimentNumber = 1;
-        ui->experimentNumberText->setText("1");
-    }
-
     tracingComplexity = ui->tracingComplexityText->text().toDouble();
     deploymentComplexity = ui->deploymentComplexityText->text().toDouble();
     levelNumber = ui->levelNumberText->text().toInt();
@@ -348,11 +351,10 @@ void MainWindow::initHierarchyHG()
     for (size_t i=0; i<hGraphHierarchy.size(); i++)
         for (size_t j=0; j<hGraphHierarchy[i].size(); j++)
             for (size_t k=0; k<hGraphHierarchy[i][j].size(); k++)
-                if (hGraphHierarchy[i][j][k]!=nullptr)
+                if (i || j)
                     delete hGraphHierarchy[i][j][k];
 
     hGraphHierarchy.clear();
-
     hGraphHierarchy.resize(levelNumber);
 
     for (int i=0; i<levelNumber; i++)
@@ -373,12 +375,9 @@ void MainWindow::initHierarchyHG()
 
     for (int i=0; i<experimentNumber; i++)
     {
-        hGraphHierarchy[0][0][i] = new HGraph;
-        hGraphHierarchy[0][0][i]->HGraphGenerator(ui->vertexNumberText->text().toInt(),
-                                             ui->minContactNumberText->text().toInt(),
-                                             ui->maxContactNumberText->text().toInt(),
-                                             ui->minEdgeNumberText->text().toInt(),
-                                             ui->maxEdgeNumberText->text().toInt());
+        hGraph[i]->resetSplitHG();
+        hGraphHierarchy[0][0][i] = hGraph[i];
+
         ui->progressBar->setValue(i);
     }
 }

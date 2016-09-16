@@ -67,12 +67,13 @@ private slots:
     void on_showButton_clicked();
 
 private:
-
     Ui::MainWindow *ui;
 
     void drawLine (QCustomPlot* chart, Line line, QString name, QPen pen, bool drawLabels = true);
     void drawText (QCustomPlot* chart, QString text, QPen pen, double x, double y);
     void reset();
+
+    void clearHGraphs();
 
     void parseSplittingNumbers();
 

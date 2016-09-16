@@ -382,6 +382,19 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="createHGButton">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Создать гиперграф</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QStackedWidget" name="splittingControlGroup">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
@@ -423,19 +436,6 @@
            <widget class="QLineEdit" name="subHGNumberText">
             <property name="text">
              <string>6</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QPushButton" name="createHGButton">
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Создать гиперграф</string>
             </property>
            </widget>
           </item>
@@ -531,6 +531,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="startButton">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>Старт</string>
             </property>

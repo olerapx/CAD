@@ -18,7 +18,7 @@ class HGEdge
 private:
     vector<HGVertex*> vertices;                   // Указатели на вершины
 
-    int maxCountOfVertex;                         // Максимальная мощность ребра
+    int maxVerticesNumber;                         // Максимальная мощность ребра
     bool full;                                    // Состояние заполненности
 
     //Поиск свободного места и изменение состояния заполненности, если такого нет.
@@ -31,16 +31,15 @@ public:
     //Исключение вершины из ребра.
     void disconnectVertex (HGVertex *oldVertex);
 
-    int getCountOfFreePlaces();
+    int getFreePlacesCount();
 
     //Попытка включения вершины в ребро.
     bool connectVertex (HGVertex *newVertex);
 
     bool isFull();
 
-    //Сеттер/геттер максимальной мощности.
-    bool setMaxCountOfVertex (int maxCV);
-    int getMaxCountOfVertex();
+    bool setMaxVerticesNumber (int maxCV);
+    int getMaxVerticesNumber();
 
     //Геттер вершины по номеру. Возвращает nullptr, если такой не существует.
     HGVertex* getVertex (int number);

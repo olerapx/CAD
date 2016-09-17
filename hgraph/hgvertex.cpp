@@ -2,17 +2,17 @@
 
 HGVertex::HGVertex ()
 {
-    numberV = 0;
-    maxDegree = 0;
+    ID = 0;
+    maxEdgesNumber = 0;
     full = true;
-    numberOfHG = -1;
+    graphID = -1;
 }
 
 HGVertex::HGVertex (int nV, int maxD)
 {
-    numberOfHG = -1;
-    numberV = nV;
-    maxDegree = maxD;
+    graphID = -1;
+    ID = nV;
+    maxEdgesNumber = maxD;
     full = false;
 
     edges.resize(maxD, nullptr);
@@ -26,7 +26,7 @@ int HGVertex::freePlaceForConnect ()
     {
         int countFree = 0;
         int numberFree = -1;
-        for (int i=0; i<maxDegree; i++)
+        for (int i=0; i<maxEdgesNumber; i++)
             if (edges[i] == nullptr)
             {
                 numberFree = i;
@@ -38,14 +38,14 @@ int HGVertex::freePlaceForConnect ()
     }                                           // занято, а вершина станет заполненной
 }
 
-int HGVertex::getNumberOfHG ()
+int HGVertex::getGraphID ()
 {
-    return numberOfHG;
+    return graphID;
 }
 
-void HGVertex::setNumberOfHG (int numberSubHG)
+void HGVertex::setGraphID (int id)
 {
-    numberOfHG = numberSubHG;
+    graphID = id;
 }
 
 bool HGVertex::connectEdge (HGEdge *newEdge)
@@ -67,7 +67,7 @@ bool HGVertex::connectEdge (HGEdge *newEdge)
 
 void HGVertex::disconnectEdge (HGEdge *oldEdge)
 {
-    for (int i=0; i<maxDegree; i++)
+    for (int i=0; i<maxEdgesNumber; i++)
         if (edges[i] == oldEdge)
         {
             edges[i] = nullptr;
@@ -82,32 +82,32 @@ bool HGVertex::isFull ()
     return full;
 }
 
-int HGVertex::getNumberV ()
+int HGVertex::getID ()
 {
-    return numberV;
+    return ID;
 }
 
-bool HGVertex::setNumberV (int nV)
+bool HGVertex::setID (int id)
 {
-    if (nV <= 0)
+    if (id <= 0)
         return false;
     else
     {
-        numberV = nV;
+        ID = id;
         return true;
     }
 }
 
-int HGVertex::getMaxDegree ()
+int HGVertex::getMaxEdgesNumber ()
 {
-    return maxDegree;
+    return maxEdgesNumber;
 }
 
-bool HGVertex::setMaxDegree (int mD)
+bool HGVertex::setMaxEdgesNumber (int mD)
 {
     if (mD > 0)
     {
-        maxDegree = mD;
+        maxEdgesNumber = mD;
         return true;
     }
     else
@@ -116,23 +116,23 @@ bool HGVertex::setMaxDegree (int mD)
 
 bool HGVertex::isInEdge (HGEdge *e)
 {
-    if (maxDegree == 0)
+    if (maxEdgesNumber == 0)
         return false;
 
-    for (int i=0; i<maxDegree; i++)
+    for (int i=0; i<maxEdgesNumber; i++)
         if (edges[i] == e)
             return true;
 
     return false;
 }
 
-int HGVertex::getCountOfFreePlaces ()
+int HGVertex::getFreePlacesCount ()
 {
     if (full)
         return 0;
 
     int countOfFreePlaces = 0;
-    for (int i=0; i<maxDegree; i++)
+    for (int i=0; i<maxEdgesNumber; i++)
         if (edges[i] == nullptr)
             countOfFreePlaces++;
 
@@ -141,7 +141,7 @@ int HGVertex::getCountOfFreePlaces ()
 
 HGEdge * HGVertex::getEdge (int numberOfEdge)
 {
-    if (maxDegree <= numberOfEdge)
+    if (maxEdgesNumber <= numberOfEdge)
         return nullptr;
     return edges[numberOfEdge];
 }

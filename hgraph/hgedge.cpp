@@ -2,25 +2,25 @@
 
 HGEdge::HGEdge()
 {
-    maxCountOfVertex = 0;
+    maxVerticesNumber = 0;
     full = true;
 }
 
 HGEdge::HGEdge (int maxVertexCount)
 {
-    maxCountOfVertex = maxVertexCount;
+    maxVerticesNumber = maxVertexCount;
     full = false;
 
     vertices.resize(maxVertexCount);
 }
 
-int HGEdge::getCountOfFreePlaces()
+int HGEdge::getFreePlacesCount()
 {
     if (full)
         return 0;
     int countOfFreePlaces = 0;
 
-    for (int i=0; i<maxCountOfVertex; i++)
+    for (int i=0; i<maxVerticesNumber; i++)
         if (vertices[i] == nullptr)
             countOfFreePlaces++;
     return countOfFreePlaces;
@@ -34,7 +34,7 @@ int HGEdge::freePlaceForConnect ()
     {
         int countFree = 0;
         int numberFree = -1;
-        for (int i=0; i<maxCountOfVertex; i++)
+        for (int i=0; i<maxVerticesNumber; i++)
             if (vertices[i] == nullptr)
             {
                 numberFree = i;
@@ -48,7 +48,7 @@ int HGEdge::freePlaceForConnect ()
 
 void HGEdge::disconnectVertex (HGVertex *oldVertex)
 {
-    for (int i=0; i<maxCountOfVertex; i++)
+    for (int i=0; i<maxVerticesNumber; i++)
         if (vertices[i] == oldVertex)
         {
             vertices[i] = nullptr;
@@ -80,34 +80,34 @@ bool HGEdge::isFull ()
     return full;
 }
 
-bool HGEdge::setMaxCountOfVertex (int maxCV)
+bool HGEdge::setMaxVerticesNumber (int maxCV)
 {
     if (maxCV >= 0)
     {
-        maxCountOfVertex = maxCV;
+        maxVerticesNumber = maxCV;
         return true;
     }
     else
         return false;
 }
 
-int HGEdge::getMaxCountOfVertex ()
+int HGEdge::getMaxVerticesNumber ()
 {
-    return maxCountOfVertex;
+    return maxVerticesNumber;
 }
 
 HGVertex* HGEdge::getVertex (int number)
 {
-    if (maxCountOfVertex <= number)
+    if (maxVerticesNumber <= number)
         return nullptr;
     return vertices[number];
 }
 
 bool HGEdge::isInEdge (HGVertex *v)
 {
-    if (maxCountOfVertex == 0)
+    if (maxVerticesNumber == 0)
         return false;
-    for (int i=0; i<maxCountOfVertex; i++)
+    for (int i=0; i<maxVerticesNumber; i++)
         if (vertices[i] == v)
             return true;
     return false;
@@ -116,7 +116,7 @@ bool HGEdge::isInEdge (HGVertex *v)
 int HGEdge::getCountOfCommonVertices (HGEdge *otherEdge)
 {
     int countOfCommonVertices = 0;
-    for (int i=0; i<getMaxCountOfVertex(); i++)
+    for (int i=0; i<getMaxVerticesNumber(); i++)
         if (vertices[i] != nullptr)
             if (otherEdge->isInEdge(vertices[i]))
                 countOfCommonVertices++;
@@ -126,13 +126,13 @@ int HGEdge::getCountOfCommonVertices (HGEdge *otherEdge)
 int HGEdge::getCountSubHG ()
 {
     int countSubHG = 1;
-    for (int i=0; i<maxCountOfVertex; i++)
-        if (vertices[i] != nullptr && vertices[i]->getNumberOfHG() != -1)
+    for (int i=0; i<maxVerticesNumber; i++)
+        if (vertices[i] != nullptr && vertices[i]->getGraphID() != -1)
             for (int j=0; j<i; j++)
             {
                 if (vertices[j]!= nullptr)
-                    if (vertices[j]->getNumberOfHG() ==
-                            vertices[i]->getNumberOfHG())
+                    if (vertices[j]->getGraphID() ==
+                            vertices[i]->getGraphID())
                         break;
                 if (j == i-1)
                     countSubHG++;

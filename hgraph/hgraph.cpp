@@ -2,92 +2,99 @@
 
 HGraph::HGraph ()
 {
-    countOfVertices = 0;
-    countOfEdges = 0;
-    splitResultCount = 0;
-    mainGraph = true;
-    numberOfHG = -1;
+    verticesNumber = 0;
+    edgesNumber = 0;
+    subGraphsNumber = 0;
+    isRoot = true;
+    ID = -1;
 }
 
-HGraph::HGraph (vector<HGVertex*> &masOfVertex, int numberSubG)
+HGraph::HGraph (vector<HGVertex*> &graphVertices, int graphID)
 {
-    splitResultCount = 0;
-    mainGraph = false;
-    numberOfHG = numberSubG;
+    subGraphsNumber = 0;
+    isRoot = false;
+    ID = graphID;
 
-    int countVerticesOfSubG = 0;
-    int countEdgesOfSubG = 0;
-    for (size_t i=0; i<masOfVertex.size(); i++)           // Считаю число вершин, входящих
+    int subGraphVerticesCount = 0;
+    int subGraphEdgesCount = 0;
+
+    for (size_t i=0; i<graphVertices.size(); i++)
+    {
+        // Считаю число вершин, входящих
         // в подграф, и максимальное
         // число инцидентных им ребер
-        if (masOfVertex[i]->getNumberOfHG()==numberSubG)
+        if (graphVertices[i]->getGraphID() == graphID)
         {
-            countVerticesOfSubG++;
-            countEdgesOfSubG += masOfVertex[i]->getMaxDegree()
-                    - masOfVertex[i]->getCountOfFreePlaces();
+            subGraphVerticesCount++;
+            subGraphEdgesCount += graphVertices[i]->getMaxEdgesNumber() - graphVertices[i]->getFreePlacesCount();
         }
+    }
 
-    vertices.resize(countVerticesOfSubG);
-
-    countOfVertices = countVerticesOfSubG;
+    vertices.resize(subGraphVerticesCount);
+    verticesNumber = subGraphVerticesCount;
 
     // Промежуточный массив под ребра
     // для устранения дублей
     vector<HGEdge*> newEdges;
-    newEdges.resize(countEdgesOfSubG);
-    countVerticesOfSubG = 0;
-    countEdgesOfSubG = 0;
+    newEdges.resize(subGraphEdgesCount);
 
-    for (size_t i=0; i<masOfVertex.size(); i++)
-        if (masOfVertex[i]->getNumberOfHG()==numberSubG)
+    fillSubGraph(graphVertices, graphID, newEdges);
+}
+
+void HGraph::fillSubGraph (vector <HGVertex*> graphVertices, int graphID, vector <HGEdge*> newEdges)
+{
+    int subGraphVerticesCount = 0;
+    int subGraphEdgesCount = 0;
+
+    for (size_t i=0; i<graphVertices.size(); i++)
+    {
+        if (graphVertices[i]->getGraphID() == graphID)
         {
-            // Делаю собственные ссылки на
-            // вершины у подграфа
-            vertices[countVerticesOfSubG] = masOfVertex[i];
-            countVerticesOfSubG++;
-            for (int j=0; j<masOfVertex[i]->getMaxDegree(); j++)
-                if (masOfVertex[i]->getEdge(j)!= nullptr)
+            vertices[subGraphVerticesCount] = graphVertices[i];
+            subGraphVerticesCount++;
+
+            for (int j=0; j<graphVertices[i]->getMaxEdgesNumber(); j++)
+            {
+                if (graphVertices[i]->getEdge(j)!= nullptr)
                 {
                     bool newEdge = true;
                     // Если такое ребро уже есть,
                     // то включать уже не надо
-                    for (int k=0; k<countEdgesOfSubG; k++)
-                        if (newEdges[k] == masOfVertex[i]->getEdge(j))
+                    for (int k=0; k<subGraphEdgesCount; k++)
+                        if (newEdges[k] == graphVertices[i]->getEdge(j))
                         {
                             newEdge = false;
                             break;
                         }
                     if (newEdge)
                     {
-                        newEdges[countEdgesOfSubG] = masOfVertex[i]->getEdge(j);
-                        countEdgesOfSubG++;
+                        newEdges[subGraphEdgesCount] = graphVertices[i]->getEdge(j);
+                        subGraphEdgesCount++;
                     }
                 }
+            }
         }
-    // Окончательное формирование
-    // массива ссылок на ребра
-    // подграфа
-    countOfEdges = countEdgesOfSubG-1;
+    }
+    edgesNumber = subGraphEdgesCount-1;
 
-    if (countOfEdges <0)
+    if (edgesNumber < 0)
     {
-            countOfEdges = 0; /// dangerous
-            countOfVertices = 0;
+            edgesNumber = 0; /// dangerous
+            verticesNumber = 0;
             vertices.clear();
     }
 
-    edges.resize(countOfEdges);
+    edges.resize(edgesNumber);
 
-    for (int i=0; i<(countEdgesOfSubG-1); i++)
+    for (int i=0; i<(subGraphEdgesCount-1); i++)
     {
         edges[i] = newEdges[i];
-        newEdges[i] = nullptr;
     }
 }
 
 HGraph::~HGraph()
 {
-    if (mainGraph)
+    if (isRoot)
     {
         for (size_t i=0;i<edges.size();i++)
             delete edges[i];
@@ -97,34 +104,37 @@ HGraph::~HGraph()
     }
 }
 
-void HGraph::createVertices (int countVertices, int minDegree, int maxDegree)
+void HGraph::createVertices (int verticesNumber, int minEdgesNumber, int maxEdgesNumber)
 {
-    if (mainGraph)                              // Создание вершин и ребер вызывается
+    if (isRoot)                              // Создание вершин и ребер вызывается
     {                                           // только для корневого графа
         for (size_t i=0;i<vertices.size();i++)
             delete vertices[i];
 
         vertices.clear();
-        vertices.resize(countVertices);
-        setCountOfVertices (countVertices);
-        for (int i=0; i<countVertices; i++)
-            vertices[i] = new HGVertex (i, (minDegree+rand()%(maxDegree-minDegree+1)));
+        vertices.resize(verticesNumber);
+        setVerticesNumber (verticesNumber);
+
+        for (int i=0; i<verticesNumber; i++)
+            vertices[i] = new HGVertex (i, (minEdgesNumber  +  rand() % (maxEdgesNumber - minEdgesNumber + 1)));
     }
 }
 
 int HGraph::getSummaryDegree ()
 {
     int summaryDegree = 0;
-    int cOfVertices = getCountOfVertices();
-    for (int i=0; i<cOfVertices; i++)
-        summaryDegree += vertices[i]->getMaxDegree();
+    int count = getVerticesNumber();
+
+    for (int i=0; i<count; i++)
+        summaryDegree += vertices[i]->getMaxEdgesNumber();
+
     return summaryDegree;
 }
 
 int HGraph::getCountOfFreeVertices ()
 {
     int countOfFreeVertices = 0;
-    int cOfVertices = getCountOfVertices();
+    int cOfVertices = getVerticesNumber();
 
     for (int i=0; i<cOfVertices; i++)
         if (!vertices[i]->isFull())
@@ -135,25 +145,27 @@ int HGraph::getCountOfFreeVertices ()
 int HGraph::getGlobalMaxDegree ()
 {
     int globalMaxDegree = 0;
-    int cOfVertices = getCountOfVertices();
+    int cOfVertices = getVerticesNumber();
+
     for (int i=0; i<cOfVertices; i++)
-        if (globalMaxDegree < vertices[i]->getMaxDegree())
-            globalMaxDegree = vertices[i]->getMaxDegree();
+        if (globalMaxDegree < vertices[i]->getMaxEdgesNumber())
+            globalMaxDegree = vertices[i]->getMaxEdgesNumber();
+
     return globalMaxDegree;
 }
 
-void HGraph::createEdges (int minCountOfVertices, int maxCountOfVertices)
+void HGraph::createEdges (int minVerticesNumber, int maxVerticesNumber)
 {
     // Создание вершин и ребер вызывается
     // только для корневого графа
-    if (mainGraph)
+    if (isRoot)
     {
         int summaryDegree = getSummaryDegree();   // Общее число возможных подключений
 
         // Порог, по прохождении которого
         // включается логика формирования
         // остаточных цепей
-        int logicalThreshold = maxCountOfVertices*getGlobalMaxDegree();
+        int logicalThreshold = maxVerticesNumber*getGlobalMaxDegree();
 
 
         // Максимальное число цепей - это
@@ -163,7 +175,7 @@ void HGraph::createEdges (int minCountOfVertices, int maxCountOfVertices)
             delete edges[i];
 
         edges.clear();
-        edges.resize(countOfVertices*logicalThreshold/(maxCountOfVertices*minCountOfVertices));
+        edges.resize(verticesNumber * logicalThreshold/(maxVerticesNumber*minVerticesNumber));
 
         // to pick random vertice correctly
         vector<HGVertex*> temp;
@@ -177,7 +189,7 @@ void HGraph::createEdges (int minCountOfVertices, int maxCountOfVertices)
         {
             if (logicalThreshold < summaryDegree)
             {
-                edges[i] = new HGEdge (minCountOfVertices + rand()%(maxCountOfVertices+1));
+                edges[i] = new HGEdge (minVerticesNumber + rand()%(maxVerticesNumber+1));
 
                 do
                 {
@@ -204,7 +216,7 @@ void HGraph::createEdges (int minCountOfVertices, int maxCountOfVertices)
                 // Логика обработки последних подключений
                 // Составляю матрицу-проекцию будущих ребер
                 int countOfFreeVertices = getCountOfFreeVertices();
-                int globalMaxDegree = logicalThreshold/maxCountOfVertices;
+                int globalMaxDegree = logicalThreshold/maxVerticesNumber;
 
                 vector<vector<int>> connectionMatrix (countOfFreeVertices);
 
@@ -219,18 +231,18 @@ void HGraph::createEdges (int minCountOfVertices, int maxCountOfVertices)
 
 
                 int elementOfMatrixNumber = 0;
-                int cOfVertices = getCountOfVertices();
+                int cOfVertices = getVerticesNumber();
 
 
                 for (int k=0; k<cOfVertices; k++)
                 {
                     if (!vertices[k]->isFull())
                     {
-                        int freePlaces = vertices[k]->getCountOfFreePlaces();
+                        int freePlaces = vertices[k]->getFreePlacesCount();
                         for(int j=0; j<freePlaces; j++)
                             connectionMatrix[elementOfMatrixNumber][j] = 1;
                         connectionMatrix[elementOfMatrixNumber][globalMaxDegree] =
-                                vertices[k]->getNumberV();
+                                vertices[k]->getID();
                         elementOfMatrixNumber++;
                     }
                 }                                     // Матрица готова
@@ -245,17 +257,17 @@ void HGraph::createEdges (int minCountOfVertices, int maxCountOfVertices)
 
                 for (int k=0; k<globalMaxDegree; k++)
                 {
-                    if (masOfPowerEdges[k] < minCountOfVertices)
+                    if (masOfPowerEdges[k] < minVerticesNumber)
                     {
                         for (int j=0; j<globalMaxDegree; j++)
                         {
                             bool endOfMove = false;
-                            if (masOfPowerEdges[j] > minCountOfVertices)
+                            if (masOfPowerEdges[j] > minVerticesNumber)
                             {
-                                int countMovedVertices = masOfPowerEdges[j] - minCountOfVertices;
-                                if (countMovedVertices > (minCountOfVertices - masOfPowerEdges[k]))
+                                int countMovedVertices = masOfPowerEdges[j] - minVerticesNumber;
+                                if (countMovedVertices > (minVerticesNumber - masOfPowerEdges[k]))
                                 {
-                                    countMovedVertices = minCountOfVertices - masOfPowerEdges[k];
+                                    countMovedVertices = minVerticesNumber - masOfPowerEdges[k];
                                     endOfMove = true;
                                 }
                                 int numberMovedVertex = 0;
@@ -291,7 +303,7 @@ void HGraph::createEdges (int minCountOfVertices, int maxCountOfVertices)
                     i++;
 
                 }
-                setCountOfEdges (i-1);
+                setEdgesNumber (i-1);
 
                 connectionMatrix.clear();
                 masOfPowerEdges.clear();
@@ -305,7 +317,7 @@ int HGraph::getCountOfExternalEdges ()
 {
     int countOfExternalEdges = 0;
 
-    for (int i=0; i<countOfEdges; i++)
+    for (int i=0; i<edgesNumber; i++)
         countOfExternalEdges += edges[i]->getCountSubHG() -1;
     countOfExternalEdges = countOfExternalEdges/2;
 
@@ -338,46 +350,46 @@ void HGraph::incidenceUninstall (HGVertex * vertex, HGEdge *edge)
     edge->disconnectVertex(vertex);
 }
 
-int HGraph::getNumberOfHG ()
+int HGraph::getID ()
 {
-    return numberOfHG;
+    return ID;
 }
 
-int HGraph::getCountOfVertices ()
+int HGraph::getVerticesNumber ()
 {
-    return countOfVertices;
+    return verticesNumber;
 }
 
-bool HGraph::setCountOfVertices (int cV)
+bool HGraph::setVerticesNumber (int number)
 {
-    if (cV > 0)
+    if (number > 0)
     {
-        countOfVertices = cV;
+        verticesNumber = number;
         return true;
     }
     else
         return false;
 }
 
-int HGraph::getCountOfEdges ()
+int HGraph::getEdgesNumber ()
 {
-    return countOfEdges;
+    return edgesNumber;
 }
 
 int HGraph::getCountOfFragments ()
 {
     int countOfFragments = 0;
-    for (int i=0; i<getCountOfEdges(); i++)
-        countOfFragments += edges[i]->getMaxCountOfVertex()-1;
+    for (int i=0; i<getEdgesNumber(); i++)
+        countOfFragments += edges[i]->getMaxVerticesNumber()-1;
 
     return countOfFragments;
 }
 
-bool HGraph::setCountOfEdges (int cE)
+bool HGraph::setEdgesNumber (int number)
 {
-    if (cE > 0)
+    if (number > 0)
     {
-        countOfEdges = cE;
+        edgesNumber = number;
         return true;
     }
     else
@@ -391,58 +403,58 @@ void HGraph::HGraphGenerator (int CountOfVertices, int minDegree, int maxDegree,
     createEdges(minPowerOfEdge, maxPowerOfEdge);
 }
 
-void HGraph::randomSplitHG (int countSubHG, int startNumberSubG)
+void HGraph::randomSplit (int subGraphsNumber, int startID)
 {
-    splitResultCount = countSubHG;
+    this->subGraphsNumber = subGraphsNumber;
     // Мощности подграфов
-    vector<int> masPowerOfSubHG (countSubHG);
+    vector<int> masPowerOfSubHG (subGraphsNumber);
 
-    for (int i=0; i<countSubHG; i++)
-        masPowerOfSubHG[i] = countOfVertices/countSubHG;
+    for (int i=0; i<subGraphsNumber; i++)
+        masPowerOfSubHG[i] = verticesNumber/subGraphsNumber;
 
-    for (int i=0; i<countOfVertices%countSubHG; i++)
+    for (int i=0; i<verticesNumber%subGraphsNumber; i++)
         masPowerOfSubHG[i]++;
 
-    for (int i=0; i<countSubHG; i++)
+    for (int i=0; i<subGraphsNumber; i++)
         for (int j=0; j<masPowerOfSubHG[i]; j++)
         {
             int numberNextVertex;
             do
             {
-                numberNextVertex = rand()%countOfVertices;
+                numberNextVertex = rand()%verticesNumber;
             }
-            while(vertices[numberNextVertex]->getNumberOfHG() != numberOfHG);
-            vertices[numberNextVertex]->setNumberOfHG(i+startNumberSubG);
+            while(vertices[numberNextVertex]->getGraphID() != ID);
+            vertices[numberNextVertex]->setGraphID(i+startID);
         }
 
     masPowerOfSubHG.clear();
 }
 
-void HGraph::gravitySplitHG (int countSubHG, int startNumberSubG)
+void HGraph::gravitySplit (int subGraphsNumber, int startID)
 {
-    splitResultCount = countSubHG;
+    this->subGraphsNumber = subGraphsNumber;
     // Мощности подграфов
-    vector<int> masPowerOfSubHG (countSubHG);
+    vector<int> subGraphVerticesNumbers (subGraphsNumber);
 
-    for (int i=0; i<countSubHG; i++)
-        masPowerOfSubHG[i] = countOfVertices/countSubHG;
+    for (int i=0; i<subGraphsNumber; i++)
+        subGraphVerticesNumbers[i] = verticesNumber/subGraphsNumber;
 
-    for (int i=0; i<countOfVertices % countSubHG; i++)
-        masPowerOfSubHG[i]++;
+    for (int i=0; i<verticesNumber % subGraphsNumber; i++)
+        subGraphVerticesNumbers[i]++;
 
-    for (int i=0; i<countSubHG; i++)
-        gravityEdge(masPowerOfSubHG[i], i+startNumberSubG);
+    for (int i=0; i<subGraphsNumber; i++)
+        gravityEdge(subGraphVerticesNumbers[i], i+startID);
 
-    masPowerOfSubHG.clear();
+    subGraphVerticesNumbers.clear();
 }
 
-void HGraph::gravityEdge (int powerOfSubHG, int numberOfSubHG)
+void HGraph::gravityEdge (int subGraphVerticesNumber, int subGraphID)
 {
     int minSplitOfEdge = 1; // Нижняя граница оценки числа подграфов, в которые входит ребро
 
     // Число вершин для включения
     // в подграф
-    int countPlacesInSubHG = powerOfSubHG;
+    int countPlacesInSubHG = subGraphVerticesNumber;
 
     bool hasAvailableEdge = false; // Сигнал для поднятия нижней границы
     do
@@ -450,25 +462,25 @@ void HGraph::gravityEdge (int powerOfSubHG, int numberOfSubHG)
         hasAvailableEdge = false;
         bool hasAnyAvailableEdge = false;
 
-        for (int i=0; i<countOfEdges; i++)
+        for (int i=0; i<edgesNumber; i++)
         {
-            for (int j=0; j<edges[i]->getMaxCountOfVertex(); j++)
+            for (int j=0; j<edges[i]->getMaxVerticesNumber(); j++)
                 if (edges[i]->getVertex(j) != nullptr)
-                    if (edges[i]->getVertex(j)->getNumberOfHG() == numberOfHG)
+                    if (edges[i]->getVertex(j)->getGraphID() == ID)
                         hasAnyAvailableEdge = true;
 
             // Нашел подходящее ребро
             if (edges[i]->getCountSubHG() <= minSplitOfEdge)
             {
                 // Ищу свободные вершины
-                for (int j=0; j<edges[i]->getMaxCountOfVertex(); j++)
+                for (int j=0; j<edges[i]->getMaxVerticesNumber(); j++)
                     if (edges[i]->getVertex(j) != nullptr)
-                        if (edges[i]->getVertex(j)->getNumberOfHG() == numberOfHG)
+                        if (edges[i]->getVertex(j)->getGraphID() == ID)
                         {
                             hasAvailableEdge = true;
                             // Включаю в подграф
                             // столько, сколько влезет :)
-                            edges[i]->getVertex(j)->setNumberOfHG(numberOfSubHG);
+                            edges[i]->getVertex(j)->setGraphID(subGraphID);
                             countPlacesInSubHG--;
                             if (countPlacesInSubHG == 0)
                             {
@@ -495,16 +507,16 @@ void HGraph::gravityEdge (int powerOfSubHG, int numberOfSubHG)
 }
 
 
-HGraph *HGraph::createSubHG(int numberOfSubHG)
+HGraph *HGraph::createSubHG(int subGraphID)
 {
-    if (numberOfSubHG >= 0)
-        return new HGraph(vertices, numberOfSubHG);
+    if (subGraphID >= 0)
+        return new HGraph(vertices, subGraphID);
     else
-        throw HGraphException ("Hypergraph number cannot be lesser than 0.");
+        throw HGraphException ("Hypergraph ID cannot be lesser than 0.");
 }
 
-void HGraph::resetSplitHG ()
+void HGraph::resetSplitting ()
 {
-    for (int i=0; i<countOfVertices; i++)
-        vertices[i]->setNumberOfHG(-1);
+    for (int i=0; i<verticesNumber; i++)
+        vertices[i]->setGraphID(-1);
 }

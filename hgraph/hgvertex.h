@@ -18,9 +18,9 @@ class HGVertex
 private:
     vector <HGEdge*> edges;                               // Инцидентные гиперребра
 
-    int numberV;                                  // Собственный номер вершины
-    int maxDegree;                                // Максимально возможное число инцидентных гиперребер
-    int numberOfHG;                               // Номер подграфа, -1, если не принадлежит ни к одному
+    int ID;                                  // Собственный номер вершины
+    int maxEdgesNumber;                                // Максимально возможное число инцидентных гиперребер
+    int graphID;                               // Номер подграфа, -1, если не принадлежит ни к одному
     bool full;                                    // Состояние заполненности
 
     // Поиск свободного места и изменение состояния заполненности, если такого нет
@@ -30,11 +30,8 @@ public:
     HGVertex ();
     HGVertex (int nV, int maxD);
 
-    // Геттер номера подграфа
-    int getNumberOfHG ();
-
-    // Сеттер номера подграфа
-    void setNumberOfHG (int numberSubHG);
+    int getGraphID ();
+    void setGraphID (int id);
 
     // Попытка включения вершины в ребро
     bool connectEdge (HGEdge *newEdge);
@@ -45,28 +42,22 @@ public:
     // Геттер заполненности
     bool isFull ();
 
-    // Геттер собственного номера вершины
-    int getNumberV ();
+    int getID ();
+    bool setID (int id);
 
-    // Сеттер собственного номера вершины
-    bool setNumberV (int nV);
-
-    // Геттер максимальной ЛС
-    int getMaxDegree ();
-
-    // Сеттер максимальной ЛС
-    bool setMaxDegree (int mD);
+    int getMaxEdgesNumber ();
+    bool setMaxEdgesNumber (int mD);
 
     // Проверка принадлежности
     bool isInEdge (HGEdge *e);
     // вершины ребру
 
     // Геттер числа свободных мест
-    int getCountOfFreePlaces ();
+    int getFreePlacesCount ();
     // для подключений
 
     // Геттер инцидентного ребра по номеру
-    HGEdge * getEdge (int numberOfEdge);
+    HGEdge* getEdge (int numberOfEdge);
 };
 
 #endif // HGVERTEX_H

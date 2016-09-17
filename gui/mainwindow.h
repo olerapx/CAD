@@ -70,11 +70,17 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
+    void initMenu();
+    void initCharts();
+
     void drawLine (QCustomPlot* chart, Line line, QString name, QPen pen, bool drawLabels = true);
     void drawText (QCustomPlot* chart, QString text, QPen pen, double x, double y);
-    void reset();
+    void resetCharts();
 
-    void clearHGraphs();
+    void clearGraphs();
+
+    void printRandomData();
+    void printSeriesData();
 
     void parseSplittingNumbers();
     void parseSplittingNumber(QString string, int i);
@@ -82,9 +88,11 @@ private:
     void calculateData (QColor graphColor, size_t index);
 
     int getNumberOfComputersOnLevel(size_t index, size_t level);
-    void initHierarchyHG (size_t index);
+    void initGraphHierarchy (size_t index);
+    void copyGraphToHierarchy ();
     void gatheringData (size_t index);
     void showData (QColor graphColor, size_t index);
+    void printHierarchicalData(QColor graphColor, size_t index);
 };
 
 #endif // MAINWINDOW_H

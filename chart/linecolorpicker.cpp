@@ -12,7 +12,10 @@ QColor LineColorPicker::getColor()
     if (counter < colors.size())
         return colors[counter ++];
 
-    return getRandomColor();
+    QColor color = getRandomColor();
+    colors.push_back(color);
+
+    return color;
 }
 
 QColor LineColorPicker::getRandomColor()

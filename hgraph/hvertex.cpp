@@ -1,6 +1,6 @@
-#include "hgvertex.h"
+#include "hvertex.h"
 
-HGVertex::HGVertex ()
+HVertex::HVertex ()
 {
     ID = 0;
     maxEdgesNumber = 0;
@@ -8,25 +8,25 @@ HGVertex::HGVertex ()
     graphID = -1;
 }
 
-HGVertex::HGVertex (int nV, int maxD)
+HVertex::HVertex (int id, int maxEdgesNumber)
 {
     graphID = -1;
-    ID = nV;
-    maxEdgesNumber = maxD;
+    ID = id;
+    this->maxEdgesNumber = maxEdgesNumber;
     full = false;
 
-    edges.resize(maxD, nullptr);
+    edges.resize(maxEdgesNumber, nullptr);
 }
 
-int HGVertex::freePlaceForConnect ()
+size_t HVertex::getFreePlaceIndex()
 {
     if (full)
         return -1;
     else
     {
-        int countFree = 0;
-        int numberFree = -1;
-        for (int i=0; i<maxEdgesNumber; i++)
+        size_t countFree = 0;
+        size_t numberFree = -1;
+        for (size_t i=0; i<maxEdgesNumber; i++)
             if (edges[i] == nullptr)
             {
                 numberFree = i;
@@ -38,23 +38,23 @@ int HGVertex::freePlaceForConnect ()
     }                                           // занято, а вершина станет заполненной
 }
 
-int HGVertex::getGraphID ()
+int HVertex::getGraphID ()
 {
     return graphID;
 }
 
-void HGVertex::setGraphID (int id)
+void HVertex::setGraphID (int id)
 {
     graphID = id;
 }
 
-bool HGVertex::connectEdge (HGEdge *newEdge)
+bool HVertex::tryConnectEdge (HEdge *newEdge)
 {
     if (full)
         return false;
     else
     {
-        int numberFree = freePlaceForConnect();
+        int numberFree = getFreePlaceIndex();
         if (numberFree > -1)
         {
             edges[numberFree] = newEdge;
@@ -65,7 +65,7 @@ bool HGVertex::connectEdge (HGEdge *newEdge)
     }
 }
 
-void HGVertex::disconnectEdge (HGEdge *oldEdge)
+void HVertex::disconnectEdge (HEdge *oldEdge)
 {
     for (int i=0; i<maxEdgesNumber; i++)
         if (edges[i] == oldEdge)
@@ -77,17 +77,17 @@ void HGVertex::disconnectEdge (HGEdge *oldEdge)
         }
 }
 
-bool HGVertex::isFull ()
+bool HVertex::isFull ()
 {
     return full;
 }
 
-int HGVertex::getID ()
+int HVertex::getID ()
 {
     return ID;
 }
 
-bool HGVertex::setID (int id)
+bool HVertex::setID (int id)
 {
     if (id <= 0)
         return false;
@@ -98,35 +98,35 @@ bool HGVertex::setID (int id)
     }
 }
 
-int HGVertex::getMaxEdgesNumber ()
+int HVertex::getMaxEdgesNumber ()
 {
     return maxEdgesNumber;
 }
 
-bool HGVertex::setMaxEdgesNumber (int mD)
+bool HVertex::setMaxEdgesNumber (int number)
 {
-    if (mD > 0)
+    if (number > 0)
     {
-        maxEdgesNumber = mD;
+        maxEdgesNumber = number;
         return true;
     }
     else
         return false;
 }
 
-bool HGVertex::isInEdge (HGEdge *e)
+bool HVertex::isInEdge (HEdge *edge)
 {
     if (maxEdgesNumber == 0)
         return false;
 
     for (int i=0; i<maxEdgesNumber; i++)
-        if (edges[i] == e)
+        if (edges[i] == edge)
             return true;
 
     return false;
 }
 
-int HGVertex::getFreePlacesCount ()
+int HVertex::getFreePlacesNumber ()
 {
     if (full)
         return 0;
@@ -139,9 +139,9 @@ int HGVertex::getFreePlacesCount ()
     return countOfFreePlaces;
 }
 
-HGEdge * HGVertex::getEdge (int numberOfEdge)
+HEdge * HVertex::getIncidentEdgeByIndex (int index)
 {
-    if (maxEdgesNumber <= numberOfEdge)
+    if (maxEdgesNumber <= index)
         return nullptr;
-    return edges[numberOfEdge];
+    return edges[index];
 }

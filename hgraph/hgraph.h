@@ -4,43 +4,40 @@
 #include <cmath>
 #include <cstdlib>
 
-#include "hgvertex.h"
-#include "hgedge.h"
+#include "hvertex.h"
+#include "hedge.h"
 #include "hgraphexception.h"
 
 using namespace std;
 
 /**
  * @brief The HGraph class
- * Гиперграф.
+ * A hypergraph.
  */
 class HGraph
 {
 private:
-    vector<HGVertex*> vertices;                   // Вершины
-    vector<HGEdge*>   edges;                      // Гиперребра
+    vector<HVertex*> vertices;
+    vector<HEdge*> edges;
 
-    int ID;                               // Номер подграфа (у главного -1)
-    int verticesNumber;                          // Число вершин
-    int edgesNumber;                             // Число ребер
-    int subGraphsNumber;                         // Число подграфов
-    bool isRoot;                               // Является ли корневым графом
+    int ID; // Номер подграфа (у главного -1)
 
-    void fillSubGraph (vector <HGVertex*> graphVertices, int graphID, vector<HGEdge *> newEdges);
+    int verticesNumber;
+    int edgesNumber;
+    int subGraphsNumber;
 
-    //Алгоритм "затягивания" ребер в один подграф.
-    void gravityEdge (int subGraphVerticesNumber, int subGraphID);
+    bool isRoot;
+
+    void fillSubGraph (vector <HVertex*> graphVertices, int graphID, vector<HEdge *> newEdges);
+
+    void dragEdgeInSubGraph (int subGraphVerticesNumber, int subGraphID);
 
     void createVertices (int verticesNumber, int minEdgesNumber, int maxEdgesNumber);
 
-    //Общее число возможных подключений ребер к вершинам.
-    int getSummaryDegree ();
+    int getTotalEdgesNumber ();
+    int getMaxEdgesNumber ();
 
-    //Число вершин с возможностью подключения.
-    int getCountOfFreeVertices();
-
-    //Максимум возможных подключений ребер к вершинам.
-    int getGlobalMaxDegree ();
+    int getNonFullVerticesNumber();
 
     void createEdges (int minVerticesNumber, int maxVerticesNumber);
 
@@ -52,9 +49,14 @@ public:
      * @brief HGraph
      * A sub graph constructor.
      */
-    HGraph (vector<HGVertex*>& graphVertices, int graphID);
+    HGraph (vector<HVertex*>& graphVertices, int graphID);
 
-    //Создание подграфа.
+    /**
+     * @brief createSubHG
+     * Creates an empty subgraph.
+     * @param subGraphID - the subgraph number.
+     * @return The created graph.
+     */
     HGraph* createSubHG (int subGraphID);
 
     void randomSplit (int subGraphsNumber, int startID);
@@ -63,16 +65,16 @@ public:
     void resetSplitting();
 
     // Генератор гиперграфа
-    void HGraphGenerator (int CountOfVertices, int minDegree, int maxDegree,
-                          int minPowerOfEdge, int maxPowerOfEdge);
+    void HGraphGenerator (int verticesNumber, int minEdgesNumber, int maxEdgesNumber,
+                          int minVerticesNumber, int maxVerticesNumber);
 
     int getID();
 
-    int getCountOfExternalEdges ();
+    int getExternalEdgesNumber ();
 
-    bool isIncident (HGVertex *vertex, HGEdge *edge);
-    bool incidenceInstall (HGVertex * vertex, HGEdge *edge);
-    void incidenceUninstall (HGVertex * vertex, HGEdge *edge);
+    bool isIncident (HVertex* vertex, HEdge* edge);
+    bool installIncidence (HVertex* vertex, HEdge* edge);
+    void uninstallIncidence (HVertex* vertex, HEdge* edge);
 
     int getVerticesNumber ();
     bool setVerticesNumber (int number);
@@ -80,7 +82,7 @@ public:
     int getEdgesNumber ();
     bool setEdgesNumber (int number);
 
-    int getCountOfFragments();
+    int getFragmentsNumber();
 };
 
 #endif // HGRAPH_H

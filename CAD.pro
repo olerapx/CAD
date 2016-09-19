@@ -17,24 +17,24 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         gui/mainwindow.cpp \
-    hgraph/hgedge.cpp \
-    hgraph/hgvertex.cpp \
     hgraph/hgraph.cpp \
     chart/qcustomplot.cpp \
     chart/line.cpp \
     gui/datawindow.cpp \
     hgraph/hgraphexception.cpp \
-    chart/linecolorpicker.cpp
+    chart/linecolorpicker.cpp \
+    hgraph/hedge.cpp \
+    hgraph/hvertex.cpp
 
 HEADERS  += gui/mainwindow.h \
-    hgraph/hgedge.h \
-    hgraph/hgvertex.h \
     hgraph/hgraph.h \
     chart/qcustomplot.h \
     chart/line.h \
    gui/datawindow.h \
     hgraph/hgraphexception.h \
-    chart/linecolorpicker.h
+    chart/linecolorpicker.h \
+    hgraph/hedge.h \
+    hgraph/hvertex.h
 
 FORMS    += gui/mainwindow.ui \
     gui/datawindow.ui

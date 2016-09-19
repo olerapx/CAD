@@ -146,8 +146,8 @@ void MainWindow::on_randomButton_clicked()
             {
                 hGraph[i]->resetSplitting();
                 hGraph[i]->randomSplit(j, 0);
-                countOfAllFragments += hGraph[i]->getCountOfFragments();
-                countOfAllExternalEdges += hGraph[i]->getCountOfExternalEdges();
+                countOfAllFragments += hGraph[i]->getFragmentsNumber();
+                countOfAllExternalEdges += hGraph[i]->getExternalEdgesNumber();
 
                 ui->progressBar->setValue(j*experimentNumber+1);
             }
@@ -202,7 +202,7 @@ void MainWindow::on_seriesButton_clicked()
         double countOfAllFragments = 0;
 
         for (int i=0; i<experimentNumber; i++)
-            countOfAllFragments += hGraph[i]->getCountOfFragments();
+            countOfAllFragments += hGraph[i]->getFragmentsNumber();
         countOfAllFragments /= experimentNumber;
 
         steps.x.push_back(1);
@@ -218,7 +218,7 @@ void MainWindow::on_seriesButton_clicked()
             {
                 hGraph[i]->resetSplitting();
                 hGraph[i]->gravitySplit(j, 0);
-                countOfAllExternalEdges += hGraph[i]->getCountOfExternalEdges();
+                countOfAllExternalEdges += hGraph[i]->getExternalEdgesNumber();
 
                 ui->progressBar->setValue(j*experimentNumber+1);
             }
@@ -354,7 +354,7 @@ void MainWindow::calculateData(QColor graphColor, size_t index)
 
     double countAllFragments = 0.0;
     for (int i=0; i<experimentNumber; i++)
-        countAllFragments += hGraphHierarchy[0][0][i]->getCountOfFragments();
+        countAllFragments += hGraphHierarchy[0][0][i]->getFragmentsNumber();
     countAllFragments /= experimentNumber;
 
     double nextIncreaseValue = 0.0;
@@ -452,7 +452,7 @@ void MainWindow::gatheringData(size_t index)
             {
                 hGraphHierarchy[i][j][k]->gravitySplit(splittingNumbers[index][i], minNumberSubHG);
 
-                increaseOfCountExternalEdges[i][j] += hGraphHierarchy[0][0][k]->getCountOfExternalEdges();
+                increaseOfCountExternalEdges[i][j] += hGraphHierarchy[0][0][k]->getExternalEdgesNumber();
 
                 if (i < levelNumber-1) // Если не последняя итерация - создаю подграфы на основе разбиений
                 {
@@ -481,7 +481,7 @@ void MainWindow::showData (QColor graphColor, size_t index)
     double currentCountOfInternalEdges = 0;
 
     for (int i=0; i<experimentNumber; i++)
-        currentCountOfInternalEdges += hGraphHierarchy[0][0][i]->getCountOfFragments();
+        currentCountOfInternalEdges += hGraphHierarchy[0][0][i]->getFragmentsNumber();
     currentCountOfInternalEdges /= experimentNumber;
 
     steps.x.push_back(0);

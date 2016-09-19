@@ -99,7 +99,7 @@ void MainWindow::on_createHGButton_clicked()
     for (size_t i=0; i<experimentNumber; i++)
     {
         hGraph[i] = new HGraph;
-        hGraph[i]->HGraphGenerator(ui->vertexNumberText->text().toUInt(),
+        HGraphWorker::generateGraph(hGraph[i], ui->vertexNumberText->text().toUInt(),
                                ui->minContactNumberText->text().toUInt(),
                                ui->maxContactNumberText->text().toUInt(),
                                ui->minEdgeNumberText->text().toUInt(),
@@ -144,8 +144,8 @@ void MainWindow::on_randomButton_clicked()
             double countOfAllExternalEdges = 0;
             for (size_t i=0; i<experimentNumber; i++)
             {
-                hGraph[i]->resetSplitting();
-                hGraph[i]->randomSplit(j, 0);
+                HGraphWorker::resetSplitting(hGraph[i]);
+                HGraphWorker::randomSplit(hGraph[i], j, 0);
                 countOfAllFragments += hGraph[i]->getFragmentsNumber();
                 countOfAllExternalEdges += hGraph[i]->getExternalEdgesNumber();
 
@@ -216,8 +216,8 @@ void MainWindow::on_seriesButton_clicked()
 
             for (size_t i=0; i<experimentNumber; i++)
             {
-                hGraph[i]->resetSplitting();
-                hGraph[i]->gravitySplit(j, 0);
+                HGraphWorker::resetSplitting(hGraph[i]);
+                HGraphWorker::gravitySplit(hGraph[i], j, 0);
                 countOfAllExternalEdges += hGraph[i]->getExternalEdgesNumber();
 
                 ui->progressBar->setValue(j*experimentNumber+1);
@@ -420,7 +420,7 @@ void MainWindow::copyGraphToHierarchy()
 {
     for (size_t i=0; i<experimentNumber; i++)
     {
-        hGraph[i]->resetSplitting();
+        HGraphWorker::resetSplitting(hGraph[i]);
         hGraphHierarchy[0][0][i] = hGraph[i];
 
         ui->progressBar->setValue(i);
@@ -450,7 +450,7 @@ void MainWindow::gatheringData(size_t index)
             increaseOfCountExternalEdges[i][j] = 0;
             for (size_t k=0; k<experimentNumber; k++)
             {
-                hGraphHierarchy[i][j][k]->gravitySplit(splittingNumbers[index][i], minSubGraphsNumber);
+                HGraphWorker::gravitySplit(hGraphHierarchy[i][j][k], splittingNumbers[index][i], minSubGraphsNumber);
 
                 increaseOfCountExternalEdges[i][j] += hGraphHierarchy[0][0][k]->getExternalEdgesNumber();
 

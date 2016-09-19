@@ -16,6 +16,8 @@ using namespace std;
  */
 class HGraph
 {
+    friend class HGraphWorker;
+
 private:
     vector<HVertex*> vertices;
     vector<HEdge*> edges;
@@ -26,20 +28,14 @@ private:
     size_t edgesNumber;
     size_t subGraphsNumber;
 
-    bool isRoot;
+    bool root;
 
     void fillSubGraph (vector <HVertex*> graphVertices, int graphID, vector<HEdge *> newEdges);
-
-    void dragEdgeInSubGraph (size_t subGraphVerticesNumber, int subGraphID);
-
-    void createVertices (size_t verticesNumber, size_t minEdgesNumber, size_t maxEdgesNumber);
 
     size_t getTotalEdgesNumber ();
     size_t getMaxEdgesNumber ();
 
     size_t getNonFullVerticesNumber();
-
-    void createEdges (size_t minVerticesNumber, size_t maxVerticesNumber);
 
 public:
     HGraph ();
@@ -51,30 +47,7 @@ public:
      */
     HGraph (vector<HVertex*>& graphVertices, int graphID);
 
-    /**
-     * @brief createSubHG
-     * Creates an empty subgraph.
-     * @param subGraphID - the subgraph number.
-     * @return The created graph.
-     */
-    HGraph* createSubHG (int subGraphID);
-
-    void randomSplit (size_t subGraphsNumber, int startID);
-    void gravitySplit (size_t subGraphsNumber, int startID);
-
-    void resetSplitting();
-
-    // Генератор гиперграфа
-    void HGraphGenerator (size_t verticesNumber, size_t minEdgesNumber, size_t maxEdgesNumber,
-                          size_t minVerticesNumber, size_t maxVerticesNumber);
-
     int getID();
-
-    size_t getExternalEdgesNumber ();
-
-    bool isIncident (HVertex* vertex, HEdge* edge);
-    bool installIncidence (HVertex* vertex, HEdge* edge);
-    void uninstallIncidence (HVertex* vertex, HEdge* edge);
 
     size_t getVerticesNumber ();
     void setVerticesNumber(size_t number);
@@ -83,6 +56,22 @@ public:
     void setEdgesNumber(size_t number);
 
     size_t getFragmentsNumber();
+
+    size_t getExternalEdgesNumber ();
+
+    bool isRoot();
+
+    bool isIncident (HVertex* vertex, HEdge* edge);
+    bool installIncidence (HVertex* vertex, HEdge* edge);
+    void uninstallIncidence (HVertex* vertex, HEdge* edge);
+
+    /**
+     * @brief createSubHG
+     * Creates an empty subgraph.
+     * @param subGraphID - the subgraph number.
+     * @return The created graph.
+     */
+    HGraph* createSubHG (int subGraphID);
 };
 
 #endif // HGRAPH_H

@@ -24,7 +24,8 @@ SOURCES += main.cpp\
     hgraph/hgraphexception.cpp \
     chart/linecolorpicker.cpp \
     hgraph/hedge.cpp \
-    hgraph/hvertex.cpp
+    hgraph/hvertex.cpp \
+    hgraph/hgraphworker.cpp
 
 HEADERS  += gui/mainwindow.h \
     hgraph/hgraph.h \
@@ -34,7 +35,8 @@ HEADERS  += gui/mainwindow.h \
     hgraph/hgraphexception.h \
     chart/linecolorpicker.h \
     hgraph/hedge.h \
-    hgraph/hvertex.h
+    hgraph/hvertex.h \
+    hgraph/hgraphworker.h
 
 FORMS    += gui/mainwindow.ui \
     gui/datawindow.ui

@@ -8,7 +8,7 @@
 
 #include "chart/qcustomplot.h"
 #include "chart/line.h"
-#include "hgraph/hgraph.h"
+#include "hgraph/hgraphworker.h"
 #include "chart/linecolorpicker.h"
 
 #include "datawindow.h"

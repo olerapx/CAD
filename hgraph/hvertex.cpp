@@ -8,7 +8,7 @@ HVertex::HVertex ()
     graphID = -1;
 }
 
-HVertex::HVertex (int id, int maxEdgesNumber)
+HVertex::HVertex (int id, size_t maxEdgesNumber)
 {
     graphID = -1;
     ID = id;
@@ -67,7 +67,7 @@ bool HVertex::tryConnectEdge (HEdge *newEdge)
 
 void HVertex::disconnectEdge (HEdge *oldEdge)
 {
-    for (int i=0; i<maxEdgesNumber; i++)
+    for (size_t i=0; i<maxEdgesNumber; i++)
         if (edges[i] == oldEdge)
         {
             edges[i] = nullptr;
@@ -98,20 +98,14 @@ bool HVertex::setID (int id)
     }
 }
 
-int HVertex::getMaxEdgesNumber ()
+size_t HVertex::getMaxEdgesNumber()
 {
     return maxEdgesNumber;
 }
 
-bool HVertex::setMaxEdgesNumber (int number)
+void HVertex::setMaxEdgesNumber (size_t number)
 {
-    if (number > 0)
-    {
-        maxEdgesNumber = number;
-        return true;
-    }
-    else
-        return false;
+    maxEdgesNumber = number;
 }
 
 bool HVertex::isInEdge (HEdge *edge)
@@ -119,27 +113,27 @@ bool HVertex::isInEdge (HEdge *edge)
     if (maxEdgesNumber == 0)
         return false;
 
-    for (int i=0; i<maxEdgesNumber; i++)
+    for (size_t i=0; i<maxEdgesNumber; i++)
         if (edges[i] == edge)
             return true;
 
     return false;
 }
 
-int HVertex::getFreePlacesNumber ()
+size_t HVertex::getFreePlacesNumber()
 {
     if (full)
         return 0;
 
-    int countOfFreePlaces = 0;
-    for (int i=0; i<maxEdgesNumber; i++)
+    size_t countOfFreePlaces = 0;
+    for (size_t i=0; i<maxEdgesNumber; i++)
         if (edges[i] == nullptr)
             countOfFreePlaces++;
 
     return countOfFreePlaces;
 }
 
-HEdge * HVertex::getIncidentEdgeByIndex (int index)
+HEdge * HVertex::getIncidentEdgeByIndex (size_t index)
 {
     if (maxEdgesNumber <= index)
         return nullptr;

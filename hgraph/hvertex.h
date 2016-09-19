@@ -19,7 +19,7 @@ private:
     vector <HEdge*> edges;
 
     int ID;
-    int maxEdgesNumber;
+    size_t maxEdgesNumber;
     int graphID; // Номер подграфа, -1, если не принадлежит ни к одному
     bool full;
 
@@ -28,7 +28,7 @@ private:
 
 public:
     HVertex ();
-    HVertex (int id, int maxEdgesNumber);
+    HVertex (int id, size_t maxEdgesNumber);
 
     int getGraphID ();
     void setGraphID (int id);
@@ -41,14 +41,14 @@ public:
     int getID ();
     bool setID (int id);
 
-    int getMaxEdgesNumber ();
-    bool setMaxEdgesNumber (int number);
+    size_t getMaxEdgesNumber ();
+    void setMaxEdgesNumber(size_t number);
 
     bool isInEdge (HEdge *edge);
 
-    int getFreePlacesNumber();
+    size_t getFreePlacesNumber();
 
-    HEdge* getIncidentEdgeByIndex (int index);
+    HEdge* getIncidentEdgeByIndex (size_t index);
 };
 
 #endif // HVERTEX_H

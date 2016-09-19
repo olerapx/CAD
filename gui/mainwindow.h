@@ -39,17 +39,17 @@ public:
 
     QString data;
 
-    int experimentNumber;
+    size_t experimentNumber;
 
     /* single-level */
     vector<HGraph*> hGraph;
-    int minNumberSubHG;
+    size_t minSubGraphsNumber;
 
     /* hierarchical */
     vector<vector<vector<HGraph*>>> hGraphHierarchy;
-    vector<vector<int>> increaseOfCountExternalEdges;
+    vector<vector<size_t>> increaseOfCountExternalEdges;
 
-    vector<vector<int>> splittingNumbers;
+    vector<vector<size_t>> splittingNumbers;
     int levelNumber;
 
 private slots:
@@ -83,11 +83,11 @@ private:
     void printSeriesData();
 
     void parseSplittingNumbers();
-    void parseSplittingNumber(QString string, int i);
+    void parseSplittingNumber(QString string, size_t i);
 
     void calculateData (QColor graphColor, size_t index);
 
-    int getNumberOfComputersOnLevel(size_t index, size_t level);
+    size_t getNumberOfComputersOnLevel(size_t index, size_t level);
     void initGraphHierarchy (size_t index);
     void copyGraphToHierarchy ();
     void gatheringData (size_t index);

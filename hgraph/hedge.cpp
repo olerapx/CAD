@@ -6,21 +6,21 @@ HEdge::HEdge()
     full = true;
 }
 
-HEdge::HEdge (int maxVertexCount)
+HEdge::HEdge (size_t maxVerticesNumber)
 {
-    maxVerticesNumber = maxVertexCount;
+    this->maxVerticesNumber = maxVerticesNumber;
     full = false;
 
-    vertices.resize(maxVertexCount);
+    vertices.resize(maxVerticesNumber);
 }
 
-int HEdge::getFreePlacesNumber()
+size_t HEdge::getFreePlacesNumber()
 {
     if (full)
         return 0;
-    int countOfFreePlaces = 0;
+    size_t countOfFreePlaces = 0;
 
-    for (int i=0; i<maxVerticesNumber; i++)
+    for (size_t i=0; i<maxVerticesNumber; i++)
         if (vertices[i] == nullptr)
             countOfFreePlaces++;
     return countOfFreePlaces;
@@ -34,7 +34,7 @@ size_t HEdge::getFreePlaceIndex()
     {
         size_t countFree = 0;
         size_t numberFree = -1;
-        for (int i=0; i<maxVerticesNumber; i++)
+        for (size_t i=0; i<maxVerticesNumber; i++)
             if (vertices[i] == nullptr)
             {
                 numberFree = i;
@@ -48,7 +48,7 @@ size_t HEdge::getFreePlaceIndex()
 
 void HEdge::disconnectVertex (HVertex *oldVertex)
 {
-    for (int i=0; i<maxVerticesNumber; i++)
+    for (size_t i=0; i<maxVerticesNumber; i++)
         if (vertices[i] == oldVertex)
         {
             vertices[i] = nullptr;
@@ -80,18 +80,12 @@ bool HEdge::isFull ()
     return full;
 }
 
-bool HEdge::setMaxVerticesNumber (int number)
+void HEdge::setMaxVerticesNumber (size_t number)
 {
-    if (number >= 0)
-    {
-        maxVerticesNumber = number;
-        return true;
-    }
-    else
-        return false;
+    maxVerticesNumber = number;
 }
 
-int HEdge::getMaxVerticesNumber ()
+size_t HEdge::getMaxVerticesNumber()
 {
     return maxVerticesNumber;
 }
@@ -107,28 +101,28 @@ bool HEdge::isInEdge (HVertex *vertex)
 {
     if (maxVerticesNumber == 0)
         return false;
-    for (int i=0; i<maxVerticesNumber; i++)
+    for (size_t i=0; i<maxVerticesNumber; i++)
         if (vertices[i] == vertex)
             return true;
     return false;
 }
 
-int HEdge::getCommonVerticesNumber (HEdge *otherEdge)
+size_t HEdge::getCommonVerticesNumber(HEdge *otherEdge)
 {
-    int countOfCommonVertices = 0;
-    for (int i=0; i<getMaxVerticesNumber(); i++)
+    size_t countOfCommonVertices = 0;
+    for (size_t i=0; i<getMaxVerticesNumber(); i++)
         if (vertices[i] != nullptr)
             if (otherEdge->isInEdge(vertices[i]))
                 countOfCommonVertices++;
     return countOfCommonVertices;
 }
 
-int HEdge::getSubGraphsNumber ()
+size_t HEdge::getSubGraphsNumber()
 {
-    int countSubHG = 1;
-    for (int i=0; i<maxVerticesNumber; i++)
+    size_t countSubHG = 1;
+    for (size_t i=0; i<maxVerticesNumber; i++)
         if (vertices[i] != nullptr && vertices[i]->getGraphID() != -1)
-            for (int j=0; j<i; j++)
+            for (size_t j=0; j<i; j++)
             {
                 if (vertices[j]!= nullptr)
                     if (vertices[j]->getGraphID() ==

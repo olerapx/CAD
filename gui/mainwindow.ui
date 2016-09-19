@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>826</width>
-    <height>686</height>
+    <height>694</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -403,7 +403,7 @@
          </sizepolicy>
         </property>
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="singleLevelPage">
          <layout class="QGridLayout" name="gridLayout_2">
@@ -420,7 +420,7 @@
            <number>5</number>
           </property>
           <item row="1" column="0">
-           <widget class="QLabel" name="subHGNumberLabel">
+           <widget class="QLabel" name="subGraphsNumberLabel">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -433,7 +433,7 @@
            </widget>
           </item>
           <item row="2" column="0">
-           <widget class="QLineEdit" name="subHGNumberText">
+           <widget class="QLineEdit" name="subGraphsNumberText">
             <property name="text">
              <string>6</string>
             </property>

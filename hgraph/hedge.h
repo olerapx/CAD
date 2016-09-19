@@ -18,7 +18,7 @@ class HEdge
 private:
     vector<HVertex*> vertices;
 
-    int maxVerticesNumber;
+    size_t maxVerticesNumber;
     bool full;
 
     //Поиск свободного места и изменение состояния заполненности, если такого нет.
@@ -26,26 +26,26 @@ private:
 
 public:
     HEdge ();
-    HEdge (int maxVertexCount);
+    HEdge (size_t maxVerticesNumber);
 
     bool tryConnectVertex (HVertex* newVertex);
     void disconnectVertex (HVertex* oldVertex);
 
-    int getFreePlacesNumber();
+    size_t getFreePlacesNumber();
 
     bool isFull();
 
-    bool setMaxVerticesNumber (int number);
-    int getMaxVerticesNumber();
+    void setMaxVerticesNumber(size_t number);
+    size_t getMaxVerticesNumber();
 
     HVertex* getIncidentVertexByIndex (size_t index);
 
     bool isInEdge (HVertex* vertex);
 
-    int getCommonVerticesNumber (HEdge* otherEdge);
+    size_t getCommonVerticesNumber (HEdge* otherEdge);
 
     //Геттер числа подграфов, в которые входит ребро.
-    int getSubGraphsNumber ();
+    size_t getSubGraphsNumber ();
 };
 
 #endif // HEDGE_H

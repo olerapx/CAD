@@ -22,24 +22,24 @@ private:
 
     int ID; // Номер подграфа (у главного -1)
 
-    int verticesNumber;
-    int edgesNumber;
-    int subGraphsNumber;
+    size_t verticesNumber;
+    size_t edgesNumber;
+    size_t subGraphsNumber;
 
     bool isRoot;
 
     void fillSubGraph (vector <HVertex*> graphVertices, int graphID, vector<HEdge *> newEdges);
 
-    void dragEdgeInSubGraph (int subGraphVerticesNumber, int subGraphID);
+    void dragEdgeInSubGraph (size_t subGraphVerticesNumber, int subGraphID);
 
-    void createVertices (int verticesNumber, int minEdgesNumber, int maxEdgesNumber);
+    void createVertices (size_t verticesNumber, size_t minEdgesNumber, size_t maxEdgesNumber);
 
-    int getTotalEdgesNumber ();
-    int getMaxEdgesNumber ();
+    size_t getTotalEdgesNumber ();
+    size_t getMaxEdgesNumber ();
 
-    int getNonFullVerticesNumber();
+    size_t getNonFullVerticesNumber();
 
-    void createEdges (int minVerticesNumber, int maxVerticesNumber);
+    void createEdges (size_t minVerticesNumber, size_t maxVerticesNumber);
 
 public:
     HGraph ();
@@ -59,30 +59,30 @@ public:
      */
     HGraph* createSubHG (int subGraphID);
 
-    void randomSplit (int subGraphsNumber, int startID);
-    void gravitySplit (int subGraphsNumber, int startID);
+    void randomSplit (size_t subGraphsNumber, int startID);
+    void gravitySplit (size_t subGraphsNumber, int startID);
 
     void resetSplitting();
 
     // Генератор гиперграфа
-    void HGraphGenerator (int verticesNumber, int minEdgesNumber, int maxEdgesNumber,
-                          int minVerticesNumber, int maxVerticesNumber);
+    void HGraphGenerator (size_t verticesNumber, size_t minEdgesNumber, size_t maxEdgesNumber,
+                          size_t minVerticesNumber, size_t maxVerticesNumber);
 
     int getID();
 
-    int getExternalEdgesNumber ();
+    size_t getExternalEdgesNumber ();
 
     bool isIncident (HVertex* vertex, HEdge* edge);
     bool installIncidence (HVertex* vertex, HEdge* edge);
     void uninstallIncidence (HVertex* vertex, HEdge* edge);
 
-    int getVerticesNumber ();
-    bool setVerticesNumber (int number);
+    size_t getVerticesNumber ();
+    void setVerticesNumber(size_t number);
 
-    int getEdgesNumber ();
-    bool setEdgesNumber (int number);
+    size_t getEdgesNumber ();
+    void setEdgesNumber(size_t number);
 
-    int getFragmentsNumber();
+    size_t getFragmentsNumber();
 };
 
 #endif // HGRAPH_H

@@ -13,11 +13,8 @@ HGraph::~HGraph()
 {
     if (root)
     {
-        for (size_t i=0;i<edges.size();i++)
-            delete edges[i];
-
-        for (size_t i=0;i<vertices.size();i++)
-            delete vertices[i];
+        clearVertices();
+        clearEdges();
     }
 }
 
@@ -206,17 +203,43 @@ size_t HGraph::getNonFullVerticesNumber()
 
 size_t HGraph::getMaxEdgesNumber()
 {
-    size_t globalMaxDegree = 0;
+    size_t maxEdgesNumber = 0;
     size_t verticesNumber = getVerticesNumber();
 
     for (size_t i=0; i<verticesNumber; i++)
-        if (globalMaxDegree < vertices[i]->getMaxEdgesNumber())
-            globalMaxDegree = vertices[i]->getMaxEdgesNumber();
+        if (maxEdgesNumber < vertices[i]->getMaxEdgesNumber())
+            maxEdgesNumber = vertices[i]->getMaxEdgesNumber();
 
-    return globalMaxDegree;
+    return maxEdgesNumber;
 }
 
-HGraph *HGraph::createSubHG(int subGraphID)
+void HGraph::clearVertices()
+{
+    if (root)
+    {
+        size_t size = vertices.size();
+        for (size_t i=0; i<size; i++)
+            delete vertices[i];
+    }
+
+    vertices.clear();
+    verticesNumber = 0;
+}
+
+void HGraph::clearEdges()
+{
+    if (root)
+    {
+        size_t size = edges.size();
+        for (size_t i=0; i<size; i++)
+            delete edges[i];
+    }
+
+    edges.clear();
+    edgesNumber = 0;
+}
+
+HGraph *HGraph::createSubGraph(int subGraphID)
 {
     if (subGraphID >= 0)
         return new HGraph(vertices, subGraphID);

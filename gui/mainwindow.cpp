@@ -140,19 +140,20 @@ void MainWindow::on_randomButton_clicked()
         {
             ui->statusLabel->setText("Осталось уровней: "+ QString::number(subGraphsNumber-j));
 
-            double countOfAllFragments = 0;
-            double countOfAllExternalEdges = 0;
+            size_t totalFragmentsNumber = 0;
+            size_t totalExternalEdgesNumber = 0;
+
             for (size_t i=0; i<experimentNumber; i++)
             {
                 HGraphWorker::resetSplitting(hGraph[i]);
                 HGraphWorker::randomSplit(hGraph[i], j, 0);
-                countOfAllFragments += hGraph[i]->getFragmentsNumber();
-                countOfAllExternalEdges += hGraph[i]->getExternalEdgesNumber();
+                totalFragmentsNumber += hGraph[i]->getFragmentsNumber();
+                totalExternalEdgesNumber += hGraph[i]->getExternalEdgesNumber();
 
                 ui->progressBar->setValue(j*experimentNumber+1);
             }
             edges.x.push_back(j);
-            edges.y.push_back(100*countOfAllExternalEdges/countOfAllFragments);
+            edges.y.push_back(100.0 * (double)totalExternalEdgesNumber/(double)totalFragmentsNumber);
         }
 
         ui->progressBar->setValue(experimentNumber * 2);
@@ -363,10 +364,10 @@ void MainWindow::calculateData(QColor graphColor, size_t index)
     {
         size_t numberOfComputersOnLevel =  getNumberOfComputersOnLevel(index, i);
         for (size_t j=0; j<numberOfComputersOnLevel; j++)
-            nextIncreaseValue += increaseOfCountExternalEdges[i][j];
+            nextIncreaseValue += externalEdgesNumberIncreasing[i][j];
 
         edges.x.push_back(i+1);
-        edges.y.push_back(100*nextIncreaseValue/countAllFragments);
+        edges.y.push_back(100 * nextIncreaseValue/countAllFragments);
     }
 
     showData(graphColor, index);
@@ -385,8 +386,8 @@ void MainWindow::initGraphHierarchy(size_t index)
 {
     minSubGraphsNumber = 0;
 
-    increaseOfCountExternalEdges.clear();
-    increaseOfCountExternalEdges.resize(levelNumber);
+    externalEdgesNumberIncreasing.clear();
+    externalEdgesNumberIncreasing.resize(levelNumber);
 
     for (size_t i=0; i<hGraphHierarchy.size(); i++)
         for (size_t j=0; j<hGraphHierarchy[i].size(); j++)
@@ -406,7 +407,7 @@ void MainWindow::initGraphHierarchy(size_t index)
         for (int j=0; j<numberOfComputersOnLevel; j++)
             hGraphHierarchy[i][j].resize(experimentNumber);
 
-        increaseOfCountExternalEdges[i].resize(numberOfComputersOnLevel);
+        externalEdgesNumberIncreasing[i].resize(numberOfComputersOnLevel);
     }
 
     ui->progressBar->setMinimum(0);
@@ -447,26 +448,26 @@ void MainWindow::gatheringData(size_t index)
 
         for (int j=0; j<numberOfComputersOnLevel; j++)
         {
-            increaseOfCountExternalEdges[i][j] = 0;
+            externalEdgesNumberIncreasing[i][j] = 0;
             for (size_t k=0; k<experimentNumber; k++)
             {
                 HGraphWorker::gravitySplit(hGraphHierarchy[i][j][k], splittingNumbers[index][i], minSubGraphsNumber);
 
-                increaseOfCountExternalEdges[i][j] += hGraphHierarchy[0][0][k]->getExternalEdgesNumber();
+                externalEdgesNumberIncreasing[i][j] += hGraphHierarchy[0][0][k]->getExternalEdgesNumber();
 
                 if (i < levelNumber-1) // Если не последняя итерация - создаю подграфы на основе разбиений
                 {
                     for (size_t l=0; l<splittingNumbers[index][i]; l++)
-                        hGraphHierarchy[i+1][j*splittingNumbers[index][i] + l][k] = hGraphHierarchy[i][j][k]->createSubHG(minSubGraphsNumber + l);
+                        hGraphHierarchy[i+1][j*splittingNumbers[index][i] + l][k] = hGraphHierarchy[i][j][k]->createSubGraph(minSubGraphsNumber + l);
                 }
             }
 
-            increaseOfCountExternalEdges[i][j] /= experimentNumber;
+            externalEdgesNumberIncreasing[i][j] /= experimentNumber;
 
             // Вычитаю уже имевшиеся связи
             // для получения прироста
-            increaseOfCountExternalEdges[i][j] -= countOldExternalEdges;
-            countOldExternalEdges += increaseOfCountExternalEdges[i][j];
+            externalEdgesNumberIncreasing[i][j] -= countOldExternalEdges;
+            countOldExternalEdges += externalEdgesNumberIncreasing[i][j];
 
             minSubGraphsNumber += splittingNumbers[index][i];
 
@@ -497,10 +498,10 @@ void MainWindow::showData (QColor graphColor, size_t index)
 
         for (int j=0; j< numberOfComputersOnLevel; j++)
         {
-            if (maxCountExternalEdges < increaseOfCountExternalEdges[i][j])
-                maxCountExternalEdges = increaseOfCountExternalEdges[i][j];
+            if (maxCountExternalEdges < externalEdgesNumberIncreasing[i][j])
+                maxCountExternalEdges = externalEdgesNumberIncreasing[i][j];
 
-            currentCountOfInternalEdges -= increaseOfCountExternalEdges[i][j];
+            currentCountOfInternalEdges -= externalEdgesNumberIncreasing[i][j];
         }
 
         currentCostOfTracing += pow((double)maxCountExternalEdges, tracingComplexity);

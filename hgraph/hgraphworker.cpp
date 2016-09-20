@@ -11,10 +11,7 @@ void HGraphWorker::createVertices (HGraph* graph, size_t verticesNumber, size_t 
 {
     if (graph->root)
     {
-        for (size_t i=0;i<graph->vertices.size();i++)
-            delete graph->vertices[i];
-
-        graph->vertices.clear();
+        graph->clearVertices();
         graph->vertices.resize(verticesNumber);
         graph->setVerticesNumber (verticesNumber);
 
@@ -25,159 +22,145 @@ void HGraphWorker::createVertices (HGraph* graph, size_t verticesNumber, size_t 
 
 void HGraphWorker::createEdges (HGraph* graph, size_t minVerticesNumber, size_t maxVerticesNumber)
 {
-    // Создание вершин и ребер вызывается
-    // только для корневого графа
-    if (graph->root)
+    if (!graph->root) return;
+
+    size_t remainingConnectionsNumber = graph->getTotalEdgesNumber();
+
+    // Порог, по прохождении которого
+    // включается логика формирования
+    // остаточных цепей
+    size_t maxEdgesNumber = graph->getMaxEdgesNumber();
+    size_t logicalThreshold = maxVerticesNumber * maxEdgesNumber;
+
+    graph->clearEdges();
+    graph->edges.resize(graph->verticesNumber * logicalThreshold/(maxVerticesNumber*minVerticesNumber));
+
+    // to pick random vertice correctly
+    vector<HVertex*> temp;
+    temp.resize(graph->vertices.size());
+    for(size_t i=0; i<temp.size(); i++)
     {
-        size_t summaryDegree = graph->getTotalEdgesNumber();   // Общее число возможных подключений
+        temp[i] = graph->vertices[i];
+    }
 
-        // Порог, по прохождении которого
-        // включается логика формирования
-        // остаточных цепей
-        size_t logicalThreshold = maxVerticesNumber*graph->getMaxEdgesNumber();
-
-
-        // Максимальное число цепей - это
-        // вершины * макс. степень / мин. мощность
-
-        for (size_t i=0;i<graph->edges.size();i++)
-            delete graph->edges[i];
-
-        graph->edges.clear();
-        graph->edges.resize(graph->verticesNumber * logicalThreshold/(maxVerticesNumber*minVerticesNumber));
-
-        // to pick random vertice correctly
-        vector<HVertex*> temp;
-        temp.resize(graph->vertices.size());
-        for(size_t i=0; i<temp.size(); i++)
+    for (size_t i=0; ; i++)        // Начинаем построение ребер (заранее неизвестно, сколько их)
+    {
+        if (logicalThreshold < remainingConnectionsNumber)
         {
-            temp[i] = graph->vertices[i];
+            graph->edges[i] = new HEdge (minVerticesNumber + rand()%(maxVerticesNumber+1));
+
+            do
+            {
+                size_t nextVertexIndexToConnect = rand()%temp.size();
+
+                graph->installIncidence(temp[nextVertexIndexToConnect], graph->edges[i]);
+
+                if(temp[nextVertexIndexToConnect]->isFull())
+                {
+                    temp.erase(temp.begin()+nextVertexIndexToConnect);
+                }
+
+                remainingConnectionsNumber--;
+
+            } while (!(graph->edges[i]->isFull()));
+
+
         }
-
-        for (size_t i=0; ; i++)        // Начинаем построение ребер (заранее неизвестно, сколько их)
+        else
         {
-            if (logicalThreshold < summaryDegree)
+            size_t nonFullVerticesNumber = graph->getNonFullVerticesNumber();
+
+            // Составляю матрицу-проекцию будущих ребер
+            vector<vector<int>> connectionMatrix (nonFullVerticesNumber);
+
+            // 0 - нет контакта, 1 - есть
+            // Надо распределить единицы по матрице
+            // так, чтобы в строках было минимум
+            // количество, равное минимальной мощности
+            // ребер
+            // Получившиеся строки - прототипы ребер
+            for (size_t k=0; k<nonFullVerticesNumber; k++)
+                connectionMatrix[k].resize(maxEdgesNumber+1, 0);
+
+
+            int matrixElementIndex = 0;
+            int verticesNumber = graph->getVerticesNumber();
+
+
+            for (int k=0; k<verticesNumber; k++)
             {
-                graph->edges[i] = new HEdge (minVerticesNumber + rand()%(maxVerticesNumber+1));
-
-                do
+                if (!graph->vertices[k]->isFull())
                 {
-
-                    // Номер очередной вершины для включения в ребро
-                    size_t nextVertexToConnect = rand()%temp.size();
-
-                    // Установление инцидентности
-                    graph->installIncidence(temp[nextVertexToConnect], graph->edges[i]);
-
-                    if(temp[nextVertexToConnect]->isFull())
-                    {
-                        temp.erase(temp.begin()+nextVertexToConnect);
-                    }
-
-                    summaryDegree--;                    // Снижаем число оставшихся для обработки подключений
-
-                } while (!(graph->edges[i]->isFull()));
-
-
-            }
-            else
-            {
-                // Логика обработки последних подключений
-                // Составляю матрицу-проекцию будущих ребер
-                size_t countOfFreeVertices = graph->getNonFullVerticesNumber();
-                size_t globalMaxDegree = logicalThreshold/maxVerticesNumber;
-
-                vector<vector<int>> connectionMatrix (countOfFreeVertices);
-
-                // 0 - нет контакта, 1 - есть
-                // Надо распределить единицы по матрице
-                // так, чтобы в строках было минимум
-                // количество, равное минимальной мощности
-                // ребер
-                // Получившиеся строки - прототипы ребер
-                for (size_t k=0; k<countOfFreeVertices; k++)
-                    connectionMatrix[k].resize(globalMaxDegree+1, 0);
-
-
-                int elementOfMatrixNumber = 0;
-                int cOfVertices = graph->getVerticesNumber();
-
-
-                for (int k=0; k<cOfVertices; k++)
-                {
-                    if (!graph->vertices[k]->isFull())
-                    {
-                        int freePlaces = graph->vertices[k]->getFreePlacesNumber();
-                        for(int j=0; j<freePlaces; j++)
-                            connectionMatrix[elementOfMatrixNumber][j] = 1;
-                        connectionMatrix[elementOfMatrixNumber][globalMaxDegree] =
-                                graph->vertices[k]->getID();
-                        elementOfMatrixNumber++;
-                    }
-                }                                     // Матрица готова
-
-                vector<size_t> masOfPowerEdges (globalMaxDegree, 0);
-                for (size_t k=0; k<globalMaxDegree; k++)
-                {
-                    for (size_t j=0; j<countOfFreeVertices; j++)
-                        if (connectionMatrix[j][k] == 1)
-                            masOfPowerEdges[k]++;
+                    int freePlaces = graph->vertices[k]->getFreePlacesNumber();
+                    for(int j=0; j<freePlaces; j++)
+                        connectionMatrix[matrixElementIndex][j] = 1;
+                    connectionMatrix[matrixElementIndex][maxEdgesNumber] =
+                            graph->vertices[k]->getID();
+                    matrixElementIndex++;
                 }
+            }                                     // Матрица готова
 
-                for (size_t k=0; k<globalMaxDegree; k++)
+            vector<size_t> verticesNumbers (maxEdgesNumber, 0);
+            for (size_t k=0; k<maxEdgesNumber; k++)
+            {
+                for (size_t j=0; j<nonFullVerticesNumber; j++)
+                    if (connectionMatrix[j][k] == 1)
+                        verticesNumbers[k]++;
+            }
+
+            for (size_t k=0; k<maxEdgesNumber; k++)
+            {
+                if (verticesNumbers[k] < minVerticesNumber)
                 {
-                    if (masOfPowerEdges[k] < minVerticesNumber)
+                    for (size_t j=0; j<maxEdgesNumber; j++)
                     {
-                        for (size_t j=0; j<globalMaxDegree; j++)
+                        bool endOfMove = false;
+                        if (verticesNumbers[j] > minVerticesNumber)
                         {
-                            bool endOfMove = false;
-                            if (masOfPowerEdges[j] > minVerticesNumber)
+                            size_t movedVerticesNumber = verticesNumbers[j] - minVerticesNumber;
+                            if (movedVerticesNumber > (minVerticesNumber - verticesNumbers[k]))
                             {
-                                size_t countMovedVertices = masOfPowerEdges[j] - minVerticesNumber;
-                                if (countMovedVertices > (minVerticesNumber - masOfPowerEdges[k]))
-                                {
-                                    countMovedVertices = minVerticesNumber - masOfPowerEdges[k];
-                                    endOfMove = true;
-                                }
-                                int numberMovedVertex = 0;
-                                for (size_t kk=0; kk<countMovedVertices; kk++)
-                                {
-                                    if (connectionMatrix[numberMovedVertex][j] == 1 &&
-                                            connectionMatrix[numberMovedVertex][k] == 0)
-                                    {
-                                        connectionMatrix[numberMovedVertex][j] = 0;
-                                        connectionMatrix[numberMovedVertex][k] = 1;
-                                        masOfPowerEdges[j]--;
-                                        masOfPowerEdges[k]++;
-                                    }
-                                    else
-                                        kk--;
-                                    numberMovedVertex++;
-                                }
+                                movedVerticesNumber = minVerticesNumber - verticesNumbers[k];
+                                endOfMove = true;
                             }
-                            if (endOfMove)
-                                break;
+                            int movedVertexIndex = 0;
+                            for (size_t kk=0; kk<movedVerticesNumber; kk++)
+                            {
+                                if (connectionMatrix[movedVertexIndex][j] == 1 &&
+                                        connectionMatrix[movedVertexIndex][k] == 0)
+                                {
+                                    connectionMatrix[movedVertexIndex][j] = 0;
+                                    connectionMatrix[movedVertexIndex][k] = 1;
+                                    verticesNumbers[j]--;
+                                    verticesNumbers[k]++;
+                                }
+                                else
+                                    kk--;
+                                movedVertexIndex++;
+                            }
                         }
+                        if (endOfMove)
+                            break;
                     }
                 }
-
-                for (size_t j=0; j<globalMaxDegree; j++)
-                {
-                    graph->edges[i] = new HEdge (masOfPowerEdges[j]);
-                    // Установление инцидентности
-                    for (size_t k=0; k<countOfFreeVertices; k++)
-                        if (connectionMatrix[k][j] == 1)
-                            graph->installIncidence(graph->vertices[connectionMatrix[k][globalMaxDegree]], graph->edges[i]);
-                    i++;
-
-                }
-                if (i == 0) throw HGraphException ("Can't create edges: edges number is 0");
-                graph->setEdgesNumber (i-1);
-
-                connectionMatrix.clear();
-                masOfPowerEdges.clear();
-                break;
             }
+
+            for (size_t j=0; j<maxEdgesNumber; j++)
+            {
+                graph->edges[i] = new HEdge (verticesNumbers[j]);
+
+                for (size_t k=0; k<nonFullVerticesNumber; k++)
+                    if (connectionMatrix[k][j] == 1)
+                        graph->installIncidence(graph->vertices[connectionMatrix[k][maxEdgesNumber]], graph->edges[i]);
+                i++;
+
+            }
+            if (i == 0) throw HGraphException ("Can't create edges: edges number is 0");
+            graph->setEdgesNumber (i-1);
+
+            connectionMatrix.clear();
+            verticesNumbers.clear();
+            break;
         }
     }
 }
@@ -185,28 +168,29 @@ void HGraphWorker::createEdges (HGraph* graph, size_t minVerticesNumber, size_t 
 void HGraphWorker::randomSplit (HGraph* graph, size_t subGraphsNumber, int startID)
 {
     graph->subGraphsNumber = subGraphsNumber;
-    // Мощности подграфов
-    vector<size_t> masPowerOfSubHG (subGraphsNumber);
+
+    vector<size_t> subGraphsVerticesNumbers (subGraphsNumber);
 
     for (size_t i=0; i<subGraphsNumber; i++)
-        masPowerOfSubHG[i] = graph->verticesNumber/subGraphsNumber;
+        subGraphsVerticesNumbers[i] = graph->verticesNumber/subGraphsNumber;
 
-    for (size_t i=0; i<graph->verticesNumber%subGraphsNumber; i++)
-        masPowerOfSubHG[i]++;
+    for (size_t i=0; i<graph->verticesNumber % subGraphsNumber; i++)
+        subGraphsVerticesNumbers[i]++;
 
     for (size_t i=0; i<subGraphsNumber; i++)
-        for (size_t j=0; j<masPowerOfSubHG[i]; j++)
+        for (size_t j=0; j<subGraphsVerticesNumbers[i]; j++)
         {
-            size_t numberNextVertex;
+            size_t nextVertexIndex;
             do
             {
-                numberNextVertex = rand()%graph->verticesNumber;
+                nextVertexIndex = rand()%graph->verticesNumber;
             }
-            while(graph->vertices[numberNextVertex]->getGraphID() != graph->ID);
-            graph->vertices[numberNextVertex]->setGraphID(i+startID);
+            while(graph->vertices[nextVertexIndex]->getGraphID() != graph->ID);
+
+            graph->vertices[nextVertexIndex]->setGraphID(i+startID);
         }
 
-    masPowerOfSubHG.clear();
+    subGraphsVerticesNumbers.clear();
 }
 
 void HGraphWorker::gravitySplit (HGraph* graph, size_t subGraphsNumber, int startID)
@@ -231,9 +215,7 @@ void HGraphWorker::dragEdgeInSubGraph (HGraph* graph, size_t subGraphVerticesNum
 {
     size_t minSplitOfEdge = 1; // Нижняя граница оценки числа подграфов, в которые входит ребро
 
-    // Число вершин для включения
-    // в подграф
-    size_t countPlacesInSubHG = subGraphVerticesNumber;
+    size_t remainingSubGraphPlacesNumber = subGraphVerticesNumber;
 
     bool hasAvailableEdge = false; // Сигнал для поднятия нижней границы
     do
@@ -260,21 +242,21 @@ void HGraphWorker::dragEdgeInSubGraph (HGraph* graph, size_t subGraphVerticesNum
                             // Включаю в подграф
                             // столько, сколько влезет :)
                             graph->edges[i]->getIncidentVertexByIndex(j)->setGraphID(subGraphID);
-                            countPlacesInSubHG--;
-                            if (countPlacesInSubHG == 0)
+                            remainingSubGraphPlacesNumber--;
+                            if (remainingSubGraphPlacesNumber == 0)
                             {
-                                break;                        // Если больше не влезет -
-                            }                               // выхожу
+                                break;
+                            }
                         }
 
-                if (countPlacesInSubHG == 0)
+                if (remainingSubGraphPlacesNumber == 0)
                 {
                     break;
                 }
             }
         }
-        if (!hasAvailableEdge)                   // Когда не нашел подходящих ребер
-            minSplitOfEdge++;                   // поднимаем нижнюю границу
+        if (!hasAvailableEdge)
+            minSplitOfEdge++;
 
         if (!hasAnyAvailableEdge)
         {
@@ -282,7 +264,7 @@ void HGraphWorker::dragEdgeInSubGraph (HGraph* graph, size_t subGraphVerticesNum
                                   " Increase the number of vertices or try again.");
         }
     }
-    while (countPlacesInSubHG > 0);
+    while (remainingSubGraphPlacesNumber > 0);
 }
 
 void HGraphWorker::resetSplitting(HGraph* graph)

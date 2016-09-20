@@ -47,7 +47,7 @@ public:
 
     /* hierarchical */
     vector<vector<vector<HGraph*>>> hGraphHierarchy;
-    vector<vector<size_t>> increaseOfCountExternalEdges;
+    vector<vector<size_t>> externalEdgesNumberIncreasing;
 
     vector<vector<size_t>> splittingNumbers;
     int levelNumber;

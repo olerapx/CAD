@@ -65,13 +65,16 @@ public:
     bool installIncidence (HVertex* vertex, HEdge* edge);
     void uninstallIncidence (HVertex* vertex, HEdge* edge);
 
+    void clearVertices();
+    void clearEdges();
+
     /**
-     * @brief createSubHG
+     * @brief createSubGraph
      * Creates an empty subgraph.
      * @param subGraphID - the subgraph number.
      * @return The created graph.
      */
-    HGraph* createSubHG (int subGraphID);
+    HGraph* createSubGraph (int subGraphID);
 };
 
 #endif // HGRAPH_H

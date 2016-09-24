@@ -11,11 +11,8 @@ HGraph::HGraph ()
 
 HGraph::~HGraph()
 {
-    if (root)
-    {
-        clearVertices();
-        clearEdges();
-    }
+    clearVertices();
+    clearEdges();
 }
 
 HGraph::HGraph (vector<HVertex*> &graphVertices, int graphID)
@@ -57,34 +54,32 @@ void HGraph::fillSubGraph (vector <HVertex*> graphVertices, int graphID, vector 
 
     for (size_t i=0; i<graphVertices.size(); i++)
     {
-        if (graphVertices[i]->getGraphID() == graphID)
-        {
-            vertices[subGraphVerticesCount] = graphVertices[i];
-            subGraphVerticesCount++;
+        if (graphVertices[i]->getGraphID() != graphID) continue;
 
-            for (size_t j=0; j<graphVertices[i]->getMaxEdgesNumber(); j++)
+        vertices[subGraphVerticesCount] = graphVertices[i];
+        subGraphVerticesCount++;
+
+        for (size_t j=0; j<graphVertices[i]->getMaxEdgesNumber(); j++)
+        {
+            if (graphVertices[i]->getIncidentEdgeByIndex(j) == nullptr) continue;
+
+            bool newEdge = true;
+            // Если такое ребро уже есть,
+            // то включать уже не надо
+            for (size_t k=0; k<subGraphEdgesCount; k++)
             {
-                if (graphVertices[i]->getIncidentEdgeByIndex(j)!= nullptr)
-                {
-                    bool newEdge = true;
-                    // Если такое ребро уже есть,
-                    // то включать уже не надо
-                    for (size_t k=0; k<subGraphEdgesCount; k++)
-                        if (newEdges[k] == graphVertices[i]->getIncidentEdgeByIndex(j))
-                        {
-                            newEdge = false;
-                            break;
-                        }
-                    if (newEdge)
-                    {
-                        newEdges[subGraphEdgesCount] = graphVertices[i]->getIncidentEdgeByIndex(j);
-                        subGraphEdgesCount++;
-                    }
-                }
+                if (newEdges[k] != graphVertices[i]->getIncidentEdgeByIndex(j)) continue;
+
+                newEdge = false;
+                break;
+            }
+            if (newEdge)
+            {
+                newEdges[subGraphEdgesCount] = graphVertices[i]->getIncidentEdgeByIndex(j);
+                subGraphEdgesCount++;
             }
         }
     }
-
 
     if (subGraphEdgesCount == 0)
     {

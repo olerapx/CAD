@@ -39,50 +39,56 @@ void HGraphWorker::createEdges (HGraph* graph, size_t minVerticesNumber, size_t 
     graph->clearEdges();
     graph->edges.resize(graph->verticesNumber * logicalThreshold/(maxVerticesNumber*minVerticesNumber));
 
-    // to pick random vertice correctly
-    vector<HVertex*> temp;
-
-    size_t size = graph->vertices.size();
-    temp.resize(size);
-
-    for(size_t i=0; i<size; i++)
-    {
-        temp[i] = graph->vertices[i];
-    }
+    vector<HVertex*> verticesBuffer = prepareVerticesBuffer(graph);
 
     size_t i = 0;
     while (logicalThreshold < remainingConnectionsNumber)
     {
-        remainingConnectionsNumber = connectRandomVertices(graph, temp, remainingConnectionsNumber, i);
+        remainingConnectionsNumber = connectRandomVertices(graph, verticesBuffer, remainingConnectionsNumber, i);
         i++;
     }
 
     connectRemainingVertices(graph, i);
 }
 
-size_t HGraphWorker::connectRandomVertices(HGraph *graph, vector<HVertex *> &temp, size_t remainingConnectionsNumber, const size_t i)
+vector <HVertex*> HGraphWorker::prepareVerticesBuffer (HGraph* graph)
+{
+    vector<HVertex*> verticesBuffer;
+
+    size_t size = graph->vertices.size();
+    verticesBuffer.resize(size);
+
+    for(size_t i=0; i<size; i++)
+    {
+        verticesBuffer[i] = graph->vertices[i];
+    }
+
+    return verticesBuffer;
+}
+
+size_t HGraphWorker::connectRandomVertices(HGraph* graph, vector<HVertex *> &verticesBuffer, size_t remainingConnectionsNumber, const size_t i)
 {
     graph->edges[i] = new HEdge (minVerticesNumber + rand()%(maxVerticesNumber+1));
 
     do
     {
-        size_t nextVertexIndexToConnect = rand()%temp.size();
+        size_t nextVertexIndexToConnect = rand()%verticesBuffer.size();
 
-        graph->installIncidence(temp[nextVertexIndexToConnect], graph->edges[i]);
+        graph->installIncidence(verticesBuffer[nextVertexIndexToConnect], graph->edges[i]);
 
-        if(temp[nextVertexIndexToConnect]->isFull())
+        if(verticesBuffer[nextVertexIndexToConnect]->isFull())
         {
-            temp.erase(temp.begin()+nextVertexIndexToConnect);
+            verticesBuffer.erase(verticesBuffer.begin()+nextVertexIndexToConnect);
         }
 
         remainingConnectionsNumber--;
-
-    } while (!(graph->edges[i]->isFull()));
+    }
+    while (!(graph->edges[i]->isFull()));
 
     return remainingConnectionsNumber;
 }
 
-void HGraphWorker::connectRemainingVertices(HGraph *graph, size_t i)
+void HGraphWorker::connectRemainingVertices(HGraph* graph, size_t i)
 {
     size_t nonFullVerticesNumber = graph->getNonFullVerticesNumber();
 
@@ -105,42 +111,43 @@ void HGraphWorker::connectRemainingVertices(HGraph *graph, size_t i)
     graph->setEdgesNumber (i-1);
 }
 
-vector<vector<int>> HGraphWorker::prepareConnectionMatrix(HGraph *graph, const size_t nonFullVerticesNumber)
+vector<vector<int>> HGraphWorker::prepareConnectionMatrix(HGraph* graph, const size_t nonFullVerticesNumber)
 {
     vector<vector<int>> connectionMatrix (nonFullVerticesNumber);
 
-    for (size_t k=0; k<nonFullVerticesNumber; k++)
-        connectionMatrix[k].resize(actualMaxEdgesNumber + 1);
+    for (size_t i=0; i<nonFullVerticesNumber; i++)
+        connectionMatrix[i].resize(actualMaxEdgesNumber + 1);
 
     int matrixElementIndex = 0;
     int verticesNumber = graph->getVerticesNumber();
 
-    for (int k=0; k<verticesNumber; k++)
+    for (int i=0; i<verticesNumber; i++)
     {
-        if (!graph->vertices[k]->isFull())
+        if (!graph->vertices[i]->isFull())
         {
-            int freePlaces = graph->vertices[k]->getFreePlacesNumber();
+            int freePlaces = graph->vertices[i]->getFreePlacesNumber();
+
             for(int j=0; j<freePlaces; j++)
                 connectionMatrix[matrixElementIndex][j] = 1;
-            connectionMatrix[matrixElementIndex][actualMaxEdgesNumber] =
-                    graph->vertices[k]->getID();
+
+            connectionMatrix[matrixElementIndex][actualMaxEdgesNumber] = graph->vertices[i]->getID();
+
             matrixElementIndex++;
         }
     }
-
     return connectionMatrix;
 }
 
 vector<size_t> HGraphWorker::getVerticesNumbers(vector<vector<int> > &connectionMatrix, size_t nonFullVerticesNumber)
 {
     vector<size_t> verticesNumbers (actualMaxEdgesNumber, 0);
-    for (size_t k=0; k<actualMaxEdgesNumber; k++)
+
+    for (size_t i=0; i<actualMaxEdgesNumber; i++)
     {
         for (size_t j=0; j<nonFullVerticesNumber; j++)
-            if (connectionMatrix[j][k] == 1)
-                verticesNumbers[k]++;
+            if (connectionMatrix[j][i] == 1)
+                verticesNumbers[i]++;
     }
-
     return verticesNumbers;
 }
 
@@ -152,40 +159,42 @@ vector<size_t> HGraphWorker::getVerticesNumbers(vector<vector<int> > &connection
 // Получившиеся строки - прототипы ребер
 void HGraphWorker::optimizeConnectionMatrix(vector<vector<int> > &connectionMatrix, vector<size_t> &verticesNumbers)
 {
-    for (size_t k=0; k<actualMaxEdgesNumber; k++)
+    for (size_t i=0; i<actualMaxEdgesNumber; i++)
     {
-        if (verticesNumbers[k] >= minVerticesNumber) continue;
+        if (verticesNumbers[i] >= minVerticesNumber) continue;
 
         for (size_t j=0; j<actualMaxEdgesNumber; j++)
         {
-            bool endMove = false;
+            bool isEnd = false;
 
             if (verticesNumbers[j] > minVerticesNumber)
             {
                 size_t movedVerticesNumber = verticesNumbers[j] - minVerticesNumber;
-                if (movedVerticesNumber > (minVerticesNumber - verticesNumbers[k]))
+                if (movedVerticesNumber > (minVerticesNumber - verticesNumbers[i]))
                 {
-                    movedVerticesNumber = minVerticesNumber - verticesNumbers[k];
-                    endMove = true;
+                    movedVerticesNumber = minVerticesNumber - verticesNumbers[i];
+                    isEnd = true;
                 }
 
                 int movedVertexIndex = 0;
-                for (size_t kk=0; kk<movedVerticesNumber; kk++)
+
+                for (size_t k=0; k<movedVerticesNumber; k++)
                 {
                     if (connectionMatrix[movedVertexIndex][j] == 1 &&
-                        connectionMatrix[movedVertexIndex][k] == 0)
+                        connectionMatrix[movedVertexIndex][i] == 0)
                     {
                         connectionMatrix[movedVertexIndex][j] = 0;
-                        connectionMatrix[movedVertexIndex][k] = 1;
+                        connectionMatrix[movedVertexIndex][i] = 1;
                         verticesNumbers[j]--;
-                        verticesNumbers[k]++;
+                        verticesNumbers[i]++;
                     }
                     else
-                        kk--;
+                        k--;
+
                     movedVertexIndex++;
                 }
             }
-            if (endMove)
+            if (isEnd)
                 break;
         }
     }
@@ -207,6 +216,7 @@ void HGraphWorker::randomSplit (HGraph* graph, size_t subGraphsNumber, int start
         for (size_t j=0; j<subGraphsVerticesNumbers[i]; j++)
         {
             size_t nextVertexIndex;
+
             do
             {
                 nextVertexIndex = rand()%graph->verticesNumber;
@@ -239,11 +249,11 @@ void HGraphWorker::gravitySplit (HGraph* graph, size_t subGraphsNumber, int star
 
 void HGraphWorker::dragEdgeInSubGraph (HGraph* graph, size_t subGraphVerticesNumber, int subGraphID)
 {
-    size_t minSplitOfEdge = 1; // Нижняя граница оценки числа подграфов, в которые входит ребро
-
+    size_t minEdgeSubGraphsNumber = 1; // Нижняя граница оценки числа подграфов, в которые входит ребро
     size_t remainingSubGraphPlacesNumber = subGraphVerticesNumber;
 
     bool hasAvailableEdge = false; // Сигнал для поднятия нижней границы
+
     do
     {
         hasAvailableEdge = false;
@@ -252,28 +262,31 @@ void HGraphWorker::dragEdgeInSubGraph (HGraph* graph, size_t subGraphVerticesNum
         for (size_t i=0; i<graph->edgesNumber; i++)
         {
             for (size_t j=0; j<graph->edges[i]->getMaxVerticesNumber(); j++)
-                if (graph->edges[i]->getIncidentVertexByIndex(j) != nullptr)
-                    if (graph->edges[i]->getIncidentVertexByIndex(j)->getGraphID() == graph->ID)
-                        hasAnyAvailableEdge = true;
-
-            // Нашел подходящее ребро
-            if (graph->edges[i]->getSubGraphsNumber() <= minSplitOfEdge)
             {
-                // Ищу свободные вершины
+                if (graph->edges[i]->getIncidentVertexByIndex(j) == nullptr) continue;
+
+                if (graph->edges[i]->getIncidentVertexByIndex(j)->getGraphID() == graph->ID)
+                    hasAnyAvailableEdge = true;
+            }
+
+            if (graph->edges[i]->getSubGraphsNumber() <= minEdgeSubGraphsNumber)
+            {
                 for (size_t j=0; j<graph->edges[i]->getMaxVerticesNumber(); j++)
-                    if (graph->edges[i]->getIncidentVertexByIndex(j) != nullptr)
-                        if (graph->edges[i]->getIncidentVertexByIndex(j)->getGraphID() == graph->ID)
-                        {
-                            hasAvailableEdge = true;
-                            // Включаю в подграф
-                            // столько, сколько влезет :)
-                            graph->edges[i]->getIncidentVertexByIndex(j)->setGraphID(subGraphID);
-                            remainingSubGraphPlacesNumber--;
-                            if (remainingSubGraphPlacesNumber == 0)
-                            {
-                                break;
-                            }
-                        }
+                {
+                    if (graph->edges[i]->getIncidentVertexByIndex(j) == nullptr) continue;
+                    if (graph->edges[i]->getIncidentVertexByIndex(j)->getGraphID() != graph->ID) continue;
+
+                    hasAvailableEdge = true;
+
+                    // Включаю в подграф столько, сколько влезет :)
+                    graph->edges[i]->getIncidentVertexByIndex(j)->setGraphID(subGraphID);
+                    remainingSubGraphPlacesNumber--;
+
+                    if (remainingSubGraphPlacesNumber == 0)
+                    {
+                        break;
+                    }
+                }
 
                 if (remainingSubGraphPlacesNumber == 0)
                 {
@@ -282,7 +295,7 @@ void HGraphWorker::dragEdgeInSubGraph (HGraph* graph, size_t subGraphVerticesNum
             }
         }
         if (!hasAvailableEdge)
-            minSplitOfEdge++;
+            minEdgeSubGraphsNumber++;
 
         if (!hasAnyAvailableEdge)
         {

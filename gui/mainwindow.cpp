@@ -85,8 +85,10 @@ void MainWindow::on_hierarchicalAction_changed()
     mode = HIERARCHICAL;
 }
 
-void MainWindow::on_createHGButton_clicked()
+void MainWindow::on_createGraphButton_clicked()
 {
+    ui->statusLabel->setText("Создание ГГ...");
+
     experimentNumber = ui->experimentNumberText->text().toUInt();
     if (experimentNumber < 1)
     {
@@ -109,6 +111,8 @@ void MainWindow::on_createHGButton_clicked()
     ui->randomButton->setEnabled(true);
     ui->seriesButton->setEnabled(true);
     ui->startButton->setEnabled(true);
+
+    ui->statusLabel->setText("Готово");
 }
 
 void MainWindow::clearGraphs()
@@ -345,8 +349,6 @@ void MainWindow::parseSplittingNumber(QString string, size_t i)
 
 void MainWindow::calculateData(QColor graphColor, size_t index)
 {
-    ui->statusLabel->setText("Создание ГГ...");
-
     edges.clear();
     steps.clear();
 

@@ -57,7 +57,7 @@ private slots:
 
     void on_hierarchicalAction_changed();
 
-    void on_createHGButton_clicked();
+    void on_createGraphButton_clicked();
 
     void on_randomButton_clicked();
 

@@ -15,7 +15,7 @@ HGraph::~HGraph()
     clearEdges();
 }
 
-HGraph::HGraph (vector<HVertex*> &graphVertices, int graphID)
+HGraph::HGraph (vector<HVertex*>& graphVertices, int graphID)
 {
     subGraphsNumber = 0;
     root = false;
@@ -26,9 +26,6 @@ HGraph::HGraph (vector<HVertex*> &graphVertices, int graphID)
 
     for (size_t i=0; i<graphVertices.size(); i++)
     {
-        // Считаю число вершин, входящих
-        // в подграф, и максимальное
-        // число инцидентных им ребер
         if (graphVertices[i]->getGraphID() == graphID)
         {
             subGraphVerticesCount++;
@@ -63,17 +60,17 @@ void HGraph::fillSubGraph (vector <HVertex*> graphVertices, int graphID, vector 
         {
             if (graphVertices[i]->getIncidentEdgeByIndex(j) == nullptr) continue;
 
-            bool newEdge = true;
-            // Если такое ребро уже есть,
-            // то включать уже не надо
+            bool isNewEdge = true;
+
             for (size_t k=0; k<subGraphEdgesCount; k++)
             {
                 if (newEdges[k] != graphVertices[i]->getIncidentEdgeByIndex(j)) continue;
 
-                newEdge = false;
+                isNewEdge = false;
                 break;
             }
-            if (newEdge)
+
+            if (isNewEdge)
             {
                 newEdges[subGraphEdgesCount] = graphVertices[i]->getIncidentEdgeByIndex(j);
                 subGraphEdgesCount++;
@@ -148,7 +145,7 @@ bool HGraph::isRoot()
     return root;
 }
 
-bool HGraph::isIncident (HVertex *vertex, HEdge *edge)
+bool HGraph::isIncident (HVertex* vertex, HEdge* edge)
 {
     if (vertex->isInEdge(edge) && edge->isInEdge(vertex))
         return true;
@@ -156,7 +153,7 @@ bool HGraph::isIncident (HVertex *vertex, HEdge *edge)
         return false;
 }
 
-bool HGraph::installIncidence (HVertex * vertex, HEdge *edge)
+bool HGraph::installIncidence (HVertex* vertex, HEdge* edge)
 {
     if (!vertex->isFull() && !edge->isFull())
         if (vertex->tryConnectEdge(edge))
@@ -168,7 +165,7 @@ bool HGraph::installIncidence (HVertex * vertex, HEdge *edge)
     return false;
 }
 
-void HGraph::uninstallIncidence (HVertex * vertex, HEdge *edge)
+void HGraph::uninstallIncidence (HVertex* vertex, HEdge* edge)
 {
     vertex->disconnectEdge(edge);
     edge->disconnectVertex(vertex);
@@ -234,7 +231,7 @@ void HGraph::clearEdges()
     edgesNumber = 0;
 }
 
-HGraph *HGraph::createSubGraph(int subGraphID)
+HGraph* HGraph::createSubGraph(int subGraphID)
 {
     if (subGraphID >= 0)
         return new HGraph(vertices, subGraphID);

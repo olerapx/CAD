@@ -18,7 +18,9 @@ private:
     static void createVertices (HGraph* graph, size_t verticesNumber, size_t minEdgesNumber, size_t actualMaxEdgesNumber);
     static void createEdges (HGraph* graph, size_t minVerticesNumber, size_t maxVerticesNumber);
 
-    static size_t connectRandomVertices (HGraph* graph, vector <HVertex*> &temp, size_t remainingConnectionsNumber, const size_t i);
+    static vector <HVertex*> prepareVerticesBuffer (HGraph* graph);
+
+    static size_t connectRandomVertices (HGraph* graph, vector <HVertex*> &verticesBuffer, size_t remainingConnectionsNumber, const size_t i);
     static void connectRemainingVertices(HGraph* graph, size_t i);
 
     static vector<vector<int>> prepareConnectionMatrix (HGraph* graph, const size_t nonFullVerticesNumber);

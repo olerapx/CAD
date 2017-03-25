@@ -428,7 +428,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Число подграфов от 2 до</string>
+             <string>Число частей от 2 до</string>
             </property>
            </widget>
           </item>

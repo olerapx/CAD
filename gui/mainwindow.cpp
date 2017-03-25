@@ -142,7 +142,7 @@ void MainWindow::on_randomButton_clicked()
 
         for (size_t j=2; j<=subGraphsNumber; j++)
         {
-            ui->statusLabel->setText("Осталось уровней: "+ QString::number(subGraphsNumber-j));
+            ui->statusLabel->setText("Осталось частей: "+ QString::number(subGraphsNumber-j));
 
             size_t totalFragmentsNumber = 0;
             size_t totalExternalEdgesNumber = 0;
@@ -217,7 +217,7 @@ void MainWindow::on_seriesButton_clicked()
         {
             double countOfAllExternalEdges = 0;
 
-            ui->statusLabel->setText("Осталось уровней: " + QString::number(subHGNumber-j));
+            ui->statusLabel->setText("Осталось частей: " + QString::number(subHGNumber-j));
 
             for (size_t i=0; i<experimentNumber; i++)
             {

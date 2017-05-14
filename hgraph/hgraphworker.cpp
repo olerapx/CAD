@@ -107,7 +107,7 @@ void HGraphWorker::connectRemainingVertices(HGraph* graph, size_t i)
         i++;
     }
 
-    if (i == 0) throw HGraphException ("Can't create edges: edges number is 0");
+    if (i == 0) throw HGraphException ("Невозможно создать ребра: число ребер равно 0");
     graph->setEdgesNumber (i-1);
 }
 
@@ -299,8 +299,8 @@ void HGraphWorker::dragEdgeInSubGraph (HGraph* graph, size_t subGraphVerticesNum
 
         if (!hasAnyAvailableEdge)
         {
-           throw HGraphException ("Can't split hypergraph: too few vertices.\nNo one edge is available for splitting."
-                                  " Increase the number of vertices or try again.");
+           throw HGraphException ("Невозможно разбить гиперграф: слишком мало вершин.\nНет ребер, доступных для разбиения."
+                                  " Увеличьте число вершин или попробуйте еще раз.");
         }
     }
     while (remainingSubGraphPlacesNumber > 0);

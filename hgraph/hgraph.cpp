@@ -236,5 +236,5 @@ HGraph* HGraph::createSubGraph(int subGraphID)
     if (subGraphID >= 0)
         return new HGraph(vertices, subGraphID);
     else
-        throw HGraphException ("Hypergraph ID cannot be lesser than 0.");
+        throw HGraphException ("ID гиперграфа не может быть меньше 0.");
 }

@@ -2,16 +2,19 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QChartView>
+#include <QLineSeries>
+#include <QMessageBox>
+#include <QChart>
+#include <QValueAxis>
 #include <ctime>
 #include <sstream>
 #include <iomanip>
 
-#include "chart/qcustomplot.h"
-#include "chart/line.h"
 #include "hgraph/hgraphworker.h"
-#include "chart/linecolorpicker.h"
-
 #include "datawindow.h"
+
+using namespace QtCharts;
 
 namespace Ui
 {
@@ -34,7 +37,7 @@ public:
 
     /* common */
     Mode mode;
-    Line steps, edges;
+
     double deploymentComplexity, tracingComplexity;
 
     QString data;
@@ -73,26 +76,27 @@ private:
     void initMenu();
     void initCharts();
 
-    void drawLine (QCustomPlot* chart, Line line, QString name, QPen pen, bool drawLabels = true);
-    void drawText (QCustomPlot* chart, QString text, QPen pen, double x, double y);
     void resetCharts();
 
     void clearGraphs();
 
-    void printRandomData();
-    void printSeriesData();
+    void printRandomData(QLineSeries *steps, QLineSeries *edges);
+    void printSeriesData(QLineSeries *steps, QLineSeries *edges);
+
+    void setSeriesStyle(QLineSeries* series);
+    void setAxisStyle(QChartView* view);
 
     void parseSplittingNumbers();
     void parseSplittingNumber(QString string, size_t i);
 
-    void calculateData (QColor graphColor, size_t index);
+    void calculateData(size_t index);
 
     size_t getNumberOfComputersOnLevel(size_t index, size_t level);
-    void initGraphHierarchy (size_t index);
-    void copyGraphToHierarchy ();
-    void gatheringData (size_t index);
-    void showData (QColor graphColor, size_t index);
-    void printHierarchicalData(QColor graphColor, size_t index);
+    void initGraphHierarchy(size_t index);
+    void copyGraphToHierarchy();
+    void gatheringData(size_t index);
+    void showData(size_t index, QLineSeries *steps, QLineSeries *edges);
+    void printHierarchicalData(size_t index, QLineSeries *steps, QLineSeries *edges);
 };
 
 #endif // MAINWINDOW_H

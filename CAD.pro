@@ -4,41 +4,33 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
-QT += printsupport
-
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
-
-CONFIG +=C++11
-
 TARGET = CAD
 TEMPLATE = app
 
+QT += core gui charts
 
-SOURCES += main.cpp\
-        gui/mainwindow.cpp \
-    hgraph/hgraph.cpp \
-    chart/qcustomplot.cpp \
-    chart/line.cpp \
-    gui/datawindow.cpp \
-    hgraph/hgraphexception.cpp \
-    chart/linecolorpicker.cpp \
-    hgraph/hedge.cpp \
-    hgraph/hvertex.cpp \
-    hgraph/hgraphworker.cpp
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-HEADERS  += gui/mainwindow.h \
+HEADERS  += \
+    gui/mainwindow.h \
+    gui/datawindow.h \
+    chart/callout.h \
     hgraph/hgraph.h \
-    chart/qcustomplot.h \
-    chart/line.h \
-   gui/datawindow.h \
     hgraph/hgraphexception.h \
-    chart/linecolorpicker.h \
     hgraph/hedge.h \
     hgraph/hvertex.h \
     hgraph/hgraphworker.h
 
-FORMS    += gui/mainwindow.ui \
-    gui/datawindow.ui
+SOURCES += main.cpp \
+    gui/mainwindow.cpp \
+    gui/datawindow.cpp \
+    chart/callout.cpp \
+    hgraph/hgraph.cpp \
+    hgraph/hgraphexception.cpp \
+    hgraph/hedge.cpp \
+    hgraph/hvertex.cpp \
+    hgraph/hgraphworker.cpp
 
-DISTFILES +=
+FORMS    += \
+    gui/mainwindow.ui \
+    gui/datawindow.ui

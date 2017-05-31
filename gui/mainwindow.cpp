@@ -163,6 +163,29 @@ void MainWindow::setSeriesStyle(QLineSeries *series)
     series->setPointsVisible(true);
 }
 
+void MainWindow::setAxisStyle(QChartView *view)
+{
+    view->chart()->createDefaultAxes();
+
+    view->chart()->axisX()->setGridLinePen(QPen(QBrush(Qt::Dense6Pattern), 0.5));
+    view->chart()->axisY()->setGridLinePen(QPen(QBrush(Qt::Dense6Pattern), 0.5));
+
+    view->chart()->axisX()->setMin(0);
+    view->chart()->axisY()->setMin(0);
+
+    int max = 0;
+    for(QAbstractSeries* s: view->chart()->series())
+    {
+        QLineSeries* ls = (QLineSeries*) s;
+
+        for(int i=0; i<ls->count(); i++)
+            if(ls->at(i).x() > max) max = ceil(ls->at(i).x());
+    }
+
+    QValueAxis* a = (QValueAxis*)view->chart()->axisX();
+    a->setTickCount(max + 1);
+}
+
 void MainWindow::printRandomData(QLineSeries* steps, QLineSeries* edges)
 {  
     ui->stepsChart->chart()->addSeries(steps);
@@ -170,6 +193,8 @@ void MainWindow::printRandomData(QLineSeries* steps, QLineSeries* edges)
 
     setAxisStyle(ui->stepsChart);
     setAxisStyle(ui->edgesChart);
+
+    updateCharts();
 
     std::stringstream str;
     str << "Случайное разбиение\n";
@@ -182,12 +207,10 @@ void MainWindow::printRandomData(QLineSeries* steps, QLineSeries* edges)
     data = QString::fromStdString(str.str());
 }
 
-void MainWindow::setAxisStyle(QChartView *view)
+void MainWindow::updateCharts()
 {
-    view->chart()->createDefaultAxes();
-
-    view->chart()->axisX()->setGridLinePen(QPen(QBrush(Qt::Dense6Pattern), 0.5));
-    view->chart()->axisY()->setGridLinePen(QPen(QBrush(Qt::Dense6Pattern), 0.5));
+    this->resize(this->width(), this->height()+1);
+    this->resize(this->width(), this->height()-1);
 }
 
 void MainWindow::on_seriesButton_clicked()
@@ -257,10 +280,12 @@ void MainWindow::on_seriesButton_clicked()
 void MainWindow::printSeriesData(QLineSeries *steps, QLineSeries *edges)
 {
     ui->stepsChart->chart()->addSeries(steps);
-    ui->edgesChart->chart()->addSeries(edges);
+    ui->edgesChart->chart()->addSeries(edges);  
 
     setAxisStyle(ui->stepsChart);
     setAxisStyle(ui->edgesChart);
+
+    updateCharts();
 
     std::stringstream str;
     str << "Последовательное разбиение\n";
@@ -525,6 +550,8 @@ void MainWindow::printHierarchicalData(size_t index, QLineSeries *steps, QLineSe
 
     setAxisStyle(ui->stepsChart);
     setAxisStyle(ui->edgesChart);
+
+    updateCharts();
 
     std::stringstream str;
     str << "Число разбиений: ";

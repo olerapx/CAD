@@ -85,6 +85,7 @@ private:
 
     void setSeriesStyle(QLineSeries* series);
     void setAxisStyle(QChartView* view);
+    void updateCharts();
 
     void parseSplittingNumbers();
     void parseSplittingNumber(QString string, size_t i);

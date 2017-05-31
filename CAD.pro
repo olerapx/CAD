@@ -14,7 +14,6 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 HEADERS  += \
     gui/mainwindow.h \
     gui/datawindow.h \
-    chart/callout.h \
     hgraph/hgraph.h \
     hgraph/hgraphexception.h \
     hgraph/hedge.h \
@@ -24,7 +23,6 @@ HEADERS  += \
 SOURCES += main.cpp \
     gui/mainwindow.cpp \
     gui/datawindow.cpp \
-    chart/callout.cpp \
     hgraph/hgraph.cpp \
     hgraph/hgraphexception.cpp \
     hgraph/hedge.cpp \

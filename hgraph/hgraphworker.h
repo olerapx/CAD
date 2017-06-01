@@ -26,6 +26,7 @@ private:
     size_t minEdgesNumber, maxEdgesNumber;
     size_t actualMaxEdgesNumber;
 
+    size_t subGraphsNumber;
     double deploymentComplexity, tracingComplexity;
 
     size_t experimentNumber;
@@ -81,11 +82,11 @@ signals:
     void sendRandomCalculated();
     void sendSeriesCalculated();
     void sendHierarchicalCalculated();
-    void sendPrintHierarchicalData(size_t i);
+    void sendPrintHierarchicalData(uint i);
 
     void sendStopped();
 
-    void sendCreateNewSeries(size_t index);
+    void sendCreateNewSeries(uint index);
     void sendSetMaxProgress(int value);
 
     void sendStatus(QString status);
@@ -98,17 +99,25 @@ signals:
     void sendError(QString error);
 
 public slots:
-    void onGenerate(uint experimentNumber, uint verticesNumber, uint minEdgesNumber, uint actualMaxEdgesNumber,
-                       uint minVerticesNumber, uint maxVerticesNumber);
+    void onGenerate();
 
-    void onCalculateRandom(uint subGraphsNumber);
-    void onCalculateSeries(uint tracingComplexity, uint deploymentComplexity, uint subGraphsNumber);
-    void onCalculateHierarchical(vector<vector<size_t>> splittingNumbers, uint tracingComplexity, uint deploymentComplexity, uint levelNumber);
+    void onCalculateRandom();
+    void onCalculateSeries();
+    void onCalculateHierarchical();
 
     void onStopped();
 
 public:
     HGraphWorker();
+
+    bool isStopped() { return actuallyStopped; }
+
+    void setGenerationParameters(size_t experimentNumber, size_t verticesNumber, size_t minEdgesNumber, size_t maxEdgesNumber,
+                       size_t minVerticesNumber, size_t maxVerticesNumber);
+
+    void setRandomParameters(size_t subGraphsNumber);
+    void setSeriesParameters(size_t tracingComplexity, size_t deploymentComplexity, size_t subGraphsNumber);
+    void setHierarchicalParameters(vector<vector<size_t>> splittingNumbers, size_t tracingComplexity, size_t deploymentComplexity, size_t levelNumber);
 };
 
 #endif // HGRAPHWORKER_H

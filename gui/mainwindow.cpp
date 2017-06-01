@@ -32,7 +32,18 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(&worker, &HGraphWorker::sendError, this, &MainWindow::onSendError);
 
+    connect(this, &MainWindow::sendStop, &worker, &HGraphWorker::onStopped, Qt::DirectConnection);
+
     srand(time(NULL));
+}
+
+void MainWindow::closeEvent(QCloseEvent* event)
+{
+    sendStop();
+
+    workerThread.wait();
+
+    QMainWindow::closeEvent(event);
 }
 
 void MainWindow::initMenu()
@@ -83,36 +94,56 @@ void MainWindow::onSendGenerated()
     ui->startButton->setEnabled(true);
 
     ui->statusLabel->setText("Готово");
+    ui->progressBar->setValue(ui->progressBar->maximum());
+
+    workerThread.disconnect();
+    workerThread.quit();
 }
 
 void MainWindow::onSendRandomCalculated()
 {
     ui->statusLabel->setText("Готово");
     printRandomData(steps, edges);
+    ui->progressBar->setValue(ui->progressBar->maximum());
+
+    workerThread.disconnect();
+    workerThread.quit();
 }
 
 void MainWindow::onSendSeriesCalculated()
 {
     ui->statusLabel->setText("Готово");
     printSeriesData(steps, edges);
+    ui->progressBar->setValue(ui->progressBar->maximum());
+
+    workerThread.disconnect();
+    workerThread.quit();
 }
 
 void MainWindow::onSendHierarchicalCalculated()
 {
     ui->statusLabel->setText("Готово");
+    ui->progressBar->setValue(ui->progressBar->maximum());
+
+    workerThread.disconnect();
+    workerThread.quit();
 }
 
-void MainWindow::onSendPrintHierarchicalData(size_t i)
+void MainWindow::onSendPrintHierarchicalData(uint i)
 {
+    ui->statusLabel->setText("Переход на следующую модель");
     printHierarchicalData(i, steps, edges);
 }
 
 void MainWindow::onSendStopped()
 {
     ui->statusLabel->setText("Остановлено");
+
+    workerThread.disconnect();
+    workerThread.quit();
 }
 
-void MainWindow::onSendCreateNewSeries(size_t index)
+void MainWindow::onSendCreateNewSeries(uint index)
 {
     steps = new QLineSeries();
     edges = new QLineSeries();
@@ -157,10 +188,14 @@ void MainWindow::onSendStepsAppend(QPointF point)
 void MainWindow::onSendError(QString error)
 {
     QMessageBox::critical(0, "Critical", error);
+    workerThread.disconnect();
+    workerThread.quit();
 }
 
 void MainWindow::on_createGraphButton_clicked()
 {
+    if(!worker.isStopped()) return;
+
     ui->statusLabel->setText("Создание ГГ...");
 
     experimentNumber = ui->experimentNumberText->text().toUInt();
@@ -170,13 +205,18 @@ void MainWindow::on_createGraphButton_clicked()
     minEdgeNumber = ui->minEdgeNumberText->text().toUInt();
     maxEdgeNumber = ui->maxEdgeNumberText->text().toUInt();
 
-    worker.onGenerate(experimentNumber, verticesNumber,
+    worker.setGenerationParameters(experimentNumber, verticesNumber,
                     minContactNumber, maxContactNumber,
                     minEdgeNumber, maxEdgeNumber);
+
+    connect(&workerThread, &QThread::started, &worker, &HGraphWorker::onGenerate);
+    workerThread.start();
 }
 
 void MainWindow::on_randomButton_clicked()
 {
+    if(!worker.isStopped()) return;
+
     resetCharts();
 
     steps = new QLineSeries();
@@ -194,7 +234,10 @@ void MainWindow::on_randomButton_clicked()
     ui->progressBar->setMaximum(subGraphsNumber * experimentNumber);
     ui->progressBar->setValue(experimentNumber * 2);
 
-    worker.onCalculateRandom(subGraphsNumber);
+    worker.setRandomParameters(subGraphsNumber);
+
+    connect(&workerThread, &QThread::started, &worker, &HGraphWorker::onCalculateRandom);
+    workerThread.start();
 
     ui->statusLabel->setText("Готово");
 }
@@ -266,6 +309,8 @@ void MainWindow::updateCharts()
 
 void MainWindow::on_seriesButton_clicked()
 {
+    if(!worker.isStopped()) return;
+
     resetCharts();
 
     steps = new QLineSeries();
@@ -285,7 +330,10 @@ void MainWindow::on_seriesButton_clicked()
     ui->progressBar->setMaximum(subGraphsNumber * experimentNumber);
     ui->progressBar->setValue(experimentNumber * 2);
 
-    worker.onCalculateSeries(tracingComplexity, deploymentComplexity, subGraphsNumber);
+    worker.setSeriesParameters(tracingComplexity, deploymentComplexity, subGraphsNumber);
+
+    connect(&workerThread, &QThread::started, &worker, &HGraphWorker::onCalculateSeries);
+    workerThread.start();
 }
 
 void MainWindow::printSeriesData(QLineSeries *steps, QLineSeries *edges)
@@ -321,6 +369,8 @@ void MainWindow::resetCharts()
 
 void MainWindow::on_startButton_clicked()
 {
+    if(!worker.isStopped()) return;
+
     resetCharts();
 
     tracingComplexity = ui->tracingComplexityText->text().toDouble();
@@ -332,7 +382,10 @@ void MainWindow::on_startButton_clicked()
     ui->progressBar->setMinimum(0);
     ui->progressBar->setMaximum(experimentNumber);
 
-    worker.onCalculateHierarchical(splittingNumbers, tracingComplexity, deploymentComplexity, levelNumber);
+    worker.setHierarchicalParameters(splittingNumbers, tracingComplexity, deploymentComplexity, levelNumber);
+
+    connect(&workerThread, &QThread::started, &worker, &HGraphWorker::onCalculateHierarchical);
+    workerThread.start();
 }
 
 void MainWindow::parseSplittingNumbers()
@@ -401,4 +454,9 @@ void MainWindow::printHierarchicalData(size_t index, QLineSeries *steps, QLineSe
 void MainWindow::on_showButton_clicked()
 {
     dataWindow.show();
+}
+
+void MainWindow::on_stopButton_clicked()
+{
+    sendStop();
 }

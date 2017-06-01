@@ -6,7 +6,41 @@ HGraphWorker::HGraphWorker()
     actuallyStopped = true;
 }
 
-void HGraphWorker::onGenerate(uint experimentNumber, uint verticesNumber, uint minEdgesNumber, uint maxEdgesNumber, uint minVerticesNumber, uint maxVerticesNumber)
+void HGraphWorker::setGenerationParameters(size_t experimentNumber, size_t verticesNumber, size_t minEdgesNumber, size_t maxEdgesNumber,
+                   size_t minVerticesNumber, size_t maxVerticesNumber)
+{
+    this->experimentNumber = experimentNumber;
+
+    this->verticesNumber = verticesNumber;
+
+    this->minEdgesNumber = minEdgesNumber;
+    this->maxEdgesNumber = maxEdgesNumber;
+
+    this->minVerticesNumber = minVerticesNumber;
+    this->maxVerticesNumber = maxVerticesNumber;
+}
+
+void HGraphWorker::setRandomParameters(size_t subGraphsNumber)
+{
+    this->subGraphsNumber = subGraphsNumber;
+}
+
+void HGraphWorker::setSeriesParameters(size_t tracingComplexity, size_t deploymentComplexity, size_t subGraphsNumber)
+{
+    this->tracingComplexity = tracingComplexity;
+    this->deploymentComplexity = deploymentComplexity;
+    this->subGraphsNumber = subGraphsNumber;
+}
+
+void HGraphWorker::setHierarchicalParameters(vector<vector<size_t>> splittingNumbers, size_t tracingComplexity, size_t deploymentComplexity, size_t levelNumber)
+{
+    this->splittingNumbers = splittingNumbers;
+    this->tracingComplexity = tracingComplexity;
+    this->deploymentComplexity = deploymentComplexity;
+    this->levelNumber = levelNumber;
+}
+
+void HGraphWorker::onGenerate()
 {
     if(!actuallyStopped)
         return;
@@ -273,7 +307,7 @@ void HGraphWorker::optimizeConnectionMatrix(vector<vector<int> > &connectionMatr
     }
 }
 
-void HGraphWorker::onCalculateRandom(uint subGraphsNumber)
+void HGraphWorker::onCalculateRandom()
 {
     if(!actuallyStopped)
         return;
@@ -353,7 +387,7 @@ void HGraphWorker::randomSplit (HGraph* graph, size_t subGraphsNumber, int start
     subGraphsVerticesNumbers.clear();
 }
 
-void HGraphWorker::onCalculateSeries(uint tracingComplexity, uint deploymentComplexity, uint subGraphsNumber)
+void HGraphWorker::onCalculateSeries()
 {
     if(!actuallyStopped)
         return;
@@ -503,7 +537,7 @@ void HGraphWorker::resetSplitting(HGraph* graph)
         graph->vertices[i]->setGraphID(-1);
 }
 
-void HGraphWorker::onCalculateHierarchical(vector<vector<size_t> > splittingNumbers, uint tracingComplexity, uint deploymentComplexity, uint levelNumber)
+void HGraphWorker::onCalculateHierarchical()
 {
     if(!actuallyStopped)
         return;

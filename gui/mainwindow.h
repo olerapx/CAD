@@ -49,11 +49,11 @@ private slots:
     void onSendRandomCalculated();
     void onSendSeriesCalculated();
     void onSendHierarchicalCalculated();
-    void onSendPrintHierarchicalData(size_t i);
+    void onSendPrintHierarchicalData(uint i);
 
     void onSendStopped();
 
-    void onSendCreateNewSeries(size_t index);
+    void onSendCreateNewSeries(uint index);
     void onSendSetMaxProgress(int value);
 
     void onSendStatus(QString status);
@@ -64,6 +64,14 @@ private slots:
     void onSendStepsAppend(QPointF point);
 
     void onSendError(QString error);
+
+    void on_stopButton_clicked();
+
+protected:
+     void closeEvent(QCloseEvent *event);
+
+signals:
+     void sendStop();
 
 private:
     Ui::MainWindow *ui;

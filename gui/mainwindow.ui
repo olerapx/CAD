@@ -684,6 +684,13 @@ p, li { white-space: pre-wrap; }
        </spacer>
       </item>
       <item>
+       <widget class="QPushButton" name="stopButton">
+        <property name="text">
+         <string>Стоп</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="showButton">
         <property name="text">
          <string>Показать данные</string>

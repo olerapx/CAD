@@ -7,6 +7,7 @@
 #include <QMessageBox>
 #include <QChart>
 #include <QValueAxis>
+#include <QThread>
 #include <ctime>
 #include <sstream>
 #include <iomanip>
@@ -21,12 +22,6 @@ namespace Ui
     class MainWindow;
 }
 
-enum Mode
-{
-    SINGLE_LEVEL,
-    HIERARCHICAL
-};
-
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -34,26 +29,6 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-
-    /* common */
-    Mode mode;
-
-    double deploymentComplexity, tracingComplexity;
-
-    QString data;
-
-    size_t experimentNumber;
-
-    /* single-level */
-    vector<HGraph*> hGraph;
-    size_t minSubGraphsNumber;
-
-    /* hierarchical */
-    vector<vector<vector<HGraph*>>> hGraphHierarchy;
-    vector<vector<size_t>> externalEdgesNumberIncreasing;
-
-    vector<vector<size_t>> splittingNumbers;
-    int levelNumber;
 
 private slots:
     void on_singleLevelAction_changed();
@@ -70,15 +45,56 @@ private slots:
 
     void on_showButton_clicked();
 
+    void onSendGenerated();
+    void onSendRandomCalculated();
+    void onSendSeriesCalculated();
+    void onSendHierarchicalCalculated();
+    void onSendPrintHierarchicalData(size_t i);
+
+    void onSendStopped();
+
+    void onSendCreateNewSeries(size_t index);
+    void onSendSetMaxProgress(int value);
+
+    void onSendStatus(QString status);
+    void onSendProgress(int progress);
+    void onSendAddProgress(int progress);
+
+    void onSendEdgesAppend(QPointF point);
+    void onSendStepsAppend(QPointF point);
+
+    void onSendError(QString error);
+
 private:
     Ui::MainWindow *ui;
+
+    QString data;
+
+    Mode mode;
+    HGraphWorker worker;
+    DataWindow dataWindow;
+
+    QThread workerThread;
+
+    size_t experimentNumber;
+    size_t verticesNumber;
+
+    size_t minContactNumber, maxContactNumber;
+    size_t minEdgeNumber, maxEdgeNumber;
+
+    size_t subGraphsNumber;
+    size_t levelNumber;
+
+    size_t tracingComplexity, deploymentComplexity;
+
+    vector<vector<size_t>> splittingNumbers;
+
+    QLineSeries *steps, *edges;
 
     void initMenu();
     void initCharts();
 
     void resetCharts();
-
-    void clearGraphs();
 
     void printRandomData(QLineSeries *steps, QLineSeries *edges);
     void printSeriesData(QLineSeries *steps, QLineSeries *edges);
@@ -90,13 +106,6 @@ private:
     void parseSplittingNumbers();
     void parseSplittingNumber(QString string, size_t i);
 
-    void calculateData(size_t index);
-
-    size_t getNumberOfComputersOnLevel(size_t index, size_t level);
-    void initGraphHierarchy(size_t index);
-    void copyGraphToHierarchy();
-    void gatheringData(size_t index);
-    void showData(size_t index, QLineSeries *steps, QLineSeries *edges);
     void printHierarchicalData(size_t index, QLineSeries *steps, QLineSeries *edges);
 };
 

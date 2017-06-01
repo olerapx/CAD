@@ -10,6 +10,28 @@ MainWindow::MainWindow(QWidget *parent) :
     initMenu();
     initCharts();
 
+    worker.moveToThread(&workerThread);
+
+    connect(&worker, &HGraphWorker::sendGenerated, this, &MainWindow::onSendGenerated);
+    connect(&worker, &HGraphWorker::sendRandomCalculated, this, &MainWindow::onSendRandomCalculated);
+    connect(&worker, &HGraphWorker::sendSeriesCalculated, this, &MainWindow::onSendSeriesCalculated);
+    connect(&worker, &HGraphWorker::sendHierarchicalCalculated, this, &MainWindow::onSendHierarchicalCalculated);
+    connect(&worker, &HGraphWorker::sendPrintHierarchicalData, this, &MainWindow::onSendPrintHierarchicalData);
+
+    connect(&worker, &HGraphWorker::sendStopped, this, &MainWindow::onSendStopped);
+
+    connect(&worker, &HGraphWorker::sendCreateNewSeries, this, &MainWindow::onSendCreateNewSeries);
+    connect(&worker, &HGraphWorker::sendSetMaxProgress, this, &MainWindow::onSendSetMaxProgress);
+
+    connect(&worker, &HGraphWorker::sendStatus, this, &MainWindow::onSendStatus);
+    connect(&worker, &HGraphWorker::sendProgress, this, &MainWindow::onSendProgress);
+    connect(&worker, &HGraphWorker::sendAddProgress, this, &MainWindow::onSendAddProgress);
+
+    connect(&worker, &HGraphWorker::sendEdgesAppend, this, &MainWindow::onSendEdgesAppend);
+    connect(&worker, &HGraphWorker::sendStepsAppend, this, &MainWindow::onSendStepsAppend);
+
+    connect(&worker, &HGraphWorker::sendError, this, &MainWindow::onSendError);
+
     srand(time(NULL));
 }
 
@@ -54,29 +76,8 @@ void MainWindow::on_hierarchicalAction_changed()
     mode = HIERARCHICAL;
 }
 
-void MainWindow::on_createGraphButton_clicked()
+void MainWindow::onSendGenerated()
 {
-    ui->statusLabel->setText("Создание ГГ...");
-
-    experimentNumber = ui->experimentNumberText->text().toUInt();
-    if (experimentNumber < 1)
-    {
-        experimentNumber = 1;
-        ui->experimentNumberText->setText("1");
-    }
-
-    clearGraphs();
-
-    for (size_t i=0; i<experimentNumber; i++)
-    {
-        hGraph[i] = new HGraph;
-        HGraphWorker::generateGraph(hGraph[i], ui->vertexNumberText->text().toUInt(),
-                               ui->minContactNumberText->text().toUInt(),
-                               ui->maxContactNumberText->text().toUInt(),
-                               ui->minEdgeNumberText->text().toUInt(),
-                               ui->maxEdgeNumberText->text().toUInt());
-    }
-
     ui->randomButton->setEnabled(true);
     ui->seriesButton->setEnabled(true);
     ui->startButton->setEnabled(true);
@@ -84,67 +85,116 @@ void MainWindow::on_createGraphButton_clicked()
     ui->statusLabel->setText("Готово");
 }
 
-void MainWindow::clearGraphs()
+void MainWindow::onSendRandomCalculated()
 {
-    hGraph.clear();
-    hGraph.resize(experimentNumber);
+    ui->statusLabel->setText("Готово");
+    printRandomData(steps, edges);
+}
 
-    for (size_t i=0; i<hGraphHierarchy.size(); i++)
-        for (size_t j=0; j<hGraphHierarchy[i].size(); j++)
-            for (size_t k=0; k<hGraphHierarchy[i][j].size(); k++)
-                delete hGraphHierarchy[i][j][k];
+void MainWindow::onSendSeriesCalculated()
+{
+    ui->statusLabel->setText("Готово");
+    printSeriesData(steps, edges);
+}
 
-    hGraphHierarchy.clear();
+void MainWindow::onSendHierarchicalCalculated()
+{
+    ui->statusLabel->setText("Готово");
+}
+
+void MainWindow::onSendPrintHierarchicalData(size_t i)
+{
+    printHierarchicalData(i, steps, edges);
+}
+
+void MainWindow::onSendStopped()
+{
+    ui->statusLabel->setText("Остановлено");
+}
+
+void MainWindow::onSendCreateNewSeries(size_t index)
+{
+    steps = new QLineSeries();
+    edges = new QLineSeries();
+
+    steps->setPointsVisible(true);
+    edges->setPointsVisible(true);
+
+    steps->setName(QString::number(index+1));
+    edges->setName(QString::number(index+1));
+}
+
+void MainWindow::onSendSetMaxProgress(int value)
+{
+    ui->progressBar->setMaximum(value);
+}
+
+void MainWindow::onSendStatus(QString status)
+{
+    ui->statusLabel->setText(status);
+}
+
+void MainWindow::onSendProgress(int progress)
+{
+    ui->progressBar->setValue(progress);
+}
+
+void MainWindow::onSendAddProgress(int progress)
+{
+    ui->progressBar->setValue(ui->progressBar->value() + progress);
+}
+
+void MainWindow::onSendEdgesAppend(QPointF point)
+{
+    edges->append(point);
+}
+
+void MainWindow::onSendStepsAppend(QPointF point)
+{
+    steps->append(point);
+}
+
+void MainWindow::onSendError(QString error)
+{
+    QMessageBox::critical(0, "Critical", error);
+}
+
+void MainWindow::on_createGraphButton_clicked()
+{
+    ui->statusLabel->setText("Создание ГГ...");
+
+    experimentNumber = ui->experimentNumberText->text().toUInt();
+    verticesNumber = ui->vertexNumberText->text().toUInt();
+    minContactNumber = ui->minContactNumberText->text().toUInt();
+    maxContactNumber = ui->maxContactNumberText->text().toUInt();
+    minEdgeNumber = ui->minEdgeNumberText->text().toUInt();
+    maxEdgeNumber = ui->maxEdgeNumberText->text().toUInt();
+
+    worker.onGenerate(experimentNumber, verticesNumber,
+                    minContactNumber, maxContactNumber,
+                    minEdgeNumber, maxEdgeNumber);
 }
 
 void MainWindow::on_randomButton_clicked()
 {
-    try
-    {
-        resetCharts();
+    resetCharts();
 
-        QLineSeries* steps = new QLineSeries();
-        QLineSeries* edges = new QLineSeries();
+    steps = new QLineSeries();
+    edges = new QLineSeries();
 
-        setSeriesStyle(steps);
-        setSeriesStyle(edges);
+    setSeriesStyle(steps);
+    setSeriesStyle(edges);
 
-        steps->setName("1");
-        edges->setName("1");
+    steps->setName("1");
+    edges->setName("1");
 
-        size_t subGraphsNumber = ui->subGraphsNumberText->text().toUInt();
+    subGraphsNumber = ui->subGraphsNumberText->text().toUInt();
 
-        ui->progressBar->setMinimum(experimentNumber * 2);
-        ui->progressBar->setMaximum(subGraphsNumber * experimentNumber);
-        ui->progressBar->setValue(experimentNumber * 2);
+    ui->progressBar->setMinimum(experimentNumber * 2);
+    ui->progressBar->setMaximum(subGraphsNumber * experimentNumber);
+    ui->progressBar->setValue(experimentNumber * 2);
 
-        for (size_t j=2; j<=subGraphsNumber; j++)
-        {
-            ui->statusLabel->setText("Осталось частей: "+ QString::number(subGraphsNumber-j));
-
-            size_t totalFragmentsNumber = 0;
-            size_t totalExternalEdgesNumber = 0;
-
-            for (size_t i=0; i<experimentNumber; i++)
-            {
-                HGraphWorker::resetSplitting(hGraph[i]);
-                HGraphWorker::randomSplit(hGraph[i], j, 0);
-                totalFragmentsNumber += hGraph[i]->getFragmentsNumber();
-                totalExternalEdgesNumber += hGraph[i]->getExternalEdgesNumber();
-
-                ui->progressBar->setValue(j*experimentNumber+1);
-            }
-            edges->append(j, 100.0 * (double)totalExternalEdgesNumber/(double)totalFragmentsNumber);
-        }
-
-        ui->progressBar->setValue(experimentNumber * 2);
-
-        printRandomData(steps, edges);
-    }
-    catch (HGraphException &ex)
-    {
-        QMessageBox::critical(0, "Critical", ex.getError().c_str());
-    }
+    worker.onCalculateRandom(subGraphsNumber);
 
     ui->statusLabel->setText("Готово");
 }
@@ -205,6 +255,7 @@ void MainWindow::printRandomData(QLineSeries* steps, QLineSeries* edges)
         str << std::setw(15) << edges->at(i).x() << std::setw(15) << edges->at(i).y() << "\n";
 
     data = QString::fromStdString(str.str());
+    dataWindow.setData(data);
 }
 
 void MainWindow::updateCharts()
@@ -215,66 +266,26 @@ void MainWindow::updateCharts()
 
 void MainWindow::on_seriesButton_clicked()
 {
-    try
-    {
-        resetCharts();
+    resetCharts();
 
-        QLineSeries* steps = new QLineSeries();
-        QLineSeries* edges = new QLineSeries();
+    steps = new QLineSeries();
+    edges = new QLineSeries();
 
-        setSeriesStyle(steps);
-        setSeriesStyle(edges);
+    setSeriesStyle(steps);
+    setSeriesStyle(edges);
 
-        steps->setName("1");
-        edges->setName("1");
+    steps->setName("1");
+    edges->setName("1");
 
-        tracingComplexity = ui->tracingComplexityText->text().toDouble();
-        deploymentComplexity = ui->deploymentComplexityText->text().toDouble();
-        size_t subHGNumber = ui->subGraphsNumberText->text().toUInt();
+    tracingComplexity = ui->tracingComplexityText->text().toDouble();
+    deploymentComplexity = ui->deploymentComplexityText->text().toDouble();
+    subGraphsNumber = ui->subGraphsNumberText->text().toUInt();
 
-        ui->progressBar->setMinimum(experimentNumber * 2);
-        ui->progressBar->setMaximum(subHGNumber * experimentNumber);
-        ui->progressBar->setValue(experimentNumber * 2);
+    ui->progressBar->setMinimum(experimentNumber * 2);
+    ui->progressBar->setMaximum(subGraphsNumber * experimentNumber);
+    ui->progressBar->setValue(experimentNumber * 2);
 
-        double countOfAllFragments = 0;
-
-        for (size_t i=0; i<experimentNumber; i++)
-            countOfAllFragments += hGraph[i]->getFragmentsNumber();
-        countOfAllFragments /= experimentNumber;
-
-        steps->append(1, pow((double)hGraph[0]->getVerticesNumber(), deploymentComplexity) + pow(countOfAllFragments, tracingComplexity));
-
-        for (size_t j=2; j<=subHGNumber; j++)
-        {
-            double countOfAllExternalEdges = 0;
-
-            ui->statusLabel->setText("Осталось частей: " + QString::number(subHGNumber-j));
-
-            for (size_t i=0; i<experimentNumber; i++)
-            {
-                HGraphWorker::resetSplitting(hGraph[i]);
-                HGraphWorker::gravitySplit(hGraph[i], j, 0);
-                countOfAllExternalEdges += hGraph[i]->getExternalEdgesNumber();
-
-                ui->progressBar->setValue(j*experimentNumber+1);
-            }
-            countOfAllExternalEdges /= experimentNumber;
-
-            edges->append(j, 100* (countOfAllExternalEdges/countOfAllFragments));
-            steps->append(j, hGraph[0]->getVerticesNumber() +
-                    pow((double)hGraph[0]->getVerticesNumber()/j, deploymentComplexity) +
-                    pow(countOfAllExternalEdges,tracingComplexity) +
-                    pow((countOfAllFragments - countOfAllExternalEdges)/j, tracingComplexity));
-        }
-        ui->progressBar->setValue(experimentNumber * 2);
-
-        printSeriesData(steps, edges);
-    }
-    catch (HGraphException &ex)
-    {
-        QMessageBox::critical(0, "Critical", ex.getError().c_str());
-    }
-    ui->statusLabel->setText("Готово");
+    worker.onCalculateSeries(tracingComplexity, deploymentComplexity, subGraphsNumber);
 }
 
 void MainWindow::printSeriesData(QLineSeries *steps, QLineSeries *edges)
@@ -297,6 +308,7 @@ void MainWindow::printSeriesData(QLineSeries *steps, QLineSeries *edges)
         str << std::setw(15) << steps->at(i+1).x() << std::setw(15) << steps->at(i+1).y() << std::setw(15) << edges->at(i).y() << "\n";
 
     data = QString::fromStdString(str.str());
+    dataWindow.setData(data);
 }
 
 void MainWindow::resetCharts()
@@ -317,19 +329,10 @@ void MainWindow::on_startButton_clicked()
 
     parseSplittingNumbers();
 
-    try
-    {
-        for (size_t i=0; i< splittingNumbers.size(); i++)
-        {
-            calculateData(i);
-        }
-    }
-    catch (HGraphException &ex)
-    {
-        QMessageBox::critical(0, "Critical", ex.getError().c_str());
-    }
+    ui->progressBar->setMinimum(0);
+    ui->progressBar->setMaximum(experimentNumber);
 
-    ui->statusLabel->setText("Готово");
+    worker.onCalculateHierarchical(splittingNumbers, tracingComplexity, deploymentComplexity, levelNumber);
 }
 
 void MainWindow::parseSplittingNumbers()
@@ -347,6 +350,7 @@ void MainWindow::parseSplittingNumbers()
 
 void MainWindow::parseSplittingNumber(QString string, size_t i)
 {
+    int levelNumber = ui->levelNumberText->text().toInt();
     splittingNumbers[i].resize(levelNumber);
 
     QStringList numbers = string.split(';', QString::KeepEmptyParts);
@@ -364,183 +368,6 @@ void MainWindow::parseSplittingNumber(QString string, size_t i)
         splittingNumbers[i][j] = (*iter).toUInt();
         j++;
     }
-}
-
-void MainWindow::calculateData(size_t index)
-{
-    QLineSeries* steps = new QLineSeries();
-    QLineSeries* edges = new QLineSeries();
-
-    steps->setPointsVisible(true);
-    edges->setPointsVisible(true);
-
-    steps->setName(QString::number(index+1));
-    edges->setName(QString::number(index+1));
-
-    initGraphHierarchy(index);
-    gatheringData(index);
-
-    double countAllFragments = 0.0;
-    for (size_t i=0; i<experimentNumber; i++)
-        countAllFragments += hGraphHierarchy[0][0][i]->getFragmentsNumber();
-    countAllFragments /= experimentNumber;
-
-    double nextIncreaseValue = 0.0;
-
-    for (int i=0; i<levelNumber; i++)
-    {
-        size_t numberOfComputersOnLevel =  getNumberOfComputersOnLevel(index, i);
-        for (size_t j=0; j<numberOfComputersOnLevel; j++)
-            nextIncreaseValue += externalEdgesNumberIncreasing[i][j];
-
-        edges->append(i+1, 100 * nextIncreaseValue/countAllFragments);
-    }
-
-    showData(index, steps, edges);
-}
-
-size_t MainWindow::getNumberOfComputersOnLevel(size_t index, size_t level)
-{
-    size_t res = 1;
-    for (size_t i=0; i< level; i++)
-        res*=splittingNumbers[index][i];
-
-    return res;
-}
-
-void MainWindow::initGraphHierarchy(size_t index)
-{
-    minSubGraphsNumber = 0;
-
-    externalEdgesNumberIncreasing.clear();
-    externalEdgesNumberIncreasing.resize(levelNumber);
-
-    for (size_t i=0; i<hGraphHierarchy.size(); i++)
-        for (size_t j=0; j<hGraphHierarchy[i].size(); j++)
-            for (size_t k=0; k<hGraphHierarchy[i][j].size(); k++)
-                if (i || j)
-                    delete hGraphHierarchy[i][j][k];
-
-    hGraphHierarchy.clear();
-    hGraphHierarchy.resize(levelNumber);
-
-    for (int i=0; i<levelNumber; i++)
-    {
-        int numberOfComputersOnLevel = getNumberOfComputersOnLevel(index, i);
-
-        hGraphHierarchy[i].resize(numberOfComputersOnLevel);
-
-        for (int j=0; j<numberOfComputersOnLevel; j++)
-            hGraphHierarchy[i][j].resize(experimentNumber);
-
-        externalEdgesNumberIncreasing[i].resize(numberOfComputersOnLevel);
-    }
-
-    ui->progressBar->setMinimum(0);
-    ui->progressBar->setMaximum(experimentNumber);
-    ui->progressBar->setValue(0);
-
-    copyGraphToHierarchy();
-}
-
-void MainWindow::copyGraphToHierarchy()
-{
-    for (size_t i=0; i<experimentNumber; i++)
-    {
-        HGraphWorker::resetSplitting(hGraph[i]);
-        hGraphHierarchy[0][0][i] = hGraph[i];
-
-        ui->progressBar->setValue(i);
-    }
-}
-
-void MainWindow::gatheringData(size_t index)
-{
-    ui->progressBar->setMinimum(0);
-    int max = 0;
-    for (int i=0; i<levelNumber; i++)
-        max += getNumberOfComputersOnLevel(index, i) * experimentNumber;
-
-    ui->progressBar->setMaximum(max);
-
-    ui->progressBar->setValue(0);
-
-    int countOldExternalEdges = 0;
-    for (int i=0; i<levelNumber; i++)
-    {
-        int numberOfComputersOnLevel = getNumberOfComputersOnLevel(index, i);
-
-        ui->statusLabel->setText("Осталось уровней: "+ QString::number(levelNumber-i));
-
-        for (int j=0; j<numberOfComputersOnLevel; j++)
-        {
-            externalEdgesNumberIncreasing[i][j] = 0;
-            for (size_t k=0; k<experimentNumber; k++)
-            {
-                HGraphWorker::gravitySplit(hGraphHierarchy[i][j][k], splittingNumbers[index][i], minSubGraphsNumber);
-
-                externalEdgesNumberIncreasing[i][j] += hGraphHierarchy[0][0][k]->getExternalEdgesNumber();
-
-                if (i < levelNumber-1) // Если не последняя итерация - создаю подграфы на основе разбиений
-                {
-                    for (size_t l=0; l<splittingNumbers[index][i]; l++)
-                        hGraphHierarchy[i+1][j*splittingNumbers[index][i] + l][k] = hGraphHierarchy[i][j][k]->createSubGraph(minSubGraphsNumber + l);
-                }
-            }
-
-            externalEdgesNumberIncreasing[i][j] /= experimentNumber;
-
-            // Вычитаю уже имевшиеся связи
-            // для получения прироста
-            externalEdgesNumberIncreasing[i][j] -= countOldExternalEdges;
-            countOldExternalEdges += externalEdgesNumberIncreasing[i][j];
-
-            minSubGraphsNumber += splittingNumbers[index][i];
-
-            ui->progressBar->setValue(ui->progressBar->value()+experimentNumber);
-        }
-    }
-}
-
-void MainWindow::showData(size_t index, QLineSeries *steps, QLineSeries *edges)
-{
-    double currentCostOfTracing = 0;
-    double currentCountOfInternalEdges = 0;
-
-    for (size_t i=0; i<experimentNumber; i++)
-        currentCountOfInternalEdges += hGraphHierarchy[0][0][i]->getFragmentsNumber();
-    currentCountOfInternalEdges /= experimentNumber;
-
-    steps->append(0, pow((double)currentCountOfInternalEdges, tracingComplexity)+
-                 pow(ui->vertexNumberText->text().toDouble(), deploymentComplexity));
-
-    int levelNumber = ui->levelNumberText->text().toInt();
-
-    for (int i=0; i<levelNumber; i++)
-    {
-        size_t maxCountExternalEdges = 0;
-        int numberOfComputersOnLevel = getNumberOfComputersOnLevel(index, i);
-
-        for (int j=0; j< numberOfComputersOnLevel; j++)
-        {
-            if (maxCountExternalEdges < externalEdgesNumberIncreasing[i][j])
-                maxCountExternalEdges = externalEdgesNumberIncreasing[i][j];
-
-            currentCountOfInternalEdges -= externalEdgesNumberIncreasing[i][j];
-        }
-
-        currentCostOfTracing += pow((double)maxCountExternalEdges, tracingComplexity);
-
-        double nextValue = hGraphHierarchy[i][0][0]->getVerticesNumber() +
-                pow((double)hGraphHierarchy[i][0][0]->getVerticesNumber()/splittingNumbers[index][i], deploymentComplexity) +
-                currentCostOfTracing +
-                pow (currentCountOfInternalEdges / getNumberOfComputersOnLevel(index, i+1),
-                     tracingComplexity);
-
-        steps->append(i+1, nextValue);
-    }
-
-    printHierarchicalData(index, steps, edges);
 }
 
 void MainWindow::printHierarchicalData(size_t index, QLineSeries *steps, QLineSeries *edges)
@@ -568,11 +395,10 @@ void MainWindow::printHierarchicalData(size_t index, QLineSeries *steps, QLineSe
         str << std::setw(15) << steps->at(i+1).x() << std::setw(15) << steps->at(i+1).y() << std::setw(15) << edges->at(i).y() << "\n";
 
     data += QString::fromStdString(str.str());
+    dataWindow.setData(data);
 }
 
 void MainWindow::on_showButton_clicked()
 {
-    DataWindow dw;
-    dw.setData(data);
-    dw.exec();
+    dataWindow.show();
 }

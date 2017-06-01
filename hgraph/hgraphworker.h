@@ -1,40 +1,114 @@
 #ifndef HGRAPHWORKER_H
 #define HGRAPHWORKER_H
 
+#include <QObject>
+#include <QPointF>
+
 #include "hgraph.h"
+
+enum Mode
+{
+    SINGLE_LEVEL,
+    HIERARCHICAL
+};
 
 /**
  * @brief The HGraphWorker class
  * Represents the hypergraph generating and splitting algorithms.
  */
-class HGraphWorker
+class HGraphWorker: public QObject
 {
+    Q_OBJECT
+
 private:
-    static size_t minVerticesNumber, maxVerticesNumber;
-    static size_t actualMaxEdgesNumber;
+    size_t verticesNumber;
+    size_t minVerticesNumber, maxVerticesNumber;
+    size_t minEdgesNumber, maxEdgesNumber;
+    size_t actualMaxEdgesNumber;
 
-    static void dragEdgeInSubGraph (HGraph* graph, size_t subGraphVerticesNumber, int subGraphID);
+    double deploymentComplexity, tracingComplexity;
 
-    static void createVertices (HGraph* graph, size_t verticesNumber, size_t minEdgesNumber, size_t actualMaxEdgesNumber);
-    static void createEdges (HGraph* graph, size_t minVerticesNumber, size_t maxVerticesNumber);
+    size_t experimentNumber;
 
-    static vector <HVertex*> prepareVerticesBuffer (HGraph* graph);
+    bool stopped;
+    bool actuallyStopped;
 
-    static size_t connectRandomVertices (HGraph* graph, vector <HVertex*> &verticesBuffer, size_t remainingConnectionsNumber, const size_t i);
-    static void connectRemainingVertices(HGraph* graph, size_t i);
+    /* single-level */
+    vector<HGraph*> hGraph;
+    size_t minSubGraphsNumber;
 
-    static vector<vector<int>> prepareConnectionMatrix (HGraph* graph, const size_t nonFullVerticesNumber);
-    static vector <size_t> getVerticesNumbers (vector<vector<int>> &connectionMatrix, size_t nonFullVerticesNumber);
-    static void optimizeConnectionMatrix (vector<vector<int>> &connectionMatrix, vector<size_t> &verticesNumbers);
+    /* hierarchical */
+    vector<vector<vector<HGraph*>>> hGraphHierarchy;
+    vector<vector<size_t>> externalEdgesNumberIncreasing;
+
+    vector<vector<size_t>> splittingNumbers;
+    int levelNumber;
+
+    void calculateData(size_t index);
+
+    void initGraphHierarchy(size_t index);
+    size_t getNumberOfComputersOnLevel(size_t index, size_t level);
+    void copyGraphToHierarchy();
+
+    void gatheringData(size_t index);
+    void showData(size_t index);
+
+    void clear();
+
+    void dragEdgeInSubGraph (HGraph* graph, size_t subGraphVerticesNumber, int subGraphID);
+
+    void createVertices (HGraph* graph);
+    void createEdges (HGraph* graph);
+
+    vector <HVertex*> prepareVerticesBuffer (HGraph* graph);
+
+    size_t connectRandomVertices (HGraph* graph, vector <HVertex*> &verticesBuffer, size_t remainingConnectionsNumber, size_t i);
+    void connectRemainingVertices(HGraph* graph, size_t i);
+
+    vector<vector<int>> prepareConnectionMatrix (HGraph* graph, const size_t nonFullVerticesNumber);
+    vector <size_t> getVerticesNumbers (vector<vector<int>> &connectionMatrix, size_t nonFullVerticesNumber);
+    void optimizeConnectionMatrix (vector<vector<int>> &connectionMatrix, vector<size_t> &verticesNumbers);
+
+    void generateGraph(HGraph *graph);
+
+    void randomSplit(HGraph* graph, size_t subGraphsNumber, int startID);
+    void gravitySplit(HGraph* graph, size_t subGraphsNumber, int startID);
+
+    void resetSplitting(HGraph *graph);
+
+signals:
+    void sendGenerated();
+    void sendRandomCalculated();
+    void sendSeriesCalculated();
+    void sendHierarchicalCalculated();
+    void sendPrintHierarchicalData(size_t i);
+
+    void sendStopped();
+
+    void sendCreateNewSeries(size_t index);
+    void sendSetMaxProgress(int value);
+
+    void sendStatus(QString status);
+    void sendProgress(int progress);
+    void sendAddProgress(int progress);
+
+    void sendEdgesAppend(QPointF point);
+    void sendStepsAppend(QPointF point);
+
+    void sendError(QString error);
+
+public slots:
+    void onGenerate(uint experimentNumber, uint verticesNumber, uint minEdgesNumber, uint actualMaxEdgesNumber,
+                       uint minVerticesNumber, uint maxVerticesNumber);
+
+    void onCalculateRandom(uint subGraphsNumber);
+    void onCalculateSeries(uint tracingComplexity, uint deploymentComplexity, uint subGraphsNumber);
+    void onCalculateHierarchical(vector<vector<size_t>> splittingNumbers, uint tracingComplexity, uint deploymentComplexity, uint levelNumber);
+
+    void onStopped();
 
 public:
-    static void generateGraph(HGraph *graph, size_t verticesNumber, size_t minEdgesNumber, size_t actualMaxEdgesNumber,
-                          size_t minVerticesNumber, size_t maxVerticesNumber);
-
-    static void randomSplit (HGraph* graph, size_t subGraphsNumber, int startID);
-    static void gravitySplit (HGraph* graph, size_t subGraphsNumber, int startID);
-
-    static void resetSplitting(HGraph *graph);
+    HGraphWorker();
 };
 
 #endif // HGRAPHWORKER_H

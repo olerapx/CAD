@@ -399,12 +399,6 @@ void HGraphWorker::onCalculateSeries()
     {
         double countOfAllFragments = 0;
 
-        for (size_t i=0; i<experimentNumber; i++)
-            countOfAllFragments += hGraph[i]->getFragmentsNumber();
-        countOfAllFragments /= experimentNumber;
-
-        sendStepsAppend(QPointF(1, pow((double)hGraph[0]->getVerticesNumber(), deploymentComplexity) + pow(countOfAllFragments, tracingComplexity)));
-
         for (size_t j=2; j<=subGraphsNumber; j++)
         {
             double countOfAllExternalEdges = 0;
@@ -413,6 +407,7 @@ void HGraphWorker::onCalculateSeries()
 
             for (size_t i=0; i<experimentNumber; i++)
             {
+                countOfAllFragments += hGraph[i]->getFragmentsNumber();
                 resetSplitting(hGraph[i]);
                 gravitySplit(hGraph[i], j, 0);
                 countOfAllExternalEdges += hGraph[i]->getExternalEdgesNumber();
@@ -426,13 +421,21 @@ void HGraphWorker::onCalculateSeries()
                     return;
                 }
             }
+
+            countOfAllFragments /= experimentNumber;
             countOfAllExternalEdges /= experimentNumber;
 
             sendEdgesAppend(QPointF(j, 100* (countOfAllExternalEdges/countOfAllFragments)));
+
             sendStepsAppend(QPointF(j, hGraph[0]->getVerticesNumber() +
                             pow((double)hGraph[0]->getVerticesNumber()/j, deploymentComplexity) +
-                            pow(countOfAllExternalEdges,tracingComplexity) +
+                            pow(countOfAllExternalEdges, tracingComplexity) +
                             pow((countOfAllFragments - countOfAllExternalEdges)/j, tracingComplexity)));
+
+            sendSingleStepsAppend(hGraph[0]->getVerticesNumber() +
+                    pow((double)hGraph[0]->getVerticesNumber()/j, deploymentComplexity) * j +
+                    pow(countOfAllExternalEdges,tracingComplexity) +
+                    pow((countOfAllFragments - countOfAllExternalEdges)/j, tracingComplexity) * j);
         }
 
         sendProgress(experimentNumber * 2);
@@ -710,15 +713,15 @@ void HGraphWorker::showData(size_t index)
 {
     if(stopped) return;
 
-    double currentCostOfTracing = 0;
+    double currentCostOfDecomposition = 0;
+    double currentCostOfExternalTracing = 0;
     double currentCountOfInternalEdges = 0;
 
     for (size_t i=0; i<experimentNumber; i++)
         currentCountOfInternalEdges += hGraphHierarchy[0][0][i]->getFragmentsNumber();
     currentCountOfInternalEdges /= experimentNumber;
 
-    sendStepsAppend(QPointF(0, pow((double)currentCountOfInternalEdges, tracingComplexity)+
-                           pow(verticesNumber, deploymentComplexity)));
+    sendStatus(tr("Вычисление шагов РСАПР"));
 
     for (int i=0; i<levelNumber; i++)
     {
@@ -735,15 +738,48 @@ void HGraphWorker::showData(size_t index)
             currentCountOfInternalEdges -= externalEdgesNumberIncreasing[i][j];
         }
 
-        currentCostOfTracing += pow((double)maxCountExternalEdges, tracingComplexity);
+        currentCostOfDecomposition += hGraphHierarchy[i][0][0]->getVerticesNumber();
+        currentCostOfExternalTracing += pow((double)maxCountExternalEdges, tracingComplexity);
 
-        double nextValue = hGraphHierarchy[i][0][0]->getVerticesNumber() +
+        double nextValue = currentCostOfDecomposition +
                 pow((double)hGraphHierarchy[i][0][0]->getVerticesNumber()/splittingNumbers[index][i], deploymentComplexity) +
-                currentCostOfTracing +
-                pow (currentCountOfInternalEdges / getNumberOfComputersOnLevel(index, i+1),
-                     tracingComplexity);
+                currentCostOfExternalTracing +
+                pow (currentCountOfInternalEdges / getNumberOfComputersOnLevel(index, i+1), tracingComplexity);
 
         sendStepsAppend(QPointF(i+1, nextValue));
+    }
+
+    sendSetMaxProgress(levelNumber);
+    sendProgress(0);
+    sendStatus(tr("Вычисление шагов САПР"));
+
+    for(int i=0; i<levelNumber; i++)
+    {
+        double countOfExternalEdges = 0;
+        double countOfFragments = 0;
+
+        int numberOfComputersOnLevel = getNumberOfComputersOnLevel(index, i+1);
+
+        for(size_t j=0; j<experimentNumber; j++)
+        {
+            if(stopped)
+                return;
+
+            countOfFragments += hGraph[j]->getFragmentsNumber();
+            resetSplitting(hGraph[j]);
+            gravitySplit(hGraph[j], numberOfComputersOnLevel, 0);
+            countOfExternalEdges += hGraph[j]->getExternalEdgesNumber();
+        }
+
+        countOfFragments /= experimentNumber;
+        countOfExternalEdges /= experimentNumber;
+
+        sendSingleStepsAppend(hGraph[0]->getVerticesNumber() +
+                pow((double)hGraph[0]->getVerticesNumber()/numberOfComputersOnLevel, deploymentComplexity) * numberOfComputersOnLevel +
+                pow(countOfExternalEdges, tracingComplexity) +
+                pow((countOfFragments - countOfExternalEdges)/numberOfComputersOnLevel, tracingComplexity) * numberOfComputersOnLevel);
+
+        sendProgress(i);
     }
 
     sendPrintHierarchicalData(index);

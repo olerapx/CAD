@@ -6,12 +6,6 @@
 
 #include "hgraph.h"
 
-enum Mode
-{
-    SINGLE_LEVEL,
-    HIERARCHICAL
-};
-
 /**
  * @brief The HGraphWorker class
  * Represents the hypergraph generating and splitting algorithms.
@@ -95,6 +89,7 @@ signals:
 
     void sendEdgesAppend(QPointF point);
     void sendStepsAppend(QPointF point);
+    void sendSingleStepsAppend(double value);
 
     void sendError(QString error);
 

@@ -10,29 +10,7 @@ MainWindow::MainWindow(QWidget *parent) :
     initMenu();
     initCharts();
 
-    worker.moveToThread(&workerThread);
-
-    connect(&worker, &HGraphWorker::sendGenerated, this, &MainWindow::onSendGenerated);
-    connect(&worker, &HGraphWorker::sendRandomCalculated, this, &MainWindow::onSendRandomCalculated);
-    connect(&worker, &HGraphWorker::sendSeriesCalculated, this, &MainWindow::onSendSeriesCalculated);
-    connect(&worker, &HGraphWorker::sendHierarchicalCalculated, this, &MainWindow::onSendHierarchicalCalculated);
-    connect(&worker, &HGraphWorker::sendPrintHierarchicalData, this, &MainWindow::onSendPrintHierarchicalData);
-
-    connect(&worker, &HGraphWorker::sendStopped, this, &MainWindow::onSendStopped);
-
-    connect(&worker, &HGraphWorker::sendCreateNewSeries, this, &MainWindow::onSendCreateNewSeries);
-    connect(&worker, &HGraphWorker::sendSetMaxProgress, this, &MainWindow::onSendSetMaxProgress);
-
-    connect(&worker, &HGraphWorker::sendStatus, this, &MainWindow::onSendStatus);
-    connect(&worker, &HGraphWorker::sendProgress, this, &MainWindow::onSendProgress);
-    connect(&worker, &HGraphWorker::sendAddProgress, this, &MainWindow::onSendAddProgress);
-
-    connect(&worker, &HGraphWorker::sendEdgesAppend, this, &MainWindow::onSendEdgesAppend);
-    connect(&worker, &HGraphWorker::sendStepsAppend, this, &MainWindow::onSendStepsAppend);
-
-    connect(&worker, &HGraphWorker::sendError, this, &MainWindow::onSendError);
-
-    connect(this, &MainWindow::sendStop, &worker, &HGraphWorker::onStopped, Qt::DirectConnection);
+    initWorker();
 
     srand(time(NULL));
 }
@@ -40,6 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
 void MainWindow::closeEvent(QCloseEvent* event)
 {
     sendStop();
+    ui->statusLabel->setText(tr("Остановка..."));
 
     workerThread.wait();
 
@@ -63,11 +42,39 @@ void MainWindow::initCharts()
     ui->stepsChart->setChart(new QChart());
     ui->edgesChart->setChart(new QChart());
 
-    ui->stepsChart->chart()->legend()->setAlignment(Qt::AlignBottom);
-    ui->edgesChart->chart()->legend()->setAlignment(Qt::AlignBottom);
+    ui->stepsChart->chart()->legend()->setAlignment(Qt::AlignLeft);
+    ui->edgesChart->chart()->legend()->setAlignment(Qt::AlignLeft);
 
     ui->stepsChart->setRenderHint(QPainter::Antialiasing);
     ui->edgesChart->setRenderHint(QPainter::Antialiasing);
+}
+
+void MainWindow::initWorker()
+{
+    worker.moveToThread(&workerThread);
+
+    connect(&worker, &HGraphWorker::sendGenerated, this, &MainWindow::onSendGenerated);
+    connect(&worker, &HGraphWorker::sendRandomCalculated, this, &MainWindow::onSendRandomCalculated);
+    connect(&worker, &HGraphWorker::sendSeriesCalculated, this, &MainWindow::onSendSeriesCalculated);
+    connect(&worker, &HGraphWorker::sendHierarchicalCalculated, this, &MainWindow::onSendHierarchicalCalculated);
+    connect(&worker, &HGraphWorker::sendPrintHierarchicalData, this, &MainWindow::onSendPrintHierarchicalData);
+
+    connect(&worker, &HGraphWorker::sendStopped, this, &MainWindow::onSendStopped);
+
+    connect(&worker, &HGraphWorker::sendCreateNewSeries, this, &MainWindow::onSendCreateNewSeries);
+    connect(&worker, &HGraphWorker::sendSetMaxProgress, this, &MainWindow::onSendSetMaxProgress);
+
+    connect(&worker, &HGraphWorker::sendStatus, this, &MainWindow::onSendStatus);
+    connect(&worker, &HGraphWorker::sendProgress, this, &MainWindow::onSendProgress);
+    connect(&worker, &HGraphWorker::sendAddProgress, this, &MainWindow::onSendAddProgress);
+
+    connect(&worker, &HGraphWorker::sendEdgesAppend, this, &MainWindow::onSendEdgesAppend);
+    connect(&worker, &HGraphWorker::sendStepsAppend, this, &MainWindow::onSendStepsAppend);
+    connect(&worker, &HGraphWorker::sendSingleStepsAppend, this, &MainWindow::onSendSingleStepsAppend);
+
+    connect(&worker, &HGraphWorker::sendError, this, &MainWindow::onSendError);
+
+    connect(this, &MainWindow::sendStop, &worker, &HGraphWorker::onStopped, Qt::DirectConnection);
 }
 
 MainWindow::~MainWindow()
@@ -103,7 +110,7 @@ void MainWindow::onSendGenerated()
 void MainWindow::onSendRandomCalculated()
 {
     ui->statusLabel->setText("Готово");
-    printRandomData(steps, edges);
+    printRandomData();
     ui->progressBar->setValue(ui->progressBar->maximum());
 
     workerThread.disconnect();
@@ -113,7 +120,7 @@ void MainWindow::onSendRandomCalculated()
 void MainWindow::onSendSeriesCalculated()
 {
     ui->statusLabel->setText("Готово");
-    printSeriesData(steps, edges);
+    printSeriesData();
     ui->progressBar->setValue(ui->progressBar->maximum());
 
     workerThread.disconnect();
@@ -132,7 +139,7 @@ void MainWindow::onSendHierarchicalCalculated()
 void MainWindow::onSendPrintHierarchicalData(uint i)
 {
     ui->statusLabel->setText("Переход на следующую модель");
-    printHierarchicalData(i, steps, edges);
+    printHierarchicalData(i);
 }
 
 void MainWindow::onSendStopped()
@@ -147,6 +154,7 @@ void MainWindow::onSendCreateNewSeries(uint index)
 {
     steps = new QLineSeries();
     edges = new QLineSeries();
+    singleSteps.clear();
 
     steps->setPointsVisible(true);
     edges->setPointsVisible(true);
@@ -185,6 +193,11 @@ void MainWindow::onSendStepsAppend(QPointF point)
     steps->append(point);
 }
 
+void MainWindow::onSendSingleStepsAppend(double value)
+{
+    singleSteps.push_back(value);
+}
+
 void MainWindow::onSendError(QString error)
 {
     QMessageBox::critical(0, "Critical", error);
@@ -221,6 +234,7 @@ void MainWindow::on_randomButton_clicked()
 
     steps = new QLineSeries();
     edges = new QLineSeries();
+    singleSteps.clear();
 
     setSeriesStyle(steps);
     setSeriesStyle(edges);
@@ -279,15 +293,13 @@ void MainWindow::setAxisStyle(QChartView *view)
     a->setTickCount(max + 1);
 }
 
-void MainWindow::printRandomData(QLineSeries* steps, QLineSeries* edges)
+void MainWindow::printRandomData()
 {  
     ui->stepsChart->chart()->addSeries(steps);
     ui->edgesChart->chart()->addSeries(edges);
 
     setAxisStyle(ui->stepsChart);
     setAxisStyle(ui->edgesChart);
-
-    updateCharts();
 
     std::stringstream str;
     str << "Случайное разбиение\n";
@@ -301,12 +313,6 @@ void MainWindow::printRandomData(QLineSeries* steps, QLineSeries* edges)
     dataWindow.setData(data);
 }
 
-void MainWindow::updateCharts()
-{
-    this->resize(this->width(), this->height()+1);
-    this->resize(this->width(), this->height()-1);
-}
-
 void MainWindow::on_seriesButton_clicked()
 {
     if(!worker.isStopped()) return;
@@ -315,6 +321,7 @@ void MainWindow::on_seriesButton_clicked()
 
     steps = new QLineSeries();
     edges = new QLineSeries();
+    singleSteps.clear();
 
     setSeriesStyle(steps);
     setSeriesStyle(edges);
@@ -336,7 +343,7 @@ void MainWindow::on_seriesButton_clicked()
     workerThread.start();
 }
 
-void MainWindow::printSeriesData(QLineSeries *steps, QLineSeries *edges)
+void MainWindow::printSeriesData()
 {
     ui->stepsChart->chart()->addSeries(steps);
     ui->edgesChart->chart()->addSeries(edges);  
@@ -344,16 +351,13 @@ void MainWindow::printSeriesData(QLineSeries *steps, QLineSeries *edges)
     setAxisStyle(ui->stepsChart);
     setAxisStyle(ui->edgesChart);
 
-    updateCharts();
-
     std::stringstream str;
     str << "Последовательное разбиение\n";
 
-    str  << std::left << std::setw(23) << "Подграфы" << std::setw(19) << "Шаги" << std::setw(20) << "Связи" << "\n";
-    str << std::setw(15) << steps->at(0).x() << std::setw(15) << steps->at(0).y()  << "N/A\n";
+    str  << std::left << std::setw(23) << "Подграфы" << std::setw(24) << "Шаги РСАПР" << std::setw(23) << "Шаги САПР" << std::setw(20) << "Связи" << "\n";
 
     for (int i=0; i<edges->count(); i++)
-        str << std::setw(15) << steps->at(i+1).x() << std::setw(15) << steps->at(i+1).y() << std::setw(15) << edges->at(i).y() << "\n";
+        str << std::setw(15) << steps->at(i).x() << std::setw(15) << steps->at(i).y() << std::setw(15) << singleSteps[i] << std::setw(15) << edges->at(i).y() << "\n";
 
     data = QString::fromStdString(str.str());
     dataWindow.setData(data);
@@ -423,15 +427,13 @@ void MainWindow::parseSplittingNumber(QString string, size_t i)
     }
 }
 
-void MainWindow::printHierarchicalData(size_t index, QLineSeries *steps, QLineSeries *edges)
+void MainWindow::printHierarchicalData(size_t index)
 {
     ui->stepsChart->chart()->addSeries(steps);
     ui->edgesChart->chart()->addSeries(edges);
 
     setAxisStyle(ui->stepsChart);
     setAxisStyle(ui->edgesChart);
-
-    updateCharts();
 
     std::stringstream str;
     str << "Число разбиений: ";
@@ -441,11 +443,10 @@ void MainWindow::printHierarchicalData(size_t index, QLineSeries *steps, QLineSe
     str << "Сложность размещения: " << deploymentComplexity << "\n";
     str << "Сложность трассировки: " << tracingComplexity << "\n";
 
-    str  << std::left << std::setw(23) << "Уровни" << std::setw(19) << "Шаги" << std::setw(20) << "Связи" << "\n";
-    str << std::setw(15) << steps->at(0).x() << std::setw(15) << steps->at(0).y()  << "N/A\n";
+    str << std::left << std::setw(21) << "Уровни" << std::setw(24) << "Шаги РСАПР" << std::setw(23) << "Шаги САПР" << std::setw(20) << "Связи" << "\n";
 
     for (int i=0; i<edges->count(); i++)
-        str << std::setw(15) << steps->at(i+1).x() << std::setw(15) << steps->at(i+1).y() << std::setw(15) << edges->at(i).y() << "\n";
+        str << std::setw(15) << steps->at(i).x() << std::setw(15) << steps->at(i).y() << std::setw(15) << singleSteps[i] << std::setw(15) << edges->at(i).y() << "\n";
 
     data += QString::fromStdString(str.str());
     dataWindow.setData(data);
@@ -459,4 +460,5 @@ void MainWindow::on_showButton_clicked()
 void MainWindow::on_stopButton_clicked()
 {
     sendStop();
+    ui->statusLabel->setText(tr("Остановка..."));
 }

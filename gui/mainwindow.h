@@ -15,12 +15,19 @@
 #include "hgraph/hgraphworker.h"
 #include "datawindow.h"
 
+
 using namespace QtCharts;
 
 namespace Ui
 {
     class MainWindow;
 }
+
+enum Mode
+{
+    SINGLE_LEVEL,
+    HIERARCHICAL
+};
 
 class MainWindow : public QMainWindow
 {
@@ -62,6 +69,7 @@ private slots:
 
     void onSendEdgesAppend(QPointF point);
     void onSendStepsAppend(QPointF point);
+    void onSendSingleStepsAppend(double value);
 
     void onSendError(QString error);
 
@@ -98,23 +106,24 @@ private:
     vector<vector<size_t>> splittingNumbers;
 
     QLineSeries *steps, *edges;
+    vector<double> singleSteps;
 
     void initMenu();
     void initCharts();
+    void initWorker();
 
     void resetCharts();
 
-    void printRandomData(QLineSeries *steps, QLineSeries *edges);
-    void printSeriesData(QLineSeries *steps, QLineSeries *edges);
+    void printRandomData();
+    void printSeriesData();
 
     void setSeriesStyle(QLineSeries* series);
     void setAxisStyle(QChartView* view);
-    void updateCharts();
 
     void parseSplittingNumbers();
     void parseSplittingNumber(QString string, size_t i);
 
-    void printHierarchicalData(size_t index, QLineSeries *steps, QLineSeries *edges);
+    void printHierarchicalData(size_t index);
 };
 
 #endif // MAINWINDOW_H

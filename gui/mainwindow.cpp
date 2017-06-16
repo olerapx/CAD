@@ -354,7 +354,7 @@ void MainWindow::printSeriesData()
     std::stringstream str;
     str << "Последовательное разбиение\n";
 
-    str  << std::left << std::setw(23) << "Подграфы" << std::setw(24) << "Шаги РСАПР" << std::setw(23) << "Шаги САПР" << std::setw(20) << "Связи" << "\n";
+    str  << std::left << std::setw(23) << "Подграфы" << std::setw(24) << "Шаги РСАПР" << std::setw(23) << "Шаги ССАПР" << std::setw(20) << "Связи" << "\n";
 
     for (int i=0; i<edges->count(); i++)
         str << std::setw(15) << steps->at(i).x() << std::setw(15) << steps->at(i).y() << std::setw(15) << singleSteps[i] << std::setw(15) << edges->at(i).y() << "\n";
@@ -443,7 +443,7 @@ void MainWindow::printHierarchicalData(size_t index)
     str << "Сложность размещения: " << deploymentComplexity << "\n";
     str << "Сложность трассировки: " << tracingComplexity << "\n";
 
-    str << std::left << std::setw(21) << "Уровни" << std::setw(24) << "Шаги РСАПР" << std::setw(23) << "Шаги САПР" << std::setw(20) << "Связи" << "\n";
+    str << std::left << std::setw(21) << "Уровни" << std::setw(24) << "Шаги РСАПР" << std::setw(23) << "Шаги ССАПР" << std::setw(20) << "Связи" << "\n";
 
     for (int i=0; i<edges->count(); i++)
         str << std::setw(15) << steps->at(i).x() << std::setw(15) << steps->at(i).y() << std::setw(15) << singleSteps[i] << std::setw(15) << edges->at(i).y() << "\n";
